@@ -19,7 +19,7 @@ redis_settings = RedisSettings()
 
 
 @asynccontextmanager
-async def lifespan() -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """FastAPI lifespan context manager."""
     redis.redis = Redis(
         host=redis_settings.host,
