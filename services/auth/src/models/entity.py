@@ -80,6 +80,6 @@ class RefreshTokens(BaseModel):
     token = Column(Text, nullable=False, unique=True, primary_key=True)
     user_uuid = Column(UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.users.uuid"))
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
-    expiration_date = Column(
+    expires_at = Column(
         TIMESTAMP, nullable=False, default=lambda: datetime.now() + timedelta(days=7)
     )

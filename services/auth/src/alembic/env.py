@@ -4,7 +4,7 @@ from sqlalchemy import pool, create_engine
 
 from alembic import context
 
-from db.postgre import Base
+from db.postgre import Base, dsn_sync
 from core.config import PostgreSettings
 from models.entity import User, Role, LoginHistory, RefreshTokens
 
@@ -16,13 +16,6 @@ config = context.config
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
-
-db_settings = PostgreSettings()
-SQLALCHEMY_DATABASE_URL = (
-    f"postgresql+psycopg2://{db_settings.user}:{db_settings.password}"
-    + f"@{db_settings.host}:{db_settings.port}"
-    + f"/{db_settings.db}"
-)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -48,7 +41,7 @@ def run_migrations_offline() -> None:
     """
     # url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=SQLALCHEMY_DATABASE_URL,
+        url=dsn_sync,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -65,7 +58,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = create_engine(SQLALCHEMY_DATABASE_URL, poolclass=pool.NullPool)
+    connectable = create_engine(dsn_sync, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
