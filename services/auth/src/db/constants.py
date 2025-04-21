@@ -1,1 +1,1 @@
-AUTH_SCHEMA = 'auth'
+AUTH_SCHEMA = "auth"

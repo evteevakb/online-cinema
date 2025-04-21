@@ -19,9 +19,9 @@ if config.config_file_name is not None:
 
 db_settings = PostgreSettings()
 SQLALCHEMY_DATABASE_URL = (
-        f"postgresql+psycopg2://{db_settings.user}:{db_settings.password}"
-        + f"@{db_settings.host}:{db_settings.port}"
-        + f"/{db_settings.db}"
+    f"postgresql+psycopg2://{db_settings.user}:{db_settings.password}"
+    + f"@{db_settings.host}:{db_settings.port}"
+    + f"/{db_settings.db}"
 )
 
 # add your model's MetaData object here
@@ -68,9 +68,7 @@ def run_migrations_online() -> None:
     connectable = create_engine(SQLALCHEMY_DATABASE_URL, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
