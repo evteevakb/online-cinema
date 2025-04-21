@@ -21,4 +21,4 @@ COPY . .
 
 USER auth
 
-CMD ["sh", "-c", "gunicorn main:app --bind $API_HOST:$API_PORT -k uvicorn.workers.UvicornWorker"]
+CMD ["sh", "-c", "alembic upgrade head && gunicorn main:app --bind $API_HOST:$API_PORT -k uvicorn.workers.UvicornWorker"]
