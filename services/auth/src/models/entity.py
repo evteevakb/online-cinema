@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import Boolean, Column, String, Text, ForeignKey, func
 from sqlalchemy import Enum as PgEnum
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from db.constants import AUTH_SCHEMA
@@ -46,12 +47,20 @@ class Role(BaseModel):
         return f"<Role {self.name}>"
 
 
+class UserRole(BaseModel):
+    __tablename__ = "user_roles"
+
+    user_uuid = Column(UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.users.uuid"), primary_key=True)
+    role_name = Column(Text, ForeignKey(f"{AUTH_SCHEMA}.roles.name"), primary_key=True)
+
+
 class User(DateTimeBaseModel):
     __tablename__ = "users"
 
     email = Column(Text, unique=True, nullable=False)
     password = Column(String(255), nullable=False)
-    role = Column(Text, ForeignKey(f"{AUTH_SCHEMA}.roles.name"))
+    roles = relationship("Role", secondary=f"{AUTH_SCHEMA}.user_roles", viewonly=True)
+
     is_active = Column(Boolean, default=True, nullable=False)
 
     def __init__(self, password: str, email: str) -> None:
