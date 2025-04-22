@@ -53,7 +53,37 @@ Once the `.env` files are set up, go to the root folder (`auth`) and run the fol
 
     docker-compose up --build -d
 
-The service now is available at `localhost:80`.
+The service now is available at `localhost:81`.
+
+## Testing
+
+To run the functional tests, follow these steps:
+
+### Step 1: Create .env files
+Prepare the required environment files based on the examples in the `tests/functional/envs/` directory.
+
+For each `.test.env.example` file, create a corresponding `.test.env` file with the necessary environment variables. For example:
+
+
+    cp tests/functional/envs/.redis.test.env.example tests/functional/envs/.redis.test.env
+
+
+### Step 2: Build Docker image (if needed)
+Ensure the `auth:latest` Docker image exists locally. If it's not available, build it from the project root:
+
+    docker-compose build
+
+### Step 3: Launch the test environment
+
+Navigate to the test directory and start the containers required for testing:
+
+    cd tests/functional
+    docker-compose -f test.docker-compose.yml up --build -d
+
+### Step 4: Check test results
+
+The results of the functional tests will be shown in the logs of the `auth-functional-tests` container.
+
 
 ## Contributors
 
