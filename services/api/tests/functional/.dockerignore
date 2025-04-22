@@ -1,4 +1,4 @@
 .dockerignore
-configs/
+envs/
 test.docker-compose.yml
 test.Dockerfile
