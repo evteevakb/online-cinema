@@ -2,5 +2,5 @@ import pytest
 
 
 @pytest.mark.asyncio
-def test_profile(users):
+def test_profile() -> None:
     pass

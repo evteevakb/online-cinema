@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from uuid import uuid4
-from src.models import User
+from models.entity import User
 from services.profile import ProfileService, get_profile_service
 
 router = APIRouter()
@@ -12,7 +12,7 @@ router = APIRouter()
     summary="Профиль пользователя",
     description="Данные о пользователе",
 )
-def get_profile_info(
+async def get_profile_info(
     uuid: int,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> User:
@@ -26,7 +26,7 @@ def get_profile_info(
     summary="Поменять пароль.",
     description="Поменять пароль.",
 )
-def get_reset_password(
+async def get_reset_password(
     uuid: int,
     password: str,
     profile_service: ProfileService = Depends(get_profile_service),
@@ -40,7 +40,7 @@ def get_reset_password(
     summary="Поменять логин.",
     description="Поменять логин.",
 )
-def get_reset_login(
+async def get_reset_login(
     uuid: int,
     login: str,
     profile_service: ProfileService = Depends(get_profile_service),
@@ -54,7 +54,7 @@ def get_reset_login(
     summary="Истоия лог-инов.",
     description="Получить историю вхождения в аккаунт пользователя.",
 )
-def get_get_history(
+async def get_get_history(
     uuid: int,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> User:
