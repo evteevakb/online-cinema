@@ -31,14 +31,14 @@ Open each `.env` file and update the necessary values.
     REDIS_PASSWORD=redis_password  # can be modified
     REDIS_USER_NAME=user  # can be modified
     REDIS_USER_PASSWORD=user_password   # can be modified
-    REDIS_HOST=redis  # must be equal to a container name
+    REDIS_HOST=api-redis  # must be equal to a container name
     REDIS_PORT=6379  # must be equal to a standard Redis port
 
 ##### .service.env
 
     API_PROJECT_NAME=movies  # can be modified
     API_HOST=0.0.0.0  # must be 0.0.0.0 to ensure accessibility by nginx
-    API_CONTAINER_NAME=fast_api  # must be equal to a container name
+    API_CONTAINER_NAME=api  # must be equal to a container name
     API_PORT=8000  # can be modified, but do not forget to fix the port number in docker-compose container expose section for proper documentation
 
 ## Running
@@ -54,12 +54,12 @@ The app will be available at `localhost:80`.
 To run the functional tests, follow these steps:
 
 ### Step 1: Create .env files
-Prepare the required environment files based on the examples in the `tests/functional/configs/` directory.
+Prepare the required environment files based on the examples in the `tests/functional/envs/` directory.
 
 For each `.test.env.example` file, create a corresponding `.test.env` file with the necessary environment variables. For example:
 
 
-    cp tests/functional/configs/.redis.test.env.example tests/functional/configs/.redis.test.env
+    cp tests/functional/envs/.redis.test.env.example tests/functional/envs/.redis.test.env
 
 
 ### Step 2: Build Docker image (if needed)

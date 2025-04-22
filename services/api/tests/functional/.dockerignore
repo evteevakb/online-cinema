@@ -1,0 +1,4 @@
+.dockerignore
+configs/
+test.docker-compose.yml
+test.Dockerfile
