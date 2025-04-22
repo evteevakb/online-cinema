@@ -76,4 +76,4 @@ Navigate to the test directory and start the containers required for testing:
 
 ### Step 4: Check test results
 
-The results of the functional tests will be shown in the logs of the `functional_tests` container.
+The results of the functional tests will be shown in the logs of the `api-functional-tests` container.
