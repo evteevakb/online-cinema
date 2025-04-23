@@ -38,6 +38,7 @@ class Role(BaseModel):
 
     name = Column(Text, unique=True, nullable=False, primary_key=True)
     description = Column(Text)
+    users = relationship("User", secondary=f"{AUTH_SCHEMA}.user_roles", back_populates="roles")
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
     modified_at = Column(
         TIMESTAMP, nullable=False, onupdate=func.now(), server_default=func.now()
@@ -59,7 +60,7 @@ class User(DateTimeBaseModel):
 
     email = Column(Text, unique=True, nullable=False)
     password = Column(String(255), nullable=False)
-    roles = relationship("Role", secondary=f"{AUTH_SCHEMA}.user_roles", viewonly=True)
+    roles = relationship("Role", secondary=f"{AUTH_SCHEMA}.user_roles", back_populates="users")
 
     is_active = Column(Boolean, default=True, nullable=False)
 
