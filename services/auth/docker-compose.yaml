@@ -22,7 +22,7 @@ services:
       retries: 3
     image: auth:latest
     networks: [auth-network]
-    ports: ["80:8000"]
+    ports: ["81:8000"]
     restart: always
 
   auth-db:

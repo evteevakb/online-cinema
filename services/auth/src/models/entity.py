@@ -1,8 +1,11 @@
+import enum
 import uuid
 from datetime import datetime, timedelta
 
 from sqlalchemy import Boolean, Column, String, Text, ForeignKey, func
+from sqlalchemy import Enum as PgEnum
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from db.constants import AUTH_SCHEMA
@@ -30,14 +33,25 @@ class DateTimeBaseModel(BaseModel):
     )
 
 
-class Role(DateTimeBaseModel):
+class Role(BaseModel):
     __tablename__ = "roles"
 
-    name = Column(Text, unique=True, nullable=False)
+    name = Column(Text, unique=True, nullable=False, primary_key=True)
     description = Column(Text)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+    modified_at = Column(
+        TIMESTAMP, nullable=False, onupdate=func.now(), server_default=func.now()
+    )
 
     def __repr__(self) -> str:
         return f"<Role {self.name}>"
+
+
+class UserRole(BaseModel):
+    __tablename__ = "user_roles"
+
+    user_uuid = Column(UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.users.uuid"), primary_key=True)
+    role_name = Column(Text, ForeignKey(f"{AUTH_SCHEMA}.roles.name"), primary_key=True)
 
 
 class User(DateTimeBaseModel):
@@ -45,7 +59,8 @@ class User(DateTimeBaseModel):
 
     email = Column(Text, unique=True, nullable=False)
     password = Column(String(255), nullable=False)
-    role_uuid = Column(UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.roles.uuid"))
+    roles = relationship("Role", secondary=f"{AUTH_SCHEMA}.user_roles", viewonly=True)
+
     is_active = Column(Boolean, default=True, nullable=False)
 
     def __init__(self, password: str, email: str) -> None:
@@ -57,6 +72,11 @@ class User(DateTimeBaseModel):
 
     def __repr__(self) -> str:
         return f"<User {self.email}>"
+
+
+class AuthEventType(enum.Enum):
+    LOGIN = "login"
+    LOGOUT = "logout"
 
 
 class LoginHistory(BaseModel):
@@ -71,7 +91,8 @@ class LoginHistory(BaseModel):
     )
     user_uuid = Column(UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.users.uuid"))
     user_agent = Column(Text)
-    login_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+    event_type = Column(PgEnum(AuthEventType, create_type=True), nullable=False)
+    occurred_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
 
 class RefreshTokens(BaseModel):

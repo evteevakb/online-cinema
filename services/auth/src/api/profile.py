@@ -15,13 +15,9 @@ router = APIRouter()
     description="Данные о пользователе",
 )
 async def get_profile_info(
-<<<<<<< HEAD
-    uuid: int,
-=======
     uuid: str,
->>>>>>> eb16eacfbe40669be0b371b4a100396431d24f4f
     profile_service: ProfileService = Depends(get_profile_service),
-) -> User:
+) -> UserResponse:
     profile = await profile_service.get_profile_info(uuid)
     return profile
 
@@ -32,15 +28,11 @@ async def get_profile_info(
     summary="Поменять пароль.",
     description="Поменять пароль.",
 )
-async def get_reset_password(
-<<<<<<< HEAD
-    uuid: int,
-=======
+async def reset_password(
     uuid: str,
->>>>>>> eb16eacfbe40669be0b371b4a100396431d24f4f
     password: str,
     profile_service: ProfileService = Depends(get_profile_service),
-) -> User:
+) -> UserUpdate:
     return await profile_service.reset_password(uuid, password)
 
 
@@ -50,15 +42,11 @@ async def get_reset_password(
     summary="Поменять логин.",
     description="Поменять логин.",
 )
-async def get_reset_login(
-<<<<<<< HEAD
-    uuid: int,
-=======
+async def reset_login(
     uuid: str,
->>>>>>> eb16eacfbe40669be0b371b4a100396431d24f4f
     login: str,
     profile_service: ProfileService = Depends(get_profile_service),
-) -> User:
+) -> UserUpdate:
     return await profile_service.reset_login(uuid, login)
 
 
@@ -69,11 +57,7 @@ async def get_reset_login(
     description="Получить историю вхождения в аккаунт пользователя.",
 )
 async def get_get_history(
-<<<<<<< HEAD
-    uuid: int,
-=======
     uuid: str,
->>>>>>> eb16eacfbe40669be0b371b4a100396431d24f4f
     profile_service: ProfileService = Depends(get_profile_service),
-) -> User:
+) -> LoginHistoryResponse:
     return await profile_service.get_history(uuid)
