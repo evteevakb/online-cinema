@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## 22.04.2025
+
+### Feature
+
+- Add infrastructure for api service and tests for it developed in the previous sprints.
+
+### Fix
+
+- No updates
+
+### Tests
+
+- Add template for tests infrastructure for auth service.
+
 ## 20.04.2025
 
 ### Feature

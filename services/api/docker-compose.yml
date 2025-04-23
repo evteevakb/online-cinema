@@ -1,0 +1,96 @@
+services:
+
+  api:
+    build:
+      context: src
+      dockerfile: Dockerfile
+    container_name: api
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      api-redis:
+        condition: service_healthy
+    env_file:
+      - envs/.elastic.env
+      - envs/.redis.env
+      - envs/.service.env
+    expose:
+      - 8000
+    healthcheck:
+      test: curl -s http://$${API_HOST}:$${API_PORT}/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    image: api:latest
+    restart: always
+
+  elasticsearch:
+    container_name: elasticsearch
+    env_file:
+      - envs/.elastic.env
+    environment:
+      - discovery.type=single-node
+      - xpack.security.http.ssl.enabled=false
+    healthcheck:
+      test: curl -s -u $${ELASTIC_USER}:$${ELASTIC_PASSWORD} http://localhost:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    image: elasticsearch:8.17.2
+    expose:
+      - 9200
+    restart: always
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+
+  elasticsearch-dump:
+    container_name: elasticsearch-dump
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c", "/init/entrypoint.sh"]
+    env_file:
+      - envs/.elastic.env
+    image: curlimages/curl:8.12.1
+    restart: on-failure:5
+    volumes:
+      - ../../init/elasticsearch:/init
+
+  api-nginx:
+    container_name: api-nginx
+    depends_on:
+      api:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    env_file:
+      - envs/.service.env
+    image: nginx:stable-alpine3.20-slim
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - ../../init/nginx/entrypoint.sh:/entrypoint.sh
+      - ../../init/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./site.conf:/etc/nginx/templates/site.conf.template
+
+  api-redis:
+    container_name: api-redis
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    env_file:
+      - envs/.redis.env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    image: redis:7.4.2
+    expose:
+      - 6379
+    restart: always
+    volumes:
+      - api-redis-data:/data
+      - ../../init/redis/entrypoint.sh:/entrypoint.sh
+
+volumes:
+  elastic-data:
+  api-redis-data:

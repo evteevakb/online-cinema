@@ -1,0 +1,78 @@
+services:
+
+  auth-test:
+    container_name: auth-test
+    depends_on:
+      auth-db-test:
+        condition: service_healthy
+      auth-redis-test:
+        condition: service_healthy
+    env_file:
+      - envs/.db.test.env
+      - envs/.redis.test.env
+      - envs/.service.test.env
+    expose:
+      - 8000
+    healthcheck:
+      test: curl -s http://$${API_HOST}:$${API_PORT}/api/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    image: auth:latest
+    networks: [auth-test-network]
+    restart: always
+
+  auth-db-test:
+    container_name: auth-db-test
+    env_file: envs/.db.test.env
+    expose: [5432]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    image: postgres:17.2
+    networks: [auth-test-network]
+    restart: always
+    volumes:
+      - auth-db-data-test:/var/lib/postgresql/data
+
+  auth-redis-test:
+    container_name: auth-redis-test
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    env_file:
+      - envs/.redis.test.env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    image: redis:7.4.2
+    expose: [6379]
+    networks: [auth-test-network]
+    restart: always
+    volumes:
+      - auth-redis-data-test:/data
+      - ../../../../init/redis/entrypoint.sh:/entrypoint.sh
+
+  auth-functional-tests:
+    build:
+        context: .
+        dockerfile: test.Dockerfile
+    container_name: auth-functional-tests
+    depends_on:
+      auth-test:
+        condition: service_healthy
+    env_file:
+      - envs/.db.test.env
+      - envs/.redis.test.env
+      - envs/.service.test.env
+    networks: [auth-test-network]
+
+volumes:
+  auth-db-data-test:
+  auth-redis-data-test:
+
+networks:
+  auth-test-network:
+    driver: bridge
