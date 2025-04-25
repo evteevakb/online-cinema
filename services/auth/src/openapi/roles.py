@@ -124,7 +124,7 @@ class RevokeRole(BaseModel):
                 "application/json": {
                     "examples": {
                         "User not found": _UserNotFoundExample.example,
-                        "Role not found": _UserNotFoundExample.example,
+                        "Role not found": _RoleNotFoundExample.example,
                     }
                 }
             },
