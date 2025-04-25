@@ -2,18 +2,13 @@
 Role endpoints for the auth service.
 """
 
-from http import HTTPStatus
+from typing import Any, cast
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
+from fastapi import APIRouter, Depends
 
 from api.v1.request_models import UserRole
-from db.postgre import get_session
-from models.entity import Role, User
 from openapi.roles import AssignRole, RevokeRole
+from services.role import get_role_service, RoleService
 
 
 router = APIRouter()
@@ -24,44 +19,24 @@ router = APIRouter()
     summary=AssignRole.summary,
     description=AssignRole.description,
     response_description=AssignRole.response_description,
-    responses=AssignRole.responses,
+    responses=cast(dict[int | str, dict[str, Any]], AssignRole.responses),
 )
 async def assign_role(
-    data: UserRole, db: AsyncSession = Depends(get_session)
-) -> JSONResponse:
-    user_uuid = data.user_uuid
+    data: UserRole,
+    role_service: RoleService = Depends(get_role_service),
+) -> dict[str, str]:
+    """Assign a role to a user.
 
-    user = await db.execute(
-        select(User).where(User.uuid == user_uuid).options(selectinload(User.roles))
-    )
-    user = user.scalar_one_or_none()
+    Args:
+        data (UserRole): an object containing the user's UUID and the role to assign.
+        role_service (RoleService): a service for role management.
 
-    if not user:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"User with {user_uuid=} not found",
-        )
-
-    role_name = data.role.name
-    role = await db.get(Role, role_name)
-    if not role:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Role with {role_name=} not found",
-        )
-    if role in user.roles:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"User with {user_uuid=} already has {role_name=}",
-        )
-
-    user.roles.append(role)
-    await db.commit()
-    return JSONResponse(
-        content={
-            "message": f"{role_name=} successfully assigned to user with {user_uuid=}"
-        },
-        status_code=HTTPStatus.OK,
+    Returns:
+        A message indicating the successfull result of the operation.
+    """
+    return await role_service.assign_role(
+        user_uuid=data.user_uuid,
+        role_name=data.role.name,
     )
 
 
@@ -70,50 +45,22 @@ async def assign_role(
     summary=RevokeRole.summary,
     description=RevokeRole.description,
     response_description=RevokeRole.response_description,
-    responses=RevokeRole.responses,
+    responses=cast(dict[int | str, dict[str, Any]], RevokeRole.responses),
 )
 async def revoke_role(
-    data: UserRole, db: AsyncSession = Depends(get_session)
-) -> JSONResponse:
-    user_uuid = data.user_uuid
+    data: UserRole,
+    role_service: RoleService = Depends(get_role_service),
+) -> dict[str, str]:
+    """Revoke a role from a user.
 
-    user = await db.execute(
-        select(User).where(User.uuid == user_uuid).options(selectinload(User.roles))
-    )
-    user = user.scalar_one_or_none()
+    Args:
+        data (UserRole): an object containing the user's UUID and the role to revoke.
+        role_service (RoleService):  a service for role management.
 
-    if not user:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"User with {user_uuid=} not found",
-        )
-
-    role_name = data.role.name
-    role = await db.get(Role, role_name)
-
-    if not role:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Role with {role_name=} not found",
-        )
-
-    if role not in user.roles:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"User with {user_uuid=} does not have {role_name=}",
-        )
-
-    if len(user.roles) == 1:
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"Cannot revoke the last role from user with {user_uuid=}",
-        )
-
-    user.roles.remove(role)
-    await db.commit()
-    return JSONResponse(
-        content={
-            "message": f"{role_name=} successfully revoked from user with {user_uuid=}"
-        },
-        status_code=HTTPStatus.OK,
+    Returns:
+        A message indicating the successfull result of the operation.
+    """
+    return await role_service.revoke_role(
+        user_uuid=data.user_uuid,
+        role_name=data.role.name,
     )
