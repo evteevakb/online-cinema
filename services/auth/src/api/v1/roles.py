@@ -12,7 +12,7 @@ from db.postgre import get_session
 from models.entity import Role
 from services.role import RoleService, get_role_service
 from openapi.roles import AssignRole, RevokeRole
-
+from utils.auth import Roles, Authorization
 
 router = APIRouter()
 
@@ -27,6 +27,7 @@ router = APIRouter()
 async def assign_role(
     data: UserRole,
     role_service: RoleService = Depends(get_role_service),
+    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER]))
 ) -> dict[str, str]:
     """Assign a role to a user.
 
@@ -53,6 +54,7 @@ async def assign_role(
 async def revoke_role(
     data: UserRole,
     role_service: RoleService = Depends(get_role_service),
+    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER]))
 ) -> dict[str, str]:
     """Revoke a role from a user.
 
@@ -73,7 +75,7 @@ async def revoke_role(
 )
 async def get_user_roles(
         user_uuid: UUID,
-        role_service: RoleService = Depends(get_role_service),
+        role_service: RoleService = Depends(get_role_service)
 ) -> List[str]:
     return await role_service.get_user_roles(
         user_uuid=user_uuid
@@ -96,7 +98,11 @@ async def list_roles(
     path='/{role_name}',
     response_model=RoleInDb
 )
-async def get_role(role_name: str, role_service: RoleService = Depends(get_role_service)) -> RoleInDb:
+async def get_role(
+        role_name: str,
+        role_service: RoleService = Depends(get_role_service),
+        user_roles = Depends(Authorization(allowed_roles=[Roles.SUPERUSER]))
+) -> RoleInDb:
     role = await role_service.get_role(role_name)
     return role
 
@@ -107,7 +113,8 @@ async def get_role(role_name: str, role_service: RoleService = Depends(get_role_
 )
 async def create_role(
         role_create: RoleCreateUpdate,
-        role_service: RoleService = Depends(get_role_service)
+        role_service: RoleService = Depends(get_role_service),
+        user_roles = Depends(Authorization(allowed_roles=[Roles.SUPERUSER]))
 ) -> RoleInDb:
     role_created = await role_service.create_role(role_create)
     return role_created
@@ -117,10 +124,12 @@ async def create_role(
     path='/{role_name}',
     response_model=RoleInDb
 )
-async def update_role(role_name: str,
-                      role_update: RoleCreateUpdate,
-                      role_service: RoleService = Depends(get_role_service)
-                      ) -> RoleInDb:
+async def update_role(
+        role_name: str,
+        role_update: RoleCreateUpdate,
+        role_service: RoleService = Depends(get_role_service),
+        user_roles=Depends(Authorization(allowed_roles=[Roles.SUPERUSER]))
+) -> RoleInDb:
     updated_role = await role_service.update_role(role_name, role_update)
     return updated_role
 
@@ -128,6 +137,10 @@ async def update_role(role_name: str,
 @router.delete(
     path='/{role_name}'
 )
-async def delete_role(role_name: str, role_service: RoleService = Depends(get_role_service)) -> dict:
+async def delete_role(
+        role_name: str,
+        role_service: RoleService = Depends(get_role_service),
+        user_roles=Depends(Authorization(allowed_roles=[Roles.SUPERUSER]))
+) -> dict:
     await role_service.delete_role(role_name)
     return {'message': f'Role {role_name} deleted'}

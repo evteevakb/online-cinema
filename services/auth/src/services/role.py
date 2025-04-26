@@ -1,17 +1,15 @@
 """
 Contains service for role management.
 """
-
 from http import HTTPStatus
 from uuid import UUID
-from typing import Any, List
+from typing import List
 
 from fastapi import Depends, HTTPException
 from sqlalchemy.engine import Result
 from sqlalchemy import select, update, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from db.postgre import get_session
