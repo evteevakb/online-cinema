@@ -11,8 +11,9 @@ from schemas.role import RoleInDb, RoleCreateUpdate, UserRole
 from db.postgre import get_session
 from models.entity import Role
 from services.role import RoleService, get_role_service
-from openapi.roles import AssignRole, RevokeRole
+from openapi.roles import AssignRole, RevokeRole, ListRole
 from utils.auth import Roles, Authorization
+
 
 router = APIRouter()
 
@@ -83,7 +84,11 @@ async def get_user_roles(
 
 @router.get(
     path='',
-    response_model=List[RoleInDb]
+    response_model=List[RoleInDb],
+    summary=ListRole.summary,
+    description=ListRole.description,
+    response_description=ListRole.response_description,
+    responses=ListRole.responses,
 )
 async def list_roles(
         skip: int = 0,
