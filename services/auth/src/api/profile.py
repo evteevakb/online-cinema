@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from uuid import uuid4
 from models.entity import User
 from services.profile import ProfileService, get_profile_service
 from openapi.user import UserResponse, UserUpdate, LoginHistoryResponse
+from fastapi.responses import JSONResponse
 
 
 router = APIRouter()
@@ -22,7 +23,7 @@ async def get_profile_info(
     return profile
 
 
-@router.get(
+@router.post(
     '/{uuid}/reset/password',
     response_model=UserUpdate,
     summary="Поменять пароль.",
@@ -33,10 +34,14 @@ async def reset_password(
     password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    return await profile_service.reset_password(uuid, password)
+    await profile_service.reset_password(uuid, password)
+    return JSONResponse(
+        content={"message": "Password updated successfully"},
+        status_code=status.HTTP_200_OK
+    )
 
 
-@router.get(
+@router.post(
     '/{uuid}/reset/login',
     response_model=UserUpdate,
     summary="Поменять логин.",
@@ -47,7 +52,11 @@ async def reset_login(
     login: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    return await profile_service.reset_login(uuid, login)
+    await profile_service.reset_login(uuid, login)
+    return JSONResponse(
+        content={"message": "Login updated successfully"},
+        status_code=status.HTTP_200_OK
+    )
 
 
 @router.get(
@@ -56,7 +65,7 @@ async def reset_login(
     summary="Истоия лог-инов.",
     description="Получить историю вхождения в аккаунт пользователя.",
 )
-async def get_get_history(
+async def get_history(
     uuid: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> LoginHistoryResponse:

@@ -40,4 +40,4 @@ app = FastAPI(
 )
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])
-app.include_router(profile.router, prefix="/api/profile", tags=["profile"])
+app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])

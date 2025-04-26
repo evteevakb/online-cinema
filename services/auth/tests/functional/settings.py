@@ -4,9 +4,7 @@ Configuration settings for the auth service.
 
 import os
 from logging import config as logging_config
-
 from pydantic_settings import BaseSettings
-
 from logger import LOGGING
 
 

@@ -2,8 +2,9 @@
 OpenAPI schema definitions for the profile endpoint.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
+from uuid import UUID
 
 
 class UserResponse(BaseModel):
@@ -13,6 +14,12 @@ class UserResponse(BaseModel):
     email: str
     created_at: datetime
     is_active: bool
+
+    @field_validator("uuid", mode="before")
+    def convert_uuid_to_str(cls, value):
+        if isinstance(value, UUID):
+            return str(value)
+        return value
 
     class Config:
         from_attributes = True

@@ -21,26 +21,20 @@ class Response(BaseModel):
     status: int
 
 
-@pytest_asyncio.fixture(name="session", scope="session")
+@pytest_asyncio.fixture(name="session")
 async def session() -> AsyncGenerator[aiohttp.ClientSession, None]:
     """Provides a shared aiohttp client session for all tests in the session.
 
     Yields:
         aiohttp.ClientSession: an asynchronous HTTP client session.
     """
-    session = aiohttp.ClientSession()
-    yield session
-    await session.close()
+    async with aiohttp.ClientSession() as session:
+        yield session
 
 
 @pytest_asyncio.fixture(name="make_get_request")
-def make_get_request(
-    session: aiohttp.ClientSession,
-) -> Callable[[str, dict[str, Any] | None], Awaitable[Response]]:
+def make_get_request(session) -> Callable[[str, dict[str, Any] | None], Awaitable[Response]]:
     """Fixture for making GET requests to the API.
-
-    Args:
-        session (aiohttp.ClientSession): the shared client session.
 
     Returns:
         Callable: an async function to perform GET requests.
@@ -52,7 +46,10 @@ def make_get_request(
     ) -> Response:
         params = params or {}
         url = api_settings.base_url + endpoint
-        async with session.get(url, params=params) as response:
+        async with session.get(
+            url,
+            params=params
+        ) as response:
             return Response(
                 body=await response.json(),
                 status=response.status,
@@ -62,9 +59,7 @@ def make_get_request(
 
 
 @pytest_asyncio.fixture(name="make_post_request")
-def make_post_request(
-    session: aiohttp.ClientSession,
-) -> Callable[[str, dict[str, Any] | None], Awaitable[Response]]:
+async def make_post_request(session) -> Callable[[str, dict[str, Any] | None], Awaitable[Response]]:
     """Fixture for making POST requests to the API.
 
     Args:
@@ -73,7 +68,6 @@ def make_post_request(
     Returns:
         Callable: an async function to perform GET requests.
     """
-
     async def inner(
         endpoint: str,
         params: dict[str, Any] | None = None,
