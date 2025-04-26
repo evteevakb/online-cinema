@@ -2,13 +2,16 @@
 Role endpoints for the auth service.
 """
 
-from typing import Any, cast
+from typing import List, Any, cast
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from api.v1.request_models import UserRole
+from schemas.role import RoleInDb, RoleCreateUpdate, UserRole
+from db.postgre import get_session
+from models.entity import Role
+from services.role import RoleService, get_role_service
 from openapi.roles import AssignRole, RevokeRole
-from services.role import get_role_service, RoleService
 
 
 router = APIRouter()
@@ -64,3 +67,67 @@ async def revoke_role(
         user_uuid=data.user_uuid,
         role_name=data.role.name,
     )
+
+@router.get(
+    path='/user/{user_uuid}'
+)
+async def get_user_roles(
+        user_uuid: UUID,
+        role_service: RoleService = Depends(get_role_service),
+) -> List[str]:
+    return await role_service.get_user_roles(
+        user_uuid=user_uuid
+    )
+
+@router.get(
+    path='',
+    response_model=List[RoleInDb]
+)
+async def list_roles(
+        skip: int = 0,
+        limit: int = 10,
+        role_service: RoleService = Depends(get_role_service)
+) -> List[RoleInDb]:
+    roles = await role_service.get_roles(skip, limit)
+    return roles
+
+
+@router.get(
+    path='/{role_name}',
+    response_model=RoleInDb
+)
+async def get_role(role_name: str, role_service: RoleService = Depends(get_role_service)) -> RoleInDb:
+    role = await role_service.get_role(role_name)
+    return role
+
+
+@router.post(
+    path='',
+    response_model=RoleInDb
+)
+async def create_role(
+        role_create: RoleCreateUpdate,
+        role_service: RoleService = Depends(get_role_service)
+) -> RoleInDb:
+    role_created = await role_service.create_role(role_create)
+    return role_created
+
+
+@router.put(
+    path='/{role_name}',
+    response_model=RoleInDb
+)
+async def update_role(role_name: str,
+                      role_update: RoleCreateUpdate,
+                      role_service: RoleService = Depends(get_role_service)
+                      ) -> RoleInDb:
+    updated_role = await role_service.update_role(role_name, role_update)
+    return updated_role
+
+
+@router.delete(
+    path='/{role_name}'
+)
+async def delete_role(role_name: str, role_service: RoleService = Depends(get_role_service)) -> dict:
+    await role_service.delete_role(role_name)
+    return {'message': f'Role {role_name} deleted'}
