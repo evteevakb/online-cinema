@@ -41,4 +41,4 @@ app = FastAPI(
 )
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])
-app.include_router(roles.router, prefix="/api/roles", tags=["roles"])
+app.include_router(roles.router, prefix="/api/v1/roles", tags=["roles"])
