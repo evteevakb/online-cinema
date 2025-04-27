@@ -10,7 +10,7 @@ from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
 from api import health
-from api.v1 import auth
+from api.v1 import auth, roles
 from core.config import APISettings, RedisSettings
 from db import redis
 
@@ -41,4 +41,5 @@ app = FastAPI(
 )
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(roles.router, prefix="/api/v1/roles", tags=["roles"])
