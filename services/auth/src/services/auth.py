@@ -1,11 +1,11 @@
-from fastapi import Depends, HTTPException, status, Query
+from fastapi import Depends, HTTPException, status, Query, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from redis.asyncio import Redis
 from db.postgre import get_session
 from db.redis import get_redis
 from models.entity import User, RefreshTokens
-from models.auth import UserRegister, UserLogin, TokenResponse
+from models.auth import UserRegister, UserLogin, TokenResponse, LogoutRequest, LogoutResponse
 from datetime import datetime, timedelta
 from jose import jwt
 from uuid import uuid4
@@ -36,11 +36,7 @@ class AuthService:
 
     def _create_access_token(self, user: User) -> str:
         return self._create_token(
-            data={
-                "sub": str(user.uuid),
-                "email": user.email,
-                # "role": user.role,
-            },
+            data={"sub": str(user.uuid), "email": user.email},
             expires_delta=timedelta(minutes=self.access_exp),
         )
 
@@ -50,23 +46,14 @@ class AuthService:
         return refresh_token
 
     async def _save_refresh_token(self, user_uuid: str, token: str):
-        await self.db.execute(
-            delete(RefreshTokens).where(RefreshTokens.user_uuid == user_uuid)
-        )
+        await self.db.execute(delete(RefreshTokens).where(RefreshTokens.user_uuid == user_uuid))
         token_entry = RefreshTokens(
             token=token,
             user_uuid=user_uuid,
-            expires_at=datetime.utcnow() + timedelta(days=self.refresh_exp)
+            expires_at=datetime.utcnow() + timedelta(days=self.refresh_exp / 24),
         )
         self.db.add(token_entry)
         await self.db.commit()
-
-    async def _save_access_token(self, user_uuid: str, token: str):
-        await self.redis.set(
-            f"access:{user_uuid}",
-            token,
-            ex=timedelta(minutes=self.access_exp)
-        )
 
     async def register(self, user_data: UserRegister) -> TokenResponse:
         result = await self.db.execute(select(User).where(User.email == user_data.email))
@@ -80,7 +67,6 @@ class AuthService:
 
         access_token = self._create_access_token(user)
         refresh_token = await self._create_refresh_token(user)
-        await self._save_access_token(str(user.uuid), access_token)
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
@@ -90,13 +76,11 @@ class AuthService:
         if not user or not user.check_password(credentials.password):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        await self.db.execute(
-            delete(RefreshTokens).where(RefreshTokens.user_uuid == user.uuid)
-        )
+        await self.db.execute(delete(RefreshTokens).where(RefreshTokens.user_uuid == user.uuid))
+        await self.db.commit()
 
         access_token = self._create_access_token(user)
         refresh_token = await self._create_refresh_token(user)
-        await self._save_access_token(str(user.uuid), access_token)
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
@@ -110,32 +94,48 @@ class AuthService:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
         await self.db.execute(delete(RefreshTokens).where(RefreshTokens.token == refresh_token))
+        await self.db.commit()
 
         user = await self._get_user_by_id(str(token.user_uuid))
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
         access_token = self._create_access_token(user)
         new_refresh_token = await self._create_refresh_token(user)
 
-        await self._save_access_token(str(user.uuid), access_token)
-
         return TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
 
-    async def logout(self, refresh_token: str = Query(...)):
+    async def logout(self, logout_request: LogoutRequest) -> LogoutResponse:  # Указываем тип ответа
+        access_token = logout_request.access_token
+        refresh_token = logout_request.refresh_token
+
+        try:
+            payload = jwt.decode(access_token, self.secret_key, algorithms=[self.algorithm])
+            exp_timestamp = payload.get("exp")
+
+            if not exp_timestamp:
+                raise HTTPException(status_code=401, detail="Invalid access token")
+
+            expires_in = exp_timestamp - int(datetime.utcnow().timestamp())
+
+            if expires_in <= 0:
+                raise HTTPException(status_code=401, detail="Access token has expired")
+
+            await self.redis.set(f"blacklist:{access_token}", "true", ex=expires_in)
+
+        except jwt.JWTError:
+            raise HTTPException(status_code=401, detail="Invalid access token")
+
         token_entry = await self.db.execute(
             select(RefreshTokens).where(RefreshTokens.token == refresh_token)
         )
         token = token_entry.scalar_one_or_none()
 
-        if not token:
-            raise HTTPException(status_code=404, detail="Refresh token not found")
+        if token:
+            await self.db.execute(delete(RefreshTokens).where(RefreshTokens.token == refresh_token))
+            await self.db.commit()
 
-        await self.db.execute(
-            delete(RefreshTokens).where(RefreshTokens.token == refresh_token)
-        )
-        await self.db.commit()
-
-        await self.redis.delete(f"access:{token.user_uuid}")
-
-        return {"detail": "Successfully logged out"}
+        return LogoutResponse(detail="Successfully logged out")
 
     async def _get_user_by_id(self, user_id: str) -> User:
         result = await self.db.execute(select(User).where(User.uuid == user_id))

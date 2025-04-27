@@ -16,8 +16,10 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
 
+class LogoutRequest(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
 
-class AuthJWTSettings(BaseModel):
-    authjwt_secret_key: str = "your-secret-key"
-    authjwt_algorithm: str = "HS256"
-    authjwt_access_token_expires: int = 15 * 60
+class LogoutResponse(BaseModel):
+    detail: str
