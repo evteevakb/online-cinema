@@ -10,7 +10,7 @@ from uuid import UUID
 class UserResponse(BaseModel):
     """Schema for user response."""
 
-    uuid: int
+    uuid: str
     email: str
     created_at: datetime
     is_active: bool

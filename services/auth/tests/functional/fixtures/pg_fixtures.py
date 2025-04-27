@@ -2,74 +2,59 @@
 PostgreSQL fixtures.
 """
 
-from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session
-from sqlalchemy import insert, text
-from settings import PostgreSettings
-from models.entity import BaseModel
 import pytest_asyncio
-import asyncio
 from typing import List, Dict
 
+from sqlalchemy.ext.asyncio import (
+    AsyncSession, create_async_engine, async_sessionmaker,
+)
+from sqlalchemy import text
+from models.entity import Base
+from settings import PostgreSettings
 
-Base = declarative_base()
 
 db_settings = PostgreSettings()
-dsn_sync = (
-    f"postgresql+psycopg2://{db_settings.user}:{db_settings.password}"
-    + f"@{db_settings.host}:{db_settings.port}"
-    + f"/{db_settings.db}"
-)
+
 dsn_async = (
     f"postgresql+asyncpg://{db_settings.user}:{db_settings.password}"
-    + f"@{db_settings.host}:{db_settings.port}"
-    + f"/{db_settings.db}"
+    f"@{db_settings.host}:{db_settings.port}/{db_settings.db}"
 )
+
 engine = create_async_engine(
     dsn_async,
     echo=False,
+    future=True,
+    pool_pre_ping=True,
+    pool_size=5,
     max_overflow=10,
-    future=True
 )
-async_session_factory = sessionmaker(
+
+async_session_factory = async_sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False,
-    autoflush=False
-)
-AsyncScopedSession = async_scoped_session(
-    async_session_factory,
-    scopefunc=asyncio.current_task
+    autoflush=False,
 )
 
 
 @pytest_asyncio.fixture(scope="function")
 async def db_session():
-    """Фикстура с полной изоляцией для каждого теста"""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-
-        async with AsyncScopedSession(bind=conn) as session:
-            try:
-                yield session
-            finally:
-                await session.close()
-                await engine.dispose()
+    async with async_session_factory() as session:
+        yield session
 
 
 @pytest_asyncio.fixture(name="pg_write_data")
 async def pg_write_data(db_session: AsyncSession):
-    """Фикстура для атомарной записи данных"""
-    async def inner(model: BaseModel, values: List[Dict]):
+    """Фикстура для записи данных."""
+    async def inner(model, values: List[Dict]):
         try:
-            for item in values:
-                instance = model(**item)
-                db_session.add(instance)
+            instances = [model(**item) for item in values]
+            db_session.add_all(instances)
             await db_session.commit()
-            await db_session.close()
+            print(f"Successfully committed {len(instances)} instances")
         except Exception as e:
             await db_session.rollback()
+            print(f"Error while committing: {e}")
             raise e
     return inner
 
@@ -83,3 +68,12 @@ async def clean_tables(db_session: AsyncSession):
     except Exception as e:
         await db_session.rollback()
         raise e
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def refresh_db():
+    """Полный рефреш базы: drop + create."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    yield

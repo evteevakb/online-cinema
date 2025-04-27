@@ -2,7 +2,6 @@
 Configuration settings for the auth service.
 """
 
-import os
 from logging import config as logging_config
 from pydantic_settings import BaseSettings
 from logger import LOGGING
@@ -15,11 +14,17 @@ class APISettings(BaseSettings):
     """Configuration settings for the API."""
 
     project_name: str = "auth-service"
+    container_name: str
+    port: int
     base_url: str | None = None
-    base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     class Config:
         env_prefix = "API_"
+
+    def model_post_init(self, __context) -> None:
+        """Post-initialization method to set the base URL."""
+        if self.base_url is None:
+            self.base_url = f"http://{self.container_name}:{self.port}/api/v1/"
 
 
 class PostgreSettings(BaseSettings):
