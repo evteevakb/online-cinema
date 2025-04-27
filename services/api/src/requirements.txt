@@ -5,3 +5,5 @@ orjson==3.10.15
 pydantic-settings==2.8.1
 redis==5.2.1
 uvicorn==0.34.0
+httpx==0.28.1
+
