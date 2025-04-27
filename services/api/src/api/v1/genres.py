@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from api.v1.response_models import GenreBase
 from openapi.genres import Genres, GenreDetails
 from services.genre import GenreService, get_genre_service
+from utils.auth import Authorization, Roles
 
 router = APIRouter()
 
@@ -25,6 +26,7 @@ async def get_genres(
     page_number: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
     genre_service: GenreService = Depends(get_genre_service),
+    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
 ) -> list[GenreBase]:
     """Fetches a paginated list of genres.
 
@@ -58,6 +60,7 @@ async def get_genres(
 async def get_genre_details(
     genre_uuid: str,
     genre_service: GenreService = Depends(get_genre_service),
+    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER]))
 ) -> GenreBase:
     """Retrieves detailed information about a genre by its UUID.
 

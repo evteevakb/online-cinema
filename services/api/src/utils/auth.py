@@ -9,6 +9,7 @@ from starlette import status
 class Roles(str, Enum):
     ADMIN = "admin"
     USER = "user"
+    PAID_USER = "paid_user"
     SUPERUSER = "superuser"
 
 async def get_user_roles(host: str, port: int, user_uuid: str):
@@ -42,7 +43,7 @@ class Authorization:
                 detail="Invalid token: no user_uuid",
             )
 
-        roles = await get_user_roles(host='localhost', port=8000, user_uuid=user_uuid)
+        roles = await get_user_roles(host='auth', port=8000, user_uuid=user_uuid)
 
         if not any(role in roles for role in self.allowed_roles):
             raise HTTPException(

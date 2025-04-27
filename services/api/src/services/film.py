@@ -2,7 +2,7 @@ from functools import lru_cache
 from typing import List, Type
 
 from elasticsearch import AsyncElasticsearch
-from fastapi import Depends, Query
+from fastapi import Depends, Query, HTTPException
 from redis.asyncio import Redis
 
 from db.elastic import get_elastic
@@ -11,9 +11,11 @@ from models.film import Film
 from services.cache import BaseCache, RedisCache
 from services.queries.film_query import FilmElasticQueryBuilder
 from services.storage import BaseRepository, ElasticsearchRepository
+from starlette import status
+from utils.auth import Roles
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
-
+ALLOWED_ROLES_PAID_FILMS = [Roles.ADMIN, Roles.SUPERUSER, Roles.PAID_USER]
 
 class FilmService:
     def __init__(
@@ -26,12 +28,19 @@ class FilmService:
     async def get_by_uuid(
         self,
         film_uuid: str,
+        user_roles: List[str]
     ) -> Film | None:
         cache_key = f"film:{film_uuid}"
         film = await self.cache.get(key=cache_key)
         if film:
             return Film.model_validate_json(film)
         film = await self._get_film_from_repository(film_uuid)
+        film_is_paid = True#film.is_paid
+        if film_is_paid and not any(role in user_roles for role in ALLOWED_ROLES_PAID_FILMS):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This operation is forbidden for you",
+            )
         if film:
             await self.cache.set(
                 key=cache_key,

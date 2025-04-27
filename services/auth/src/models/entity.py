@@ -38,7 +38,12 @@ class Role(BaseModel):
 
     name = Column(Text, unique=True, nullable=False, primary_key=True)
     description = Column(Text)
-    users = relationship("User", secondary=f"{AUTH_SCHEMA}.user_roles", back_populates="roles")
+    users = relationship(
+        "User",
+        secondary=f"{AUTH_SCHEMA}.user_roles",
+        back_populates="roles",
+        passive_deletes=True
+    )
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
     modified_at = Column(
         TIMESTAMP, nullable=False, onupdate=func.now(), server_default=func.now()
@@ -52,7 +57,10 @@ class UserRole(BaseModel):
     __tablename__ = "user_roles"
 
     user_uuid = Column(UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.users.uuid"), primary_key=True)
-    role_name = Column(Text, ForeignKey(f"{AUTH_SCHEMA}.roles.name"), primary_key=True)
+    role_name = Column(
+        Text,
+        ForeignKey(f"{AUTH_SCHEMA}.roles.name", ondelete="CASCADE"),
+        primary_key=True)
 
 
 class User(DateTimeBaseModel):

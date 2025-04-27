@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from api.v1.response_models import Film, PersonBase, GenreBase, FilmBase
 from openapi.films import FilmDetails, FilmsSearch, Films
 from services.film import FilmService, get_film_service, film_filters
+from utils.auth import Authorization, Roles
 
 router = APIRouter()
 
@@ -22,6 +23,7 @@ async def films_search(
     query: str,
     common_filters: dict = Depends(film_filters),
     film_service: FilmService = Depends(get_film_service),
+    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
 ) -> List[FilmBase]:
     films = await film_service.get_all(query=query, **common_filters)
     return [
@@ -41,8 +43,9 @@ async def films_search(
 async def film_details(
     film_uuid: str,
     film_service: FilmService = Depends(get_film_service),
+    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
 ) -> Film:
-    film = await film_service.get_by_uuid(film_uuid)
+    film = await film_service.get_by_uuid(film_uuid=film_uuid, user_roles=user_roles)
 
     if not film:
         raise HTTPException(
@@ -84,6 +87,7 @@ async def film_details(
 async def films_list(
     common_filters: dict = Depends(film_filters),
     film_service: FilmService = Depends(get_film_service),
+    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
 ) -> List[FilmBase]:
     films = await film_service.get_all(**common_filters)
     results = []

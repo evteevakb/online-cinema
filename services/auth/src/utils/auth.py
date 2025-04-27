@@ -9,6 +9,7 @@ from starlette import status
 class Roles(str, Enum):
     ADMIN = "admin"
     USER = "user"
+    PAID_USER = "paid_user"
     SUPERUSER = "superuser"
 
 
