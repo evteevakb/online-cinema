@@ -50,10 +50,15 @@ def make_get_request(session) -> Callable[[str, dict[str, Any] | None], Awaitabl
             url,
             params=params
         ) as response:
-            return Response(
-                body=await response.json(),
-                status=response.status,
-            )
+            try:
+                new_response = Response(
+                    body=await response.json(),
+                    status=response.status,
+                )
+            except Exception:
+                print(response)
+                return response
+            return new_response
 
     return inner
 

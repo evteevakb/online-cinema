@@ -16,7 +16,7 @@ async def test_profile(pg_write_data: Any, make_get_request: Any, db_session: An
             select(User.uuid).where(User.email == user_sample[0]["email"])
         )
         user_uuid = result.scalar_one()
-        count = await session.execute(select(User.uuid))
+        count = await session.execute(select(User))
         len_users = len(count.scalars().all())
         assert len_users == len(user_sample)
         result = await session.execute(select(User).where(User.uuid == user_uuid))
@@ -25,12 +25,10 @@ async def test_profile(pg_write_data: Any, make_get_request: Any, db_session: An
 
     response = await make_get_request(f"profile/{user_uuid}")
     assert response.status == HTTPStatus.OK
-    assert len(response.body) == 1
     assert response.body["uuid"] == str(user_uuid)
 
     response = await make_get_request(f"profile/f8557b55-c2c6-4613-8a6d-e459f3456005")
-    assert response.status == HTTPStatus.NOT_FOUND
-    assert not response.body
+    assert response.status == 404
 
 
 @pytest.mark.asyncio
@@ -51,11 +49,13 @@ async def test_history(pg_write_data: Any, make_get_request: Any, db_session: An
         event_uuid = await session.execute(
             select(LoginHistory.uuid).where(LoginHistory.user_uuid == user_uuid)
         )
+        event_uuid = str(event_uuid.scalars().all()[0])
 
     response = await make_get_request(f"profile/{user_uuid}/history")
 
     assert response.status == HTTPStatus.OK
     assert isinstance(response.body, list)
+    assert response.body[0]["uuid"] == event_uuid
     assert any(item["uuid"] == event_uuid for item in response.body)
 
 

@@ -28,12 +28,21 @@ class ProfileService:
         return UserResponse.model_validate(user)
 
     async def get_history(self, user_uuid: str) -> List[LoginHistoryResponse]:
-        result = await self.postgres.execute(
-            select(LoginHistory)
-            .where(LoginHistory.user_uuid == user_uuid)
-        )
-        history = result.scalars().all()
-        return [LoginHistoryResponse.model_validate(h) for h in history] or []
+        try:
+            result = await self.postgres.execute(
+                select(LoginHistory)
+                .where(LoginHistory.user_uuid == user_uuid)
+            )
+            history = result.scalars().all()
+            if not history:
+                return []
+            return [LoginHistoryResponse.model_validate(h) for h in history]
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail={"message": f"Database error: {str(e)}"}
+            )
 
     async def reset_password(self, user_uuid: str, new_password: str) -> None:
         result = await self.postgres.execute(

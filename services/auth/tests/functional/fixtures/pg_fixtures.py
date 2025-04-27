@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy import text
 from models.entity import Base
 from settings import PostgreSettings
+from sqlalchemy.pool import NullPool
 
 
 db_settings = PostgreSettings()
@@ -25,8 +26,7 @@ engine = create_async_engine(
     echo=False,
     future=True,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
+    poolclass=NullPool,
 )
 
 async_session_factory = async_sessionmaker(

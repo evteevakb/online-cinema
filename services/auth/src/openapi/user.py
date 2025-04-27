@@ -28,10 +28,15 @@ class UserResponse(BaseModel):
 class LoginHistoryResponse(BaseModel):
     """Schema for login history response."""
 
-    id: int
-    user_uuid: int
-    login_time: datetime
-    ip_address: str
+    uuid: str
+    user_uuid: str
+    event_type: str
+    user_agent: str
+    occurred_at: datetime
+
+    @field_validator("uuid", "user_uuid", "event_type", mode="before")
+    def convert_to_str(cls, value):
+        return str(value)
 
     class Config:
         from_attributes = True

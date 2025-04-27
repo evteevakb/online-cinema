@@ -4,7 +4,7 @@ from models.entity import User
 from services.profile import ProfileService, get_profile_service
 from openapi.user import UserResponse, UserUpdate, LoginHistoryResponse
 from fastapi.responses import JSONResponse
-
+from typing import List
 
 router = APIRouter()
 
@@ -61,12 +61,12 @@ async def reset_login(
 
 @router.get(
     '/{uuid}/history',
-    response_model=LoginHistoryResponse,
+    response_model=List[LoginHistoryResponse],
     summary="Истоия лог-инов.",
     description="Получить историю вхождения в аккаунт пользователя.",
 )
 async def get_history(
     uuid: str,
     profile_service: ProfileService = Depends(get_profile_service),
-) -> LoginHistoryResponse:
+) -> List[LoginHistoryResponse]:
     return await profile_service.get_history(uuid)
