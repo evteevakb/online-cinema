@@ -48,9 +48,9 @@ async def logout(
     return await auth_service.logout(data)
 
 
-@router.post('/verify_tokens', response_model=VerifyResponse)
-async def verify_tokens(
+@router.post('/verify_access_token', response_model=VerifyResponse)
+async def verify_access_token(
     data: VerifyRequest,
     auth_service: AuthService = Depends(get_auth_service)
 ) -> VerifyResponse:
-    return await auth_service.verify_tokens(data)
+    return await auth_service.verify_access_token(data)

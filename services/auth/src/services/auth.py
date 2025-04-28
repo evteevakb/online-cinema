@@ -5,7 +5,15 @@ from redis.asyncio import Redis
 from db.postgre import get_session
 from db.redis import get_redis
 from models.entity import User, RefreshTokens
-from schemas.auth import UserRegister, UserLogin, TokenResponse, LogoutRequest, LogoutResponse, VerifyRequest
+from schemas.auth import (
+    UserRegister,
+    UserLogin,
+    TokenResponse,
+    LogoutRequest,
+    LogoutResponse,
+    VerifyRequest,
+    VerifyResponse
+)
 from datetime import datetime, timedelta
 from jose import jwt
 
@@ -142,12 +150,12 @@ class AuthService:
         result = await self.db.execute(select(User).where(User.uuid == user_id))
         return result.scalar_one_or_none()
 
-    async def _verify_access_token(self, access_token: str) -> dict:
+    async def verify_access_token(self, data: VerifyRequest) -> dict:
         try:
-            payload = jwt.decode(access_token, self.secret_key, algorithms=[self.algorithm])
+            payload = jwt.decode(data.access_token, self.secret_key, algorithms=[self.algorithm])
             exp_timestamp = payload.get("exp")
 
-            cache_key = f"blacklist:{access_token}"
+            cache_key = f"blacklist:{data.access_token}"
             invalidated_token = await self.redis.get(cache_key)
             if invalidated_token or not exp_timestamp:
                 raise HTTPException(status_code=401, detail="Invalid access token")
@@ -156,39 +164,14 @@ class AuthService:
             if expires_in <= 0:
                 raise HTTPException(status_code=401, detail="Access token has expired")
 
-            return payload
-
         except jwt.JWTError:
             raise HTTPException(status_code=401, detail="Invalid access token")
 
-    async def _verify_refresh_token(self, refresh_token: str) -> dict:
-        try:
-            payload = jwt.decode(refresh_token, self.secret_key, algorithms=[self.algorithm])
-        except jwt.JWTError as e:
-            raise HTTPException(status_code=401, detail="Invalid refresh token")
-        token_entry = await self.db.execute(
-            select(RefreshTokens).where(RefreshTokens.token == refresh_token)
-        )
-        token = token_entry.scalar_one_or_none()
-
-        if not token or token.expires_at < datetime.now():
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
-        return payload
-
-    async def verify_tokens(self, data: VerifyRequest) -> dict:
-        if data.token_type.lower() != 'bearer':
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type")
-
-        access_payload = await self._verify_access_token(data.access_token)
-        refresh_payload = await self._verify_refresh_token(data.refresh_token)
-        if not access_payload.get('sub') == refresh_payload.get('sub'):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid tokens")
-
-        user = await self._get_user_by_id(access_payload.get('sub'))
+        user = await self._get_user_by_id(payload.get('sub'))
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-        return access_payload
+        return payload
 
 def get_auth_service(
     redis: Redis = Depends(get_redis),
