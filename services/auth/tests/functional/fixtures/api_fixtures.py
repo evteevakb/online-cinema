@@ -4,12 +4,11 @@ API fixtures for functional tests.
 
 from typing import Any, AsyncGenerator, Awaitable, Callable
 
+from http import HTTPMethod
 import aiohttp
 import pytest_asyncio
 from pydantic import BaseModel
-
 from settings import APISettings
-
 
 api_settings = APISettings()
 
@@ -32,57 +31,52 @@ async def session() -> AsyncGenerator[aiohttp.ClientSession, None]:
         yield session
 
 
-@pytest_asyncio.fixture(name="make_get_request")
-def make_get_request(session) -> Callable[[str, dict[str, Any] | None], Awaitable[Response]]:
-    """Fixture for making GET requests to the API.
-
-    Returns:
-        Callable: an async function to perform GET requests.
-    """
-
-    async def inner(
-        endpoint: str,
-        params: dict[str, Any] | None = None,
-    ) -> Response:
-        params = params or {}
-        url = api_settings.base_url + endpoint
-        async with session.get(
-            url,
-            params=params
-        ) as response:
-            try:
-                new_response = Response(
-                    body=await response.json(),
-                    status=response.status,
-                )
-            except Exception:
-                print(response)
-                return response
-            return new_response
-
-    return inner
-
-
-@pytest_asyncio.fixture(name="make_post_request")
-async def make_post_request(session) -> Callable[[str, dict[str, Any] | None], Awaitable[Response]]:
-    """Fixture for making POST requests to the API.
+@pytest_asyncio.fixture(name="make_request")
+def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], Awaitable[Response]]:
+    """Fixture for making HTTP requests to the API.
 
     Args:
         session (aiohttp.ClientSession): the shared client session.
 
     Returns:
-        Callable: an async function to perform GET requests.
+        Callable: an async function to perform requests.
     """
     async def inner(
+        method: HTTPMethod,
         endpoint: str,
         params: dict[str, Any] | None = None,
+        token: str | None = None,
     ) -> Response:
         params = params or {}
         url = api_settings.base_url + endpoint
-        async with session.post(url, params=params) as response:
-            return Response(
-                body=await response.json(),
-                status=response.status,
-            )
+
+        request_func = {
+            "GET": session.get,
+            "POST": session.post,
+            "PATCH": session.patch,
+        }.get(method)
+
+        if request_func is None:
+            raise ValueError(f"Unsupported HTTP method: {method}")
+
+        headers = {}
+        if token is not None:
+            headers["Authorization"] = f"Bearer {token}"
+        request_kwargs = {"headers": headers} if headers else {}
+
+        if method in ("POST", "PATCH"):
+            async with request_func(url, params=params, **request_kwargs) as response:
+                return Response(
+                    body=await response.json(),
+                    status=response.status,
+                )
+        elif method == "GET":
+            async with request_func(url, params=params, **request_kwargs) as response:
+                return Response(
+                    body=await response.json(),
+                    status=response.status,
+                )
+        else:
+            raise NotImplementedError
 
     return inner

@@ -1,10 +1,11 @@
+from typing import List, cast, Any
+
 from fastapi import APIRouter, Depends, status
-from uuid import uuid4
-from models.entity import User
-from services.profile import ProfileService, get_profile_service
-from openapi.user import UserResponse, UserUpdate, LoginHistoryResponse
 from fastapi.responses import JSONResponse
-from typing import List
+
+from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate
+from openapi.user import GetProfileInfo, GetHistory, ResetPassword, ResetLogin
+from services.profile import ProfileService, get_profile_service
 
 router = APIRouter()
 
@@ -12,8 +13,10 @@ router = APIRouter()
 @router.get(
     '/{uuid}',
     response_model=UserResponse,
-    summary="Профиль пользователя",
-    description="Данные о пользователе",
+    summary=GetProfileInfo.summary,
+    description=GetProfileInfo.description,
+    response_description=GetProfileInfo.response_description,
+    responses=cast(dict[int | str, dict[str, Any]], GetProfileInfo.responses),
 )
 async def get_profile_info(
     uuid: str,
@@ -26,8 +29,10 @@ async def get_profile_info(
 @router.post(
     '/{uuid}/reset/password',
     response_model=UserUpdate,
-    summary="Поменять пароль.",
-    description="Поменять пароль.",
+    summary=ResetPassword.summary,
+    description=ResetPassword.description,
+    response_description=ResetPassword.response_description,
+    responses=cast(dict[int | str, dict[str, Any]], ResetPassword.responses),
 )
 async def reset_password(
     uuid: str,
@@ -44,8 +49,10 @@ async def reset_password(
 @router.post(
     '/{uuid}/reset/login',
     response_model=UserUpdate,
-    summary="Поменять логин.",
-    description="Поменять логин.",
+    summary=ResetLogin.summary,
+    description=ResetLogin.description,
+    response_description=ResetLogin.response_description,
+    responses=cast(dict[int | str, dict[str, Any]], ResetLogin.responses),
 )
 async def reset_login(
     uuid: str,
@@ -62,8 +69,10 @@ async def reset_login(
 @router.get(
     '/{uuid}/history',
     response_model=List[LoginHistoryResponse],
-    summary="Истоия лог-инов.",
-    description="Получить историю вхождения в аккаунт пользователя.",
+    summary=GetHistory.summary,
+    description=GetHistory.description,
+    response_description=GetHistory.response_description,
+    responses=cast(dict[int | str, dict[str, Any]], ResetPassword.responses),
 )
 async def get_history(
     uuid: str,

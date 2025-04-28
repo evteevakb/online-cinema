@@ -2,12 +2,13 @@ import enum
 import uuid
 from datetime import datetime, timedelta
 
-from sqlalchemy import Boolean, Column, String, Text, ForeignKey, func
+from sqlalchemy import Boolean, Column
 from sqlalchemy import Enum as PgEnum
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+from sqlalchemy import ForeignKey, String, Text, func
+from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import declarative_base, relationship
-from werkzeug.security import check_password_hash, generate_password_hash
 
+from werkzeug.security import check_password_hash, generate_password_hash
 
 Base = declarative_base()
 AUTH_SCHEMA = "auth"
@@ -39,6 +40,7 @@ class Role(BaseModel):
 
     name = Column(Text, unique=True, nullable=False, primary_key=True)
     description = Column(Text)
+    users = relationship("User", secondary=f"{AUTH_SCHEMA}.user_roles", back_populates="roles")
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
     modified_at = Column(
         TIMESTAMP, nullable=False, onupdate=func.now(), server_default=func.now()
@@ -60,7 +62,7 @@ class User(DateTimeBaseModel):
 
     email = Column(Text, unique=True, nullable=False)
     password = Column(String(255), nullable=False)
-    roles = relationship("Role", secondary=f"{AUTH_SCHEMA}.user_roles", viewonly=True)
+    roles = relationship("Role", secondary=f"{AUTH_SCHEMA}.user_roles", back_populates="users")
     is_active = Column(Boolean, default=True, nullable=False)
 
     def __init__(self, password: str, email: str) -> None:

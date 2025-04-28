@@ -1,13 +1,15 @@
+import uuid
+from typing import List
+
 from fastapi import Depends, HTTPException, status
-from models.entity import User, LoginHistory
+from openapi.user import LoginHistoryResponse, UserResponse
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+
 from db.postgre import get_session
 from db.redis import get_redis
-from typing import List
-from openapi.user import UserResponse, UserUpdate, LoginHistoryResponse
-import uuid
+from models.entity import LoginHistory, User
 
 
 class ProfileService:
@@ -24,7 +26,10 @@ class ProfileService:
         info = await self.postgres.execute(stmt)
         user = info.scalar_one_or_none()
         if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
         return UserResponse.model_validate(user)
 
     async def get_history(self, user_uuid: str) -> List[LoginHistoryResponse]:

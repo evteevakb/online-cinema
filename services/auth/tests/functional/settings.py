@@ -3,11 +3,8 @@ Configuration settings for the auth service.
 """
 
 from logging import config as logging_config
+
 from pydantic_settings import BaseSettings
-from logger import LOGGING
-
-
-logging_config.dictConfig(LOGGING)
 
 
 class APISettings(BaseSettings):

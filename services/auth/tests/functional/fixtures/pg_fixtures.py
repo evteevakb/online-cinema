@@ -2,17 +2,17 @@
 PostgreSQL fixtures.
 """
 
-import pytest_asyncio
-from typing import List, Dict
+from typing import Dict, List
 
-from sqlalchemy.ext.asyncio import (
-    AsyncSession, create_async_engine, async_sessionmaker,
-)
-from sqlalchemy import text
-from models.entity import Base
+import pytest_asyncio
 from settings import PostgreSettings
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import (
+    AsyncSession, async_sessionmaker, create_async_engine,
+)
 from sqlalchemy.pool import NullPool
 
+from models.entity import Base
 
 db_settings = PostgreSettings()
 
@@ -46,6 +46,7 @@ async def db_session():
 @pytest_asyncio.fixture(name="pg_write_data")
 async def pg_write_data(db_session: AsyncSession):
     """Фикстура для записи данных."""
+
     async def inner(model, values: List[Dict]):
         try:
             instances = [model(**item) for item in values]
@@ -56,6 +57,7 @@ async def pg_write_data(db_session: AsyncSession):
             await db_session.rollback()
             print(f"Error while committing: {e}")
             raise e
+
     return inner
 
 
@@ -63,7 +65,9 @@ async def pg_write_data(db_session: AsyncSession):
 async def clean_tables(db_session: AsyncSession):
     yield
     try:
-        await db_session.execute(text("TRUNCATE TABLE auth.users, auth.login_history CASCADE"))
+        await db_session.execute(
+            text("TRUNCATE TABLE auth.users, auth.login_history CASCADE")
+        )
         await db_session.commit()
     except Exception as e:
         await db_session.rollback()
