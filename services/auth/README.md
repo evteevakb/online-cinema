@@ -49,8 +49,9 @@ Open each `.env` file and update the necessary values.
 
 ## Running
 
-Once the `.env` files are set up, go to the root folder (`auth`) and run the following command to start all components:
+Once the `.env` files are set up, go to the root folder (`auth`) and run the following command to create external network (if not created) and start all components:
 
+    docker network create shared_network
     docker-compose up --build -d
 
 The service now is available at `localhost:81`.
