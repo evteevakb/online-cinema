@@ -5,7 +5,15 @@ from redis.asyncio import Redis
 from db.postgre import get_session
 from db.redis import get_redis
 from models.entity import User, RefreshTokens
-from schemas.auth import UserRegister, UserLogin, TokenResponse, LogoutRequest, LogoutResponse
+from schemas.auth import (
+    UserRegister,
+    UserLogin,
+    TokenResponse,
+    LogoutRequest,
+    LogoutResponse,
+    VerifyRequest,
+    VerifyResponse
+)
 from datetime import datetime, timedelta
 from jose import jwt
 
@@ -142,6 +150,28 @@ class AuthService:
         result = await self.db.execute(select(User).where(User.uuid == user_id))
         return result.scalar_one_or_none()
 
+    async def verify_access_token(self, data: VerifyRequest) -> dict:
+        try:
+            payload = jwt.decode(data.access_token, self.secret_key, algorithms=[self.algorithm])
+            exp_timestamp = payload.get("exp")
+
+            cache_key = f"blacklist:{data.access_token}"
+            invalidated_token = await self.redis.get(cache_key)
+            if invalidated_token or not exp_timestamp:
+                raise HTTPException(status_code=401, detail="Invalid access token")
+
+            expires_in = exp_timestamp - int(datetime.now().timestamp())
+            if expires_in <= 0:
+                raise HTTPException(status_code=401, detail="Access token has expired")
+
+        except jwt.JWTError:
+            raise HTTPException(status_code=401, detail="Invalid access token")
+
+        user = await self._get_user_by_id(payload.get('sub'))
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        return payload
 
 def get_auth_service(
     redis: Redis = Depends(get_redis),
