@@ -5,10 +5,9 @@ from redis.asyncio import Redis
 from db.postgre import get_session
 from db.redis import get_redis
 from models.entity import User, RefreshTokens
-from models.auth import UserRegister, UserLogin, TokenResponse, LogoutRequest, LogoutResponse
+from schemas.auth import UserRegister, UserLogin, TokenResponse, LogoutRequest, LogoutResponse
 from datetime import datetime, timedelta
 from jose import jwt
-from uuid import uuid4
 
 
 class AuthService:
@@ -30,8 +29,8 @@ class AuthService:
 
     def _create_token(self, data: dict, expires_delta: timedelta) -> str:
         to_encode = data.copy()
-        expire = datetime.utcnow() + expires_delta
-        to_encode.update({"exp": expire, "iat": datetime.utcnow()})
+        expire = datetime.now() + expires_delta
+        to_encode.update({"exp": expire, "iat": datetime.now()})
         return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
 
     def _create_access_token(self, user: User) -> str:
@@ -41,16 +40,18 @@ class AuthService:
         )
 
     async def _create_refresh_token(self, user: User) -> str:
-        refresh_token = str(uuid4())
+        refresh_token = self._create_token(
+            data={"sub": str(user.uuid), "email": user.email},
+            expires_delta=timedelta(minutes=self.refresh_exp),
+        )
         await self._save_refresh_token(user.uuid, refresh_token)
         return refresh_token
 
     async def _save_refresh_token(self, user_uuid: str, token: str):
-        await self.db.execute(delete(RefreshTokens).where(RefreshTokens.user_uuid == user_uuid))
         token_entry = RefreshTokens(
             token=token,
             user_uuid=user_uuid,
-            expires_at=datetime.utcnow() + timedelta(days=self.refresh_exp / 24),
+            expires_at=datetime.now() + timedelta(days=self.refresh_exp / 24),
         )
         self.db.add(token_entry)
         await self.db.commit()
@@ -76,8 +77,6 @@ class AuthService:
         if not user or not user.check_password(credentials.password):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        await self.db.execute(delete(RefreshTokens).where(RefreshTokens.user_uuid == user.uuid))
-        await self.db.commit()
 
         access_token = self._create_access_token(user)
         refresh_token = await self._create_refresh_token(user)
@@ -90,7 +89,7 @@ class AuthService:
         )
         token = token_entry.scalar_one_or_none()
 
-        if not token or token.expires_at < datetime.utcnow():
+        if not token or token.expires_at < datetime.now():
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
         await self.db.execute(delete(RefreshTokens).where(RefreshTokens.token == refresh_token))
@@ -113,15 +112,17 @@ class AuthService:
             payload = jwt.decode(access_token, self.secret_key, algorithms=[self.algorithm])
             exp_timestamp = payload.get("exp")
 
-            if not exp_timestamp:
+            cache_key = f"blacklist:{access_token}"
+            invalidated_token = await self.redis.get(cache_key)
+            if invalidated_token or not exp_timestamp:
                 raise HTTPException(status_code=401, detail="Invalid access token")
 
-            expires_in = exp_timestamp - int(datetime.utcnow().timestamp())
+            expires_in = exp_timestamp - int(datetime.now().timestamp())
 
             if expires_in <= 0:
                 raise HTTPException(status_code=401, detail="Access token has expired")
 
-            await self.redis.set(f"blacklist:{access_token}", "true", ex=expires_in)
+            await self.redis.set(cache_key, "true", ex=expires_in)
 
         except jwt.JWTError:
             raise HTTPException(status_code=401, detail="Invalid access token")
