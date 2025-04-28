@@ -1,5 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from services.auth import UserRegister, UserLogin, TokenResponse, LogoutRequest, LogoutResponse
+from fastapi import APIRouter, Depends
+from schemas.auth import (
+    UserRegister,
+    UserLogin,
+    TokenResponse,
+    LogoutRequest,
+    LogoutResponse,
+    VerifyRequest,
+    VerifyResponse
+)
 from services.auth import AuthService, get_auth_service
 
 
@@ -38,3 +46,11 @@ async def logout(
     auth_service: AuthService = Depends(get_auth_service),
 ):
     return await auth_service.logout(data)
+
+
+@router.post('/verify_tokens', response_model=VerifyResponse)
+async def verify_tokens(
+    data: VerifyRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+) -> VerifyResponse:
+    return await auth_service.verify_tokens(data)
