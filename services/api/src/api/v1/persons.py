@@ -22,7 +22,11 @@ async def search_persons(
     query: str,
     common_filters: dict = Depends(person_filters),
     service: PersonService = Depends(get_person_service),
-    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
+    _=Depends(
+        Authorization(
+            allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
+        )
+    ),
 ) -> list[Person]:
     persons = await service.search_persons(query=query, **common_filters)
     return [
@@ -46,7 +50,11 @@ async def search_persons(
 async def person_details(
     person_uuid: str,
     person_service: PersonService = Depends(get_person_service),
-    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
+    _=Depends(
+        Authorization(
+            allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
+        )
+    ),
 ) -> Person:
     person = await person_service.get_person(person_uuid)
 
@@ -74,7 +82,11 @@ async def person_details(
 async def person_films(
     person_uuid: str,
     person_service: PersonService = Depends(get_person_service),
-    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
+    _=Depends(
+        Authorization(
+            allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
+        )
+    ),
 ) -> list[FilmBase]:
     films = await person_service.get_films_by_person(person_uuid)
     return [

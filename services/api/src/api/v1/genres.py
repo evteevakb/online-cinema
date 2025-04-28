@@ -26,7 +26,11 @@ async def get_genres(
     page_number: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
     genre_service: GenreService = Depends(get_genre_service),
-    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]))
+    _=Depends(
+        Authorization(
+            allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
+        )
+    ),
 ) -> list[GenreBase]:
     """Fetches a paginated list of genres.
 
@@ -60,7 +64,7 @@ async def get_genres(
 async def get_genre_details(
     genre_uuid: str,
     genre_service: GenreService = Depends(get_genre_service),
-    user_roles=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER]))
+    _=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])),
 ) -> GenreBase:
     """Retrieves detailed information about a genre by its UUID.
 

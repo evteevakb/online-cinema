@@ -19,6 +19,7 @@ class RoleCreateUpdate(BaseModel):
     name: str
     description: Optional[str]
 
+
 class BaseRole(BaseModel):
     """Represents a role with a name."""
 

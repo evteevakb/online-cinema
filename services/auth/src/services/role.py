@@ -1,6 +1,7 @@
 """
 Contains service for role management.
 """
+
 from http import HTTPStatus
 from uuid import UUID
 from typing import List
@@ -87,7 +88,7 @@ class RoleService:
             await self.session.rollback()
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail=f"Role {role_create.name} already exists"
+                detail=f"Role {role_create.name} already exists",
             )
         return role
 
@@ -104,15 +105,19 @@ class RoleService:
         Raises:
             HTTPException: If the role does not exist (404).
         """
-        stmt = update(Role).filter_by(name=role_name).values(
-            name=role_update.name,
-            description=role_update.description
-        ).returning(Role)
+        stmt = (
+            update(Role)
+            .filter_by(name=role_name)
+            .values(name=role_update.name, description=role_update.description)
+            .returning(Role)
+        )
         result = await self.session.execute(stmt)
         await self.session.commit()
         updated_role = result.scalar_one_or_none()
         if not updated_role:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Role not found")
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail="Role not found"
+            )
         return updated_role
 
     async def delete_role(self, role_name: str) -> None:
@@ -128,7 +133,9 @@ class RoleService:
         result = await self.session.execute(stmt)
         deleted = result.scalar_one_or_none()
         if not deleted:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Role not found')
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail="Role not found"
+            )
         await self.session.commit()
 
     async def get_user_with_roles(

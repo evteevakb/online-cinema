@@ -1,6 +1,7 @@
 """
 OpenAPI schema definitions for role assignment and revocation endpoints.
 """
+
 import datetime
 from http import HTTPStatus
 from typing import Any, ClassVar
@@ -10,7 +11,7 @@ from pydantic import BaseModel
 from schemas.role import RoleInDb
 
 
-__all__ = ["AssignRole", "RevokeRole"]
+__all__ = ["AssignRole", "ListRole", "RevokeRole"]
 
 role_name = "user"
 user_uuid = "68039548-01c4-800b-babf-fff7ac5fb54e"
@@ -136,16 +137,16 @@ class RevokeRole(BaseModel):
 class _RoleResponseContent(BaseModel):
     example: ClassVar[list[RoleInDb]] = [
         RoleInDb(
-            name='admin',
-            description='It is admin',
+            name="admin",
+            description="It is admin",
             created_at=datetime.datetime(year=2025, month=1, day=1),
-            modified_at=datetime.datetime(year=2025, month=1, day=1)
+            modified_at=datetime.datetime(year=2025, month=1, day=1),
         ),
         RoleInDb(
-            name='user',
-            description='Just user',
+            name="user",
+            description="Just user",
             created_at=datetime.datetime(year=2025, month=1, day=1),
-            modified_at=datetime.datetime(year=2025, month=1, day=1)
+            modified_at=datetime.datetime(year=2025, month=1, day=1),
         ),
     ]
 
@@ -159,10 +160,6 @@ class ListRole(BaseModel):
     responses: ClassVar[dict[int, Any]] = {
         HTTPStatus.OK: {
             "description": "Request completed successfully",
-            "content": {
-                "application/json": {
-                    "example": _RoleResponseContent.example
-                }
-            },
+            "content": {"application/json": {"example": _RoleResponseContent.example}},
         }
     }
