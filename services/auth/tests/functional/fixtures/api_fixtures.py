@@ -45,6 +45,7 @@ def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], 
         method: HTTPMethod,
         endpoint: str,
         params: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
         token: str | None = None,
     ) -> Response:
         params = params or {}
@@ -64,19 +65,10 @@ def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], 
             headers["Authorization"] = f"Bearer {token}"
         request_kwargs = {"headers": headers} if headers else {}
 
-        if method in ("POST", "PATCH"):
-            async with request_func(url, params=params, **request_kwargs) as response:
+        async with request_func(url, params=params, json=json, **request_kwargs) as response:
                 return Response(
                     body=await response.json(),
                     status=response.status,
                 )
-        elif method == "GET":
-            async with request_func(url, params=params, **request_kwargs) as response:
-                return Response(
-                    body=await response.json(),
-                    status=response.status,
-                )
-        else:
-            raise NotImplementedError
 
     return inner
