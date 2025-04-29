@@ -1,9 +1,8 @@
 """
-Configuration settings for the auth service.
+Configuration settings for the auth test service.
 """
 
-from logging import config as logging_config
-
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -13,10 +12,12 @@ class APISettings(BaseSettings):
     project_name: str = "auth-service"
     container_name: str
     port: int
+    auth_secret_key: str
+    auth_algorithm: str
+    auth_access_exp: int
     base_url: str | None = None
 
-    class Config:
-        env_prefix = "API_"
+    model_config = ConfigDict(env_prefix="API_")
 
     def model_post_init(self, __context) -> None:
         """Post-initialization method to set the base URL."""
@@ -33,8 +34,7 @@ class PostgreSettings(BaseSettings):
     port: int
     db: str
 
-    class Config:
-        env_prefix = "POSTGRES_"
+    model_config = ConfigDict(env_prefix="POSTGRES_")
 
 
 class RedisSettings(BaseSettings):
@@ -45,5 +45,4 @@ class RedisSettings(BaseSettings):
     user_name: str
     user_password: str
 
-    class Config:
-        env_prefix = "REDIS_"
+    model_config = ConfigDict(env_prefix="REDIS_")
