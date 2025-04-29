@@ -45,7 +45,8 @@ class GetProfileInfo(BaseModel):
                         uuid=user_uuid,
                         email="user@example.com",
                         full_name="John Doe",
-                        created_at=datetime(2025, 4, 27, 12, 0)
+                        created_at=datetime(2025, 4, 27, 12, 0),
+                        is_active=True
                     )
                 }
             }
