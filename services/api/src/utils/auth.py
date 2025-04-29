@@ -5,7 +5,10 @@ import httpx
 from fastapi import HTTPException, Header
 from starlette import status
 
+from core.config import APISettings
 from schemas.auth import VerifyRequest, VerifyResponse
+
+api_settings = APISettings()
 
 
 class Roles(str, Enum):
@@ -53,7 +56,7 @@ class AuthorizationRequests:
 class Authorization:
     def __init__(self, allowed_roles: List[Roles]):
         self.allowed_roles = allowed_roles
-        self.request_class = AuthorizationRequests(host='auth', port=8000)
+        self.request_class = AuthorizationRequests(host=api_settings.auth_host, port=api_settings.auth_port)
 
     async def __call__(self, authorization: str = Header(...)):
         token = self.extract_token(authorization)

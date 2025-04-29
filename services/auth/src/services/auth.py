@@ -88,7 +88,7 @@ class AuthService:
         )
         user = result.scalar_one_or_none()
         if not user or not user.check_password(credentials.password):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
         access_token = self._create_access_token(user)
         refresh_token = await self._create_refresh_token(user)
@@ -137,17 +137,17 @@ class AuthService:
             cache_key = f"blacklist:{access_token}"
             invalidated_token = await self.redis.get(cache_key)
             if invalidated_token or not exp_timestamp:
-                raise HTTPException(status_code=401, detail="Invalid access token")
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
 
             expires_in = exp_timestamp - int(datetime.now().timestamp())
 
             if expires_in <= 0:
-                raise HTTPException(status_code=401, detail="Access token has expired")
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token has expired")
 
             await self.redis.set(cache_key, "true", ex=expires_in)
 
         except jwt.JWTError:
-            raise HTTPException(status_code=401, detail="Invalid access token")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
 
         token_entry = await self.db.execute(
             select(RefreshTokens).where(RefreshTokens.token == refresh_token)
@@ -176,14 +176,14 @@ class AuthService:
             cache_key = f"blacklist:{data.access_token}"
             invalidated_token = await self.redis.get(cache_key)
             if invalidated_token or not exp_timestamp:
-                raise HTTPException(status_code=401, detail="Invalid access token")
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
 
             expires_in = exp_timestamp - int(datetime.now().timestamp())
             if expires_in <= 0:
-                raise HTTPException(status_code=401, detail="Access token has expired")
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token has expired")
 
         except jwt.JWTError:
-            raise HTTPException(status_code=401, detail="Invalid access token")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
 
         user = await self._get_user_by_id(payload.get("sub"))
         if not user:

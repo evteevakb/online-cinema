@@ -35,7 +35,7 @@ class FilmService:
         if film:
             return Film.model_validate_json(film)
         film = await self._get_film_from_repository(film_uuid)
-        film_is_paid = True#film.is_paid
+        film_is_paid = film.paid_only
         if film_is_paid and not any(role in user_roles for role in ALLOWED_ROLES_PAID_FILMS):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
