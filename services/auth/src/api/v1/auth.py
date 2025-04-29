@@ -27,7 +27,7 @@ async def register_user(
     return await auth_service.register(email, password)
 
 
-@router.post("/login", response_model=TokenResponse,)
+@router.post("/login", response_model=TokenResponse)
 async def login(
         email : str,
         password: str,

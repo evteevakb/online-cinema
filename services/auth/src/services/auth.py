@@ -108,7 +108,7 @@ class AuthService:
         login_event = LoginHistory(
             user_uuid=user.uuid,
             user_agent=user_agent,
-            event_type=AuthEventType.LOGIN  # Предполагается, что LOGIN — это одно из значений Enum
+            event_type=AuthEventType.LOGIN
         )
         self.db.add(login_event)
         await self.db.commit()
