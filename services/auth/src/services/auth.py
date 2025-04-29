@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.postgre import get_session
 from db.redis import get_redis
-from models.entity import User, RefreshTokens
+from models.entity import User, RefreshTokens, Role
 from schemas.auth import (
     UserRegister,
     UserLogin,
@@ -72,7 +72,19 @@ class AuthService:
         if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="User already exists")
 
+        role_result = await self.db.execute(select(Role).where(Role.name == "user"))
+        user_role = role_result.scalar_one_or_none()
+
+        if not user_role:
+            user_role = Role(name="user")
+            self.db.add(user_role)
+            await self.db.commit()
+            await self.db.refresh(user_role)
+
         user = User(email=user_data.email, password=user_data.password)
+        user.is_active = True
+        user.roles = [user_role]
+
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)
