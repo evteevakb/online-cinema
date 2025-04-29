@@ -1,6 +1,7 @@
 import uuid
 from typing import List
 
+from werkzeug.security import generate_password_hash
 from fastapi import Depends, HTTPException, status
 from openapi.user import LoginHistoryResponse, UserResponse
 from redis.asyncio import Redis
@@ -66,7 +67,7 @@ class ProfileService:
                 detail="User not found"
             )
         elif user.check_password(old_password):
-            user.password = new_password
+            user.password = generate_password_hash(new_password)
             await self.postgres.commit()
         else:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
