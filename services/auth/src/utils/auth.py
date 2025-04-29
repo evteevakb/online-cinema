@@ -6,7 +6,7 @@ from fastapi import HTTPException, Header
 from starlette import status
 
 from core.config import APISettings
-from schemas.auth import VerifyRequest, VerifyResponse
+from schemas.auth import VerifyRequest, VerifyResponse, AuthorizationResponse
 
 
 api_settings = APISettings()
@@ -92,7 +92,7 @@ class Authorization:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="This operation is forbidden for you",
             )
-        return roles
+        return AuthorizationResponse(user_uuid=user_uuid, roles=roles)
 
     @staticmethod
     def extract_token(authorization: str) -> str:

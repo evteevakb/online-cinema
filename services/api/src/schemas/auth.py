@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 
@@ -11,3 +13,7 @@ class VerifyResponse(BaseModel):
     email: str
     exp: int
     iat: int
+
+class AuthorizationResponse(BaseModel):
+    user_uuid: str
+    roles: List[str]
