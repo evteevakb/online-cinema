@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List
 
 from pydantic import BaseModel
@@ -48,3 +49,5 @@ class Film(FilmBase):
     actors: List[PersonBase] = []
     directors: List[PersonBase] = []
     writers: List[PersonBase] = []
+    creation_data: date | None = None
+    paid_only: bool = False

@@ -124,6 +124,12 @@
               "analyzer": "ru_en"
             }
           }
+        },
+        "creation_date": {
+          "type": "date"
+        },
+        "paid_only": {
+          "type": "boolean"
         }
       }
     }
