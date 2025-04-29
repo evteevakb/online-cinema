@@ -16,6 +16,8 @@ logging_config.dictConfig(LOGGING)
 class APISettings(BaseSettings):
     """Configuration settings for the API."""
 
+    port: int
+    container_name: str
     project_name: str = "auth-service"
     base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

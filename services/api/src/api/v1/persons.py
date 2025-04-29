@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.v1.response_models import PersonFilm, Person, FilmBase
 from openapi.persons import PersonDetails, PersonFilms, PersonsSearch
 from services.person import PersonService, get_person_service, person_filters
+from utils.auth import Authorization, Roles
 
 router = APIRouter()
 
@@ -21,6 +22,11 @@ async def search_persons(
     query: str,
     common_filters: dict = Depends(person_filters),
     service: PersonService = Depends(get_person_service),
+    _=Depends(
+        Authorization(
+            allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
+        )
+    ),
 ) -> list[Person]:
     persons = await service.search_persons(query=query, **common_filters)
     return [
@@ -44,6 +50,11 @@ async def search_persons(
 async def person_details(
     person_uuid: str,
     person_service: PersonService = Depends(get_person_service),
+    _=Depends(
+        Authorization(
+            allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
+        )
+    ),
 ) -> Person:
     person = await person_service.get_person(person_uuid)
 
@@ -71,6 +82,11 @@ async def person_details(
 async def person_films(
     person_uuid: str,
     person_service: PersonService = Depends(get_person_service),
+    _=Depends(
+        Authorization(
+            allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
+        )
+    ),
 ) -> list[FilmBase]:
     films = await person_service.get_films_by_person(person_uuid)
     return [

@@ -6,6 +6,7 @@ from openapi.user import LoginHistoryResponse, UserResponse
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from werkzeug.security import generate_password_hash
 
 from db.postgre import get_session
 from db.redis import get_redis
@@ -66,7 +67,7 @@ class ProfileService:
                 detail="User not found"
             )
         elif user.check_password(old_password):
-            user.password = new_password
+            user.password = generate_password_hash(new_password)
             await self.postgres.commit()
         else:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)

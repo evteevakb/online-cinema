@@ -70,8 +70,8 @@ def upgrade() -> None:
     op.create_table('user_roles',
     sa.Column('user_uuid', sa.UUID(), nullable=False),
     sa.Column('role_name', sa.Text(), nullable=False),
-    sa.ForeignKeyConstraint(['role_name'], ['auth.roles.name'], ),
-    sa.ForeignKeyConstraint(['user_uuid'], ['auth.users.uuid'], ),
+    sa.ForeignKeyConstraint(['role_name'], ['auth.roles.name'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_uuid'], ['auth.users.uuid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_uuid', 'role_name'),
     schema='auth'
     )

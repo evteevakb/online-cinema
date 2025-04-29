@@ -1,6 +1,7 @@
 """
 Contains classes that describe the business entity of a movie.
 """
+from datetime import date
 
 from pydantic import BaseModel
 
@@ -17,6 +18,8 @@ class Film(BaseModel):
     actors: list[PersonBase] = []
     directors: list[PersonBase] = []
     writers: list[PersonBase] = []
+    creation_data: date | None = None
+    paid_only: bool = False
 
 
 class FilmBase(BaseModel):
