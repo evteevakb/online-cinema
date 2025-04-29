@@ -47,13 +47,13 @@ async def films_search(
 async def film_details(
     film_uuid: str,
     film_service: FilmService = Depends(get_film_service),
-    user_roles=Depends(
+    user_with_roles=Depends(
         Authorization(
             allowed_roles=[Roles.ADMIN, Roles.SUPERUSER, Roles.USER, Roles.PAID_USER]
         )
     ),
 ) -> Film:
-    film = await film_service.get_by_uuid(film_uuid=film_uuid, user_roles=user_roles)
+    film = await film_service.get_by_uuid(film_uuid=film_uuid, user_with_roles=user_with_roles)
 
     if not film:
         raise HTTPException(

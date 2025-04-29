@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -37,3 +39,7 @@ class LogoutRequest(BaseModel):
 
 class LogoutResponse(BaseModel):
     detail: str
+
+class AuthorizationResponse(BaseModel):
+    user_uuid: str
+    roles: List[str]
