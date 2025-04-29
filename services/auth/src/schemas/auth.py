@@ -16,9 +16,11 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
 
+
 class VerifyRequest(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
 
 class VerifyResponse(BaseModel):
     sub: str
@@ -26,10 +28,12 @@ class VerifyResponse(BaseModel):
     exp: int
     iat: int
 
+
 class LogoutRequest(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
 
 class LogoutResponse(BaseModel):
     detail: str

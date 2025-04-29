@@ -43,8 +43,9 @@ Open each `.env` file and update the necessary values.
 
 ## Running
 
-Once the `.env` files are set up, run the following command to start all services:
+Once the `.env` files are set up, run the following command to create external network (if not created) and start all services:
 
+    docker network create shared_network
     docker-compose up --build -d
 
 The app will be available at `localhost:80`.
