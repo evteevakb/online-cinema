@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -34,7 +34,7 @@ class VerifyResponse(BaseModel):
 class LogoutRequest(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
+    user_agent: Optional[str] = "unknown"
 
 
 class LogoutResponse(BaseModel):
