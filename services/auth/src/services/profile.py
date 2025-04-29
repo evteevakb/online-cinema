@@ -21,7 +21,13 @@ class ProfileService:
         self.postgres = postgres
 
     async def get_profile_info(self, uuid_: str) -> UserResponse:
-        profile_uuid = uuid.UUID(uuid_)
+        try:
+            profile_uuid = uuid.UUID(uuid_)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User not found"
+            )
         stmt = select(User).where(User.uuid == profile_uuid)
         info = await self.postgres.execute(stmt)
         user = info.scalar_one_or_none()
@@ -49,9 +55,9 @@ class ProfileService:
                 detail={"message": f"Database error: {str(e)}"}
             )
 
-    async def reset_password(self, user_uuid: str, new_password: str) -> None:
+    async def reset_password(self, email: str, old_password: str, new_password: str) -> None:
         result = await self.postgres.execute(
-            select(User).where(User.uuid == user_uuid)
+            select(User).where(User.email == email)
         )
         user = result.scalar_one_or_none()
         if not user:
@@ -59,12 +65,15 @@ class ProfileService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        user.password = new_password
-        await self.postgres.commit()
+        elif user.check_password(old_password):
+            user.password = new_password
+            await self.postgres.commit()
+        else:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
-    async def reset_login(self, user_uuid: str, login: str) -> None:
+    async def reset_login(self, email: str, new_login: str, password: str) -> None:
         result = await self.postgres.execute(
-            select(User).where(User.uuid == user_uuid)
+            select(User).where(User.email == email)
         )
         user = result.scalar_one_or_none()
         if not user:
@@ -72,8 +81,11 @@ class ProfileService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        user.email = login
-        await self.postgres.commit()
+        elif user.check_password(password):
+            user.email = new_login
+            await self.postgres.commit()
+        else:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
 
 def get_profile_service(

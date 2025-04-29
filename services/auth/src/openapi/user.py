@@ -13,7 +13,7 @@ new_login = "new_user_login"
 
 class _UserNotFoundExample(BaseModel):
     """Пример ответа для отсутствующего пользователя"""
-    
+
     example: ClassVar[dict] = {
         "summary": "User not found",
         "value": {"detail": f"User with uuid={user_uuid} not found"},
@@ -44,9 +44,8 @@ class GetProfileInfo(BaseModel):
                     "example": UserResponse(
                         uuid=user_uuid,
                         email="user@example.com",
-                        full_name="John Doe",
-                        created_at=datetime(2025, 4, 27, 12, 0),
-                        is_active=True
+                        is_active=True,
+                        created_at=datetime(2025, 4, 27, 12, 0)
                     )
                 }
             }

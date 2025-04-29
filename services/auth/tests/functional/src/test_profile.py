@@ -69,15 +69,11 @@ async def test_reset_password(
     pg_write_data: Any, make_request: Any, db_session: Any, clean_tables: Any
 ) -> None:
     user_sample = user()
-    new_pass = {"password": "new_pass"}
+    email = user_sample[0]["email"]
+    body = {"login": user_sample[0]["email"], "password": user_sample[0]["password"],  "new_password": "new_pass"}
     await pg_write_data(User, user_sample)
-    async with db_session as session:
-        result = await session.execute(
-            select(User.uuid).where(User.email == user_sample[0]["email"])
-        )
-        user_uuid = result.scalar_one()
 
-    response = await make_request(HTTPMethod.POST, f"profile/{user_uuid}/reset/password", new_pass)
+    response = await make_request(HTTPMethod.POST, f"profile/{email}/reset/password", body)
     assert response.status == HTTPStatus.OK
 
 
@@ -86,13 +82,9 @@ async def test_reset_login(
     pg_write_data: Any, make_request: Any, db_session: Any, clean_tables: Any
 ) -> None:
     user_sample = user()
-    new_login = {"login": "new_email@gmail.com"}
+    email = user_sample[0]["email"]
+    body = {"login": email, "new_login": "new_email@gmail.com", "password": user_sample[0]["password"]}
     await pg_write_data(User, user_sample)
-    async with db_session as session:
-        result = await session.execute(
-            select(User.uuid).where(User.email == user_sample[0]["email"])
-        )
-        user_uuid = result.scalar_one()
 
-    response = await make_request(HTTPMethod.POST, f"profile/{user_uuid}/reset/login", new_login)
+    response = await make_request(HTTPMethod.POST, f"profile/{email}/reset/login", body)
     assert response.status == HTTPStatus.OK

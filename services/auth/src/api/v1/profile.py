@@ -27,7 +27,7 @@ async def get_profile_info(
 
 
 @router.post(
-    '/{uuid}/reset/password',
+    '/{email}/reset/password',
     response_model=UserUpdate,
     summary=ResetPassword.summary,
     description=ResetPassword.description,
@@ -35,11 +35,12 @@ async def get_profile_info(
     responses=cast(dict[int | str, dict[str, Any]], ResetPassword.responses),
 )
 async def reset_password(
-    uuid: str,
+    login: str,
     password: str,
+    new_password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_password(uuid, password)
+    await profile_service.reset_password(login, password, new_password)
     return JSONResponse(
         content={"message": "Password updated successfully"},
         status_code=status.HTTP_200_OK
@@ -47,7 +48,7 @@ async def reset_password(
 
 
 @router.post(
-    '/{uuid}/reset/login',
+    '/{login}/reset/login',
     response_model=UserUpdate,
     summary=ResetLogin.summary,
     description=ResetLogin.description,
@@ -55,11 +56,12 @@ async def reset_password(
     responses=cast(dict[int | str, dict[str, Any]], ResetLogin.responses),
 )
 async def reset_login(
-    uuid: str,
     login: str,
+    new_login: str,
+    password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_login(uuid, login)
+    await profile_service.reset_login(login, new_login, password)
     return JSONResponse(
         content={"message": "Login updated successfully"},
         status_code=status.HTTP_200_OK
