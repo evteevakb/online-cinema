@@ -87,7 +87,7 @@ class RoleService:
         except IntegrityError:
             await self.session.rollback()
             raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                status_code=HTTPStatus.BAD_REQUEST,
                 detail=f"Role {role_create.name} already exists",
             )
         return role

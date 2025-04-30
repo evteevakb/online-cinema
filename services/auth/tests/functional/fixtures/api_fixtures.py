@@ -55,6 +55,8 @@ def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], 
             "GET": session.get,
             "POST": session.post,
             "PATCH": session.patch,
+            "PUT": session.put,
+            "DELETE": session.delete,
         }.get(method)
 
         if request_func is None:
