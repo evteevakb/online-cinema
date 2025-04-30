@@ -605,10 +605,10 @@ class TestDeleteRole:
 
 
 @pytest.mark.asyncio()
-class TestLiseUserRole:
+class TestListUserRole:
     """Tests for /roles/user/{user_uuid} endpoint"""
 
-    endpoint = "/roles/user"
+    endpoint = "roles/user"
     method = HTTPMethod.GET
 
     async def test_success(
@@ -649,7 +649,7 @@ class TestLiseUserRole:
 
         response = await make_request(
             method=self.method,
-            endpoint=f'{self.endpoint}/RndmUser',
+            endpoint=f'{self.endpoint}/{uuid.uuid4()}',
             token=su_token,
         )
 
