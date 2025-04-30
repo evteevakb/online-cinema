@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from schemas.auth import (
     UserRegister,
     UserLogin,
@@ -19,18 +19,24 @@ router = APIRouter()
     response_model=TokenResponse,
 )
 async def register_user(
-    user_data: UserRegister,
+    email : str,
+    password: str,
+    #user_data: UserRegister,
     auth_service: AuthService = Depends(get_auth_service)
 ):
-    return await auth_service.register(user_data)
+    return await auth_service.register(email, password)
 
 
-@router.post("/login")
+@router.post("/login", response_model=TokenResponse)
 async def login(
-        data: UserLogin,
+        email : str,
+        password: str,
+        request: Request,
+        #data: UserLogin,
         auth_service: AuthService = Depends(get_auth_service),
 ):
-    return await auth_service.login(data)
+    user_agent = request.headers.get("user-agent", "unknown")
+    return await auth_service.login(email, password, user_agent)
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -42,10 +48,13 @@ async def refresh_token(
 
 @router.post("/logout", response_model=LogoutResponse)
 async def logout(
-    data: LogoutRequest,
+    access_token, refresh_token,
+    #data: LogoutRequest,
+    request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ):
-    return await auth_service.logout(data)
+    user_agent = request.headers.get("user-agent", "unknown")
+    return await auth_service.logout(access_token, refresh_token, user_agent)
 
 
 @router.post('/verify_access_token', response_model=VerifyResponse)

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.postgre import get_session
 from db.redis import get_redis
-from models.entity import User, RefreshTokens, Role
+from models.entity import User, RefreshTokens, Role, LoginHistory, AuthEventType
 from schemas.auth import (
     UserRegister,
     UserLogin,
@@ -65,9 +65,9 @@ class AuthService:
         self.db.add(token_entry)
         await self.db.commit()
 
-    async def register(self, user_data: UserRegister) -> TokenResponse:
+    async def register(self, email, password) -> TokenResponse:
         result = await self.db.execute(
-            select(User).where(User.email == user_data.email)
+            select(User).where(User.email == email)
         )
         if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="User already exists")
@@ -81,7 +81,7 @@ class AuthService:
             await self.db.commit()
             await self.db.refresh(user_role)
 
-        user = User(email=user_data.email, password=user_data.password)
+        user = User(email=email, password=password)
         user.is_active = True
         user.roles = [user_role]
 
@@ -94,16 +94,24 @@ class AuthService:
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
-    async def login(self, credentials: UserLogin) -> TokenResponse:
+    async def login(self, email: str, password: str, user_agent: str) -> TokenResponse:
         result = await self.db.execute(
-            select(User).where(User.email == credentials.email)
+            select(User).where(User.email == email)
         )
         user = result.scalar_one_or_none()
-        if not user or not user.check_password(credentials.password):
+        if not user or not user.check_password(password):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
         access_token = self._create_access_token(user)
         refresh_token = await self._create_refresh_token(user)
+
+        login_event = LoginHistory(
+            user_uuid=user.uuid,
+            user_agent=user_agent,
+            event_type=AuthEventType.LOGIN
+        )
+        self.db.add(login_event)
+        await self.db.commit()
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
@@ -135,16 +143,15 @@ class AuthService:
         return TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
 
     async def logout(
-        self, logout_request: LogoutRequest
+            self, access_token, refresh_token, user_agent
     ) -> LogoutResponse:
-        access_token = logout_request.access_token
-        refresh_token = logout_request.refresh_token
 
         try:
             payload = jwt.decode(
                 access_token, self.secret_key, algorithms=[self.algorithm]
             )
             exp_timestamp = payload.get("exp")
+            user_uuid = payload.get("sub")  # Обычно ID пользователя
 
             cache_key = f"blacklist:{access_token}"
             invalidated_token = await self.redis.get(cache_key)
@@ -152,7 +159,6 @@ class AuthService:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
 
             expires_in = exp_timestamp - int(datetime.now().timestamp())
-
             if expires_in <= 0:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token has expired")
 
@@ -170,6 +176,16 @@ class AuthService:
             await self.db.execute(
                 delete(RefreshTokens).where(RefreshTokens.token == refresh_token)
             )
+            await self.db.commit()
+
+        # Запись в login_history
+        if user_uuid:
+            logout_event = LoginHistory(
+                user_uuid=user_uuid,
+                user_agent=user_agent,
+                event_type=AuthEventType.LOGOUT
+            )
+            self.db.add(logout_event)
             await self.db.commit()
 
         return LogoutResponse(detail="Successfully logged out")
