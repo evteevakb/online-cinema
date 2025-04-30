@@ -45,21 +45,19 @@ class GetProfileInfo(BaseModel):
                         uuid=user_uuid,
                         email="user@example.com",
                         is_active=True,
-                        created_at=datetime(2025, 4, 27, 12, 0)
+                        created_at=datetime(2025, 4, 27, 12, 0),
                     )
                 }
-            }
+            },
         },
         HTTPStatus.NOT_FOUND: {
             "description": "Пользователь не найден",
             "content": {
                 "application/json": {
-                    "examples": {
-                        "User not found": _UserNotFoundExample.example
-                    }
+                    "examples": {"User not found": _UserNotFoundExample.example}
                 }
-            }
-        }
+            },
+        },
     }
 
 
@@ -77,28 +75,24 @@ class ResetPassword(BaseModel):
                 "application/json": {
                     "example": {"message": "Password updated successfully"}
                 }
-            }
+            },
         },
         HTTPStatus.BAD_REQUEST: {
             "description": "Некорректный запрос",
             "content": {
                 "application/json": {
-                    "examples": {
-                        "Validation error": _ValidationErrorExample.example
-                    }
+                    "examples": {"Validation error": _ValidationErrorExample.example}
                 }
-            }
+            },
         },
         HTTPStatus.NOT_FOUND: {
             "description": "Пользователь не найден",
             "content": {
                 "application/json": {
-                    "examples": {
-                        "User not found": _UserNotFoundExample.example
-                    }
+                    "examples": {"User not found": _UserNotFoundExample.example}
                 }
-            }
-        }
+            },
+        },
     }
 
 
@@ -116,7 +110,7 @@ class ResetLogin(BaseModel):
                 "application/json": {
                     "example": {"message": "Login updated successfully"}
                 }
-            }
+            },
         },
         HTTPStatus.BAD_REQUEST: {
             "description": "Некорректный запрос",
@@ -125,22 +119,20 @@ class ResetLogin(BaseModel):
                     "examples": {
                         "Login exists": {
                             "summary": "Login exists",
-                            "value": {"detail": f"Login {new_login} already exists"}
+                            "value": {"detail": f"Login {new_login} already exists"},
                         }
                     }
                 }
-            }
+            },
         },
         HTTPStatus.NOT_FOUND: {
             "description": "Пользователь не найден",
             "content": {
                 "application/json": {
-                    "examples": {
-                        "User not found": _UserNotFoundExample.example
-                    }
+                    "examples": {"User not found": _UserNotFoundExample.example}
                 }
-            }
-        }
+            },
+        },
     }
 
 
@@ -153,7 +145,7 @@ class _HistoryResponseContent(BaseModel):
             user_uuid=user_uuid,
             event_type="login",
             user_agent="Mozilla/5.0",
-            occurred_at=datetime(2025, 4, 27, 12, 0)
+            occurred_at=datetime(2025, 4, 27, 12, 0),
         )
     ]
 
@@ -169,19 +161,15 @@ class GetHistory(BaseModel):
         HTTPStatus.OK: {
             "description": "Успешный запрос",
             "content": {
-                "application/json": {
-                    "example": _HistoryResponseContent.example
-                }
-            }
+                "application/json": {"example": _HistoryResponseContent.example}
+            },
         },
         HTTPStatus.NOT_FOUND: {
             "description": "Пользователь не найден",
             "content": {
                 "application/json": {
-                    "examples": {
-                        "User not found": _UserNotFoundExample.example
-                    }
+                    "examples": {"User not found": _UserNotFoundExample.example}
                 }
-            }
-        }
+            },
+        },
     }
