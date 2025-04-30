@@ -1,9 +1,6 @@
 from http import HTTPStatus, HTTPMethod
-import asyncio
-import pytest
 
-from models.entity import LoginHistory, User
-from testdata.samples.users import user, user_history
+import pytest
 
 
 @pytest.mark.asyncio
@@ -27,7 +24,6 @@ async def test_login(make_request):
         HTTPMethod.POST, "auth/registration", login_payload
     )
     assert register_response.status == HTTPStatus.OK
-    await asyncio.sleep(5)
     login_response = await make_request(HTTPMethod.POST, "auth/login", login_payload)
     assert login_response.status == HTTPStatus.OK
     response_json = login_response.body
@@ -43,10 +39,8 @@ async def test_logout(make_request):
         HTTPMethod.POST, "auth/registration", login_payload
     )
     assert register_response.status == HTTPStatus.OK
-    await asyncio.sleep(5)
     login_response = await make_request(HTTPMethod.POST, "auth/login", login_payload)
     assert login_response.status == HTTPStatus.OK
-    await asyncio.sleep(5)
     response_json = login_response.body
     logout_payload = {
         "access_token": response_json.get("access_token"),
@@ -65,10 +59,8 @@ async def test_refresh(make_request):
         HTTPMethod.POST, "auth/registration", login_payload
     )
     assert register_response.status == HTTPStatus.OK
-    await asyncio.sleep(5)
     login_response = await make_request(HTTPMethod.POST, "auth/login", login_payload)
     assert login_response.status == HTTPStatus.OK
-    await asyncio.sleep(5)
     logout_payload = {"refresh_token": login_response.body.get("refresh_token")}
 
     refresh_response = await make_request(

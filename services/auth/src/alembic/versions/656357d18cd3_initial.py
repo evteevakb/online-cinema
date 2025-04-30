@@ -74,11 +74,7 @@ def upgrade() -> None:
         sa.Column("uuid", sa.UUID(), nullable=False),
         sa.Column("user_uuid", sa.UUID(), nullable=True),
         sa.Column("user_agent", sa.Text(), nullable=True),
-        sa.Column(
-            "event_type",
-            sa.Enum("LOGIN", "LOGOUT", name="autheventtype"),
-            nullable=False,
-        ),
+        sa.Column("event_type", sa.Text(), nullable=False),
         sa.Column(
             "occurred_at",
             postgresql.TIMESTAMP(),

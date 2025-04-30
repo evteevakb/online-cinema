@@ -73,9 +73,18 @@ def make_request(
         async with request_func(
             url, params=params, json=json, **request_kwargs
         ) as response:
+            try:
+                body = await response.json()
+            except aiohttp.ContentTypeError:
+                body = await response.text()
+
+            status = response.status
+            if 500 <= status < 600:
+                raise RuntimeError(f"{status}: {body}")
+
             return Response(
-                body=await response.json(),
-                status=response.status,
+                body=body,
+                status=status,
             )
 
     return inner

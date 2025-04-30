@@ -3,7 +3,6 @@ import uuid
 from datetime import datetime, timedelta
 
 from sqlalchemy import Boolean, Column
-from sqlalchemy import Enum as PgEnum
 from sqlalchemy import ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import declarative_base, relationship
@@ -96,7 +95,7 @@ class LoginHistory(BaseModel):
     )
     user_uuid = Column(UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.users.uuid"))
     user_agent = Column(Text)
-    event_type = Column(PgEnum(AuthEventType, create_type=True), nullable=False)
+    event_type = Column(Text, nullable=False)
     occurred_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
 
