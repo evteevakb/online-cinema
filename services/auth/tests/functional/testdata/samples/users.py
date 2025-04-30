@@ -21,7 +21,7 @@ def user_history(user_sample):
         {
             "user_uuid": user.uuid,
             "user_agent": "Linux",
-            "event_type": AuthEventType("login"),
+            "event_type": AuthEventType.LOGIN.value,
         }
         for _ in range(2)
         for user in user_sample

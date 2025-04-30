@@ -68,9 +68,19 @@ def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], 
         request_kwargs = {"headers": headers} if headers else {}
 
         async with request_func(url, params=params, json=json, **request_kwargs) as response:
-                return Response(
-                    body=await response.json(),
-                    status=response.status,
-                )
+
+            try:
+                body = await response.json()
+            except aiohttp.ContentTypeError:
+                body = await response.text()
+
+            status = response.status
+            if 500 <= status < 600:
+                raise RuntimeError(f"{status}: {body}")
+
+            return Response(
+                body=body,
+                status=status,
+            )
 
     return inner

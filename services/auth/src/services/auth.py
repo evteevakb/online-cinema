@@ -101,6 +101,17 @@ class AuthService:
         user = result.scalar_one_or_none()
         if not user or not user.check_password(password):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        
+        result = await self.db.execute(
+            select(RefreshTokens).where(RefreshTokens.user_uuid == user.uuid)
+        )
+        result = result.scalar_one_or_none()
+        old_token = result.token if result else None
+        if old_token:
+            await self.db.execute(
+                delete(RefreshTokens).where(RefreshTokens.token == old_token)
+            )
+            await self.db.commit()
 
         access_token = self._create_access_token(user)
         refresh_token = await self._create_refresh_token(user)
@@ -108,7 +119,7 @@ class AuthService:
         login_event = LoginHistory(
             user_uuid=user.uuid,
             user_agent=user_agent,
-            event_type=AuthEventType.LOGIN
+            event_type=AuthEventType.LOGIN.value,
         )
         self.db.add(login_event)
         await self.db.commit()
@@ -183,7 +194,7 @@ class AuthService:
             logout_event = LoginHistory(
                 user_uuid=user_uuid,
                 user_agent=user_agent,
-                event_type=AuthEventType.LOGOUT
+                event_type=AuthEventType.LOGOUT.value,
             )
             self.db.add(logout_event)
             await self.db.commit()
