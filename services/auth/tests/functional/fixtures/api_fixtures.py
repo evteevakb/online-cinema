@@ -16,7 +16,7 @@ api_settings = APISettings()
 class Response(BaseModel):
     """Represents a HTTP response object."""
 
-    body: list[dict[str, Any]] | dict[str, Any]
+    body: Any
     status: int
 
 
