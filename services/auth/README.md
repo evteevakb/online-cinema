@@ -93,6 +93,9 @@ Navigate to the test directory and start the containers required for testing:
 
 The results of the functional tests will be shown in the logs of the `auth-functional-tests` container.
 
+## Service schema
+
+[Schema](https://miro.com/welcomeonboard/R0F6RmtPWVFlNUJ2eitsVHRCMTZ2YVN0SHp3ay9TWCtIR2JEOW5Pelo0cEFRUUFjZklWKy96dTBZL0I0UG5rVDVzOEhQZlVrelpyZEcveDUxUklSc0V0Vno0SnVNRDdKNTdUTWVhZXlHSUtXQ1FaYXNpUzJSVU9OeDdyWDFhOEJBS2NFMDFkcUNFSnM0d3FEN050ekl3PT0hdjE=?share_link_id=611276372820)
 
 ## Contributors
 
