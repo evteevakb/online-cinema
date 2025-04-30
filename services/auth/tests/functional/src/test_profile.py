@@ -12,7 +12,7 @@ from utils.auth import create_access_token
 
 @pytest.mark.asyncio
 async def test_profile(
-    pg_write_data: Any, make_request: Any, db_session: Any, refresh_db, clean_tables
+    pg_write_data: Any, make_request: Any, db_session: Any,
 ) -> None:
     user_sample = user()
     await pg_write_data(User, user_sample)
@@ -47,8 +47,6 @@ async def test_history(
     db_session: Any,
     create_roles: Any,
     create_user: Any,
-    refresh_db: Any,
-    clean_tables: Any,
 ) -> None:
     user_sample = user()
     user_role = Roles.USER.value
@@ -86,7 +84,7 @@ async def test_history(
 
 @pytest.mark.asyncio
 async def test_reset_password(
-    pg_write_data: Any, make_request: Any, db_session: Any, clean_tables: Any
+    pg_write_data: Any, make_request: Any,
 ) -> None:
     user_sample = user()
     email = user_sample[0]["email"]
@@ -105,7 +103,7 @@ async def test_reset_password(
 
 @pytest.mark.asyncio
 async def test_reset_login(
-    pg_write_data: Any, make_request: Any, db_session: Any, clean_tables: Any
+    pg_write_data: Any, make_request: Any,
 ) -> None:
     user_sample = user()
     email = user_sample[0]["email"]
