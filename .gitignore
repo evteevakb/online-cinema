@@ -1,0 +1,6 @@
+*env
+*lock
+*mypy_cache
+*ruff_cache
+*venv
+*__pycache__
