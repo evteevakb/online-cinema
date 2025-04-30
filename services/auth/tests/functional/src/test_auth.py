@@ -1,9 +1,6 @@
 from http import HTTPStatus, HTTPMethod
-from os import access
-from typing import Any
 import asyncio
 import pytest
-from sqlalchemy.future import select
 
 from models.entity import LoginHistory, User
 from testdata.samples.users import user, user_history
@@ -38,9 +35,9 @@ async def test_login(make_request):
     await asyncio.sleep(5)
     login_response = await make_request(HTTPMethod.POST, "auth/login", login_payload)
     assert login_response.status == HTTPStatus.OK
-    #response_json = login_response.body
-    #assert "access_token" in response_json
-    #assert "refresh_token" in response_json
+    response_json = login_response.body
+    assert "access_token" in response_json
+    assert "refresh_token" in response_json
 
 
 @pytest.mark.asyncio
@@ -59,8 +56,8 @@ async def test_logout(make_request):
     await asyncio.sleep(5)
     response_json = login_response.body
     logout_payload = {
-        "access_token": response_json.access_token,
-        "refresh_token": response_json.refresh_token
+        "access_token": response_json.get('access_token'),
+        "refresh_token": response_json.get('refresh_token')
     }
 
     logout_response = await make_request(HTTPMethod.POST, "auth/logout", logout_payload)
@@ -82,7 +79,7 @@ async def test_refresh(make_request):
     assert login_response.status == HTTPStatus.OK
     await asyncio.sleep(5)
     logout_payload = {
-        "refresh_token": login_response.refresh_token
+        "refresh_token": login_response.body.get('refresh_token')
     }
 
     refresh_response = await make_request(HTTPMethod.POST, "auth/refresh", logout_payload)
