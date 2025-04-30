@@ -34,7 +34,9 @@ async def test_profile(
     assert response.status == HTTPStatus.OK
     assert response.body["uuid"] == str(user_uuid)
 
-    response = await make_request(HTTPMethod.GET, "profile/f8557b55-c2c6-4613-8a6d-e459f3456005")
+    response = await make_request(
+        HTTPMethod.GET, "profile/f8557b55-c2c6-4613-8a6d-e459f3456005"
+    )
     assert response.status == 404
 
 
@@ -88,10 +90,16 @@ async def test_reset_password(
 ) -> None:
     user_sample = user()
     email = user_sample[0]["email"]
-    body = {"login": user_sample[0]["email"], "password": user_sample[0]["password"],  "new_password": "new_pass"}
+    body = {
+        "login": user_sample[0]["email"],
+        "password": user_sample[0]["password"],
+        "new_password": "new_pass",
+    }
     await pg_write_data(User, user_sample)
 
-    response = await make_request(HTTPMethod.POST, f"profile/{email}/reset/password", body)
+    response = await make_request(
+        HTTPMethod.POST, f"profile/{email}/reset/password", body
+    )
     assert response.status == HTTPStatus.OK
 
 
@@ -101,7 +109,11 @@ async def test_reset_login(
 ) -> None:
     user_sample = user()
     email = user_sample[0]["email"]
-    body = {"login": email, "new_login": "new_email@gmail.com", "password": user_sample[0]["password"]}
+    body = {
+        "login": email,
+        "new_login": "new_email@gmail.com",
+        "password": user_sample[0]["password"],
+    }
     await pg_write_data(User, user_sample)
 
     response = await make_request(HTTPMethod.POST, f"profile/{email}/reset/login", body)
