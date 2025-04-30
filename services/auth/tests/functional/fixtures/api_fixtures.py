@@ -32,7 +32,9 @@ async def session() -> AsyncGenerator[aiohttp.ClientSession, None]:
 
 
 @pytest_asyncio.fixture(name="make_request")
-def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], Awaitable[Response]]:
+def make_request(
+    session,
+) -> Callable[[HTTPMethod, str, dict[str, Any] | None], Awaitable[Response]]:
     """Fixture for making HTTP requests to the API.
 
     Args:
@@ -41,6 +43,7 @@ def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], 
     Returns:
         Callable: an async function to perform requests.
     """
+
     async def inner(
         method: HTTPMethod,
         endpoint: str,
@@ -67,8 +70,9 @@ def make_request(session) -> Callable[[HTTPMethod, str, dict[str, Any] | None], 
             headers["Authorization"] = f"Bearer {token}"
         request_kwargs = {"headers": headers} if headers else {}
 
-        async with request_func(url, params=params, json=json, **request_kwargs) as response:
-
+        async with request_func(
+            url, params=params, json=json, **request_kwargs
+        ) as response:
             try:
                 body = await response.json()
             except aiohttp.ContentTypeError:

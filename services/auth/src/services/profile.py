@@ -19,8 +19,9 @@ class ProfileService:
     SU_ROLES = [Roles.ADMIN, Roles.SUPERUSER]
 
     def __init__(
-        self, redis: Redis = Depends(get_redis),
-        postgres: AsyncSession = Depends(get_session)
+        self,
+        redis: Redis = Depends(get_redis),
+        postgres: AsyncSession = Depends(get_session),
     ):
         self.redis = redis
         self.postgres = postgres
@@ -31,24 +32,21 @@ class ProfileService:
         user = info.scalar_one_or_none()
         if user is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         return UserResponse.model_validate(user)
 
     async def get_history(
-            self,
-            user_uuid: str,
-            user_with_roles: AuthorizationResponse
+        self, user_uuid: str, user_with_roles: AuthorizationResponse
     ) -> List[LoginHistoryResponse]:
         if user_with_roles.user_uuid != user_uuid and not any(
-                role in self.SU_ROLES for role in user_with_roles.roles):
+            role in self.SU_ROLES for role in user_with_roles.roles
+        ):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
         try:
             result = await self.postgres.execute(
-                select(LoginHistory)
-                .where(LoginHistory.user_uuid == user_uuid)
+                select(LoginHistory).where(LoginHistory.user_uuid == user_uuid)
             )
             history = result.scalars().all()
             if not history:
@@ -57,19 +55,17 @@ class ProfileService:
 
         except Exception as e:
             raise HTTPException(
-                status_code=500,
-                detail={"message": f"Database error: {str(e)}"}
+                status_code=500, detail={"message": f"Database error: {str(e)}"}
             )
 
-    async def reset_password(self, email: str, old_password: str, new_password: str) -> None:
-        result = await self.postgres.execute(
-            select(User).where(User.email == email)
-        )
+    async def reset_password(
+        self, email: str, old_password: str, new_password: str
+    ) -> None:
+        result = await self.postgres.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         elif user.check_password(old_password):
             user.password = generate_password_hash(new_password)
@@ -78,14 +74,11 @@ class ProfileService:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     async def reset_login(self, email: str, new_login: str, password: str) -> None:
-        result = await self.postgres.execute(
-            select(User).where(User.email == email)
-        )
+        result = await self.postgres.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         elif user.check_password(password):
             user.email = new_login
@@ -95,7 +88,7 @@ class ProfileService:
 
 
 def get_profile_service(
-        redis: Redis = Depends(get_redis),
-        postgres: AsyncSession = Depends(get_session),
+    redis: Redis = Depends(get_redis),
+    postgres: AsyncSession = Depends(get_session),
 ) -> ProfileService:
     return ProfileService(redis, postgres)

@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get(
-    '/{email}',
+    "/{email}",
     response_model=UserResponse,
     summary=GetProfileInfo.summary,
     description=GetProfileInfo.description,
@@ -28,7 +28,7 @@ async def get_profile_info(
 
 
 @router.post(
-    '/{email}/reset/password',
+    "/{email}/reset/password",
     response_model=UserUpdate,
     summary=ResetPassword.summary,
     description=ResetPassword.description,
@@ -44,12 +44,12 @@ async def reset_password(
     await profile_service.reset_password(login, password, new_password)
     return JSONResponse(
         content={"message": "Password updated successfully"},
-        status_code=status.HTTP_200_OK
+        status_code=status.HTTP_200_OK,
     )
 
 
 @router.post(
-    '/{login}/reset/login',
+    "/{login}/reset/login",
     response_model=UserUpdate,
     summary=ResetLogin.summary,
     description=ResetLogin.description,
@@ -65,12 +65,12 @@ async def reset_login(
     await profile_service.reset_login(login, new_login, password)
     return JSONResponse(
         content={"message": "Login updated successfully"},
-        status_code=status.HTTP_200_OK
+        status_code=status.HTTP_200_OK,
     )
 
 
 @router.get(
-    '/{uuid}/history',
+    "/{uuid}/history",
     response_model=List[LoginHistoryResponse],
     summary=GetHistory.summary,
     description=GetHistory.description,
@@ -80,11 +80,10 @@ async def reset_login(
 async def get_history(
     uuid: str,
     profile_service: ProfileService = Depends(get_profile_service),
-    user_with_roles=Depends(Authorization(allowed_roles=[
-        Roles.SUPERUSER,
-        Roles.ADMIN,
-        Roles.PAID_USER,
-        Roles.USER
-    ]))
+    user_with_roles=Depends(
+        Authorization(
+            allowed_roles=[Roles.SUPERUSER, Roles.ADMIN, Roles.PAID_USER, Roles.USER]
+        )
+    ),
 ) -> List[LoginHistoryResponse]:
     return await profile_service.get_history(uuid, user_with_roles)

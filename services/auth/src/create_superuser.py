@@ -10,14 +10,16 @@ from db.postgre import get_session
 app = typer.Typer()
 
 
-async def create_superuser(email: str, password: str, session_gen = get_session()):
+async def create_superuser(email: str, password: str, session_gen=get_session()):
     session = await anext(session_gen)
     try:
         result = await session.execute(select(User).where(User.email == email))
         if result.scalar_one_or_none():
             raise Exception("User already exists")
 
-        role_result = await session.execute(select(Role).where(Role.name == "superuser"))
+        role_result = await session.execute(
+            select(Role).where(Role.name == "superuser")
+        )
         user_role = role_result.scalar_one_or_none()
 
         if not user_role:
@@ -35,6 +37,7 @@ async def create_superuser(email: str, password: str, session_gen = get_session(
         await session.refresh(user)
     finally:
         await session.close()
+
 
 @app.command()
 def create(email: str, password: str):

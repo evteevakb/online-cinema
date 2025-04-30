@@ -66,9 +66,7 @@ class AuthService:
         await self.db.commit()
 
     async def register(self, email, password) -> TokenResponse:
-        result = await self.db.execute(
-            select(User).where(User.email == email)
-        )
+        result = await self.db.execute(select(User).where(User.email == email))
         if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="User already exists")
 
@@ -95,13 +93,13 @@ class AuthService:
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
     async def login(self, email: str, password: str, user_agent: str) -> TokenResponse:
-        result = await self.db.execute(
-            select(User).where(User.email == email)
-        )
+        result = await self.db.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
         if not user or not user.check_password(password):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-        
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+            )
+
         result = await self.db.execute(
             select(RefreshTokens).where(RefreshTokens.user_uuid == user.uuid)
         )
@@ -153,10 +151,7 @@ class AuthService:
 
         return TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
 
-    async def logout(
-            self, access_token, refresh_token, user_agent
-    ) -> LogoutResponse:
-
+    async def logout(self, access_token, refresh_token, user_agent) -> LogoutResponse:
         try:
             payload = jwt.decode(
                 access_token, self.secret_key, algorithms=[self.algorithm]
@@ -167,16 +162,24 @@ class AuthService:
             cache_key = f"blacklist:{access_token}"
             invalidated_token = await self.redis.get(cache_key)
             if invalidated_token or not exp_timestamp:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid access token",
+                )
 
             expires_in = exp_timestamp - int(datetime.now().timestamp())
             if expires_in <= 0:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token has expired")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Access token has expired",
+                )
 
             await self.redis.set(cache_key, "true", ex=expires_in)
 
         except jwt.JWTError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token"
+            )
 
         token_entry = await self.db.execute(
             select(RefreshTokens).where(RefreshTokens.token == refresh_token)
@@ -215,14 +218,22 @@ class AuthService:
             cache_key = f"blacklist:{data.access_token}"
             invalidated_token = await self.redis.get(cache_key)
             if invalidated_token or not exp_timestamp:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid access token",
+                )
 
             expires_in = exp_timestamp - int(datetime.now().timestamp())
             if expires_in <= 0:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token has expired")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Access token has expired",
+                )
 
         except jwt.JWTError:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token"
+            )
 
         user = await self._get_user_by_id(payload.get("sub"))
         if not user:

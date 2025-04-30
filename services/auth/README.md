@@ -56,6 +56,14 @@ Once the `.env` files are set up, go to the root folder (`auth`) and run the fol
 
 The service now is available at `localhost:81`.
 
+## Creating superuser
+
+Commands to create superuser:
+    
+    docker exec -it auth bash
+    python3 create_superuser.py admin@test.com 1234
+
+
 ## Testing
 
 To run the functional tests, follow these steps:
