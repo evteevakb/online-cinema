@@ -6,6 +6,8 @@ from sqlalchemy.future import select
 
 from models.entity import LoginHistory, User
 from testdata.samples.users import user, user_history
+from testdata.samples.roles import Roles, all_role_names
+from utils.auth import create_access_token
 
 
 @pytest.mark.asyncio
@@ -20,6 +22,7 @@ async def test_profile(
             select(User.uuid).where(User.email == user_sample[0]["email"])
         )
         user_uuid = result.scalar_one()
+        user_email = user_sample[0]["email"]
         count = await session.execute(select(User))
         len_users = len(count.scalars().all())
         assert len_users == len(user_sample)
@@ -27,7 +30,7 @@ async def test_profile(
         result = result.scalar_one_or_none()
         assert result is not None
 
-    response = await make_request(HTTPMethod.GET, f"profile/{user_uuid}")
+    response = await make_request(HTTPMethod.GET, f"profile/{user_email}")
     assert response.status == HTTPStatus.OK
     assert response.body["uuid"] == str(user_uuid)
 
@@ -37,16 +40,27 @@ async def test_profile(
 
 @pytest.mark.asyncio
 async def test_history(
-    pg_write_data: Any, make_request: Any, db_session: Any, clean_tables: Any
+    pg_write_data: Any,
+    make_request: Any,
+    db_session: Any,
+    create_roles: Any,
+    create_user: Any,
+    refresh_db: Any,
+    clean_tables: Any,
 ) -> None:
     user_sample = user()
-    await pg_write_data(User, user_sample)
+    user_role = Roles.USER.value
+    await create_roles(all_role_names)
+    user_created = await create_user(**user_sample[0], role_names=[user_role])
+    user_token = create_access_token(user_created)
+    await pg_write_data(User, user_sample[1:])
 
     async with db_session as session:
         result = await session.execute(
             select(User.uuid).where(User.email == user_sample[0]["email"])
         )
         user_uuid = result.scalar_one()
+        user_email = user_sample[0]["email"]
         second_result = await session.execute(select(User))
         users = second_result.scalars().all()
         user_history_sample = user_history(users)
@@ -56,7 +70,11 @@ async def test_history(
         )
         event_uuid = str(event_uuid.scalars().all()[0])
 
-    response = await make_request(HTTPMethod.GET, f"profile/{user_uuid}/history")
+    response = await make_request(
+        method=HTTPMethod.GET,
+        endpoint=f"profile/{user_uuid}/history",
+        token=user_token,
+    )
 
     assert response.status == HTTPStatus.OK
     assert isinstance(response.body, list)

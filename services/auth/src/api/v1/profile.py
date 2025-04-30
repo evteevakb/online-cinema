@@ -6,12 +6,13 @@ from fastapi.responses import JSONResponse
 from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate
 from openapi.user import GetProfileInfo, GetHistory, ResetPassword, ResetLogin
 from services.profile import ProfileService, get_profile_service
+from utils.auth import Authorization, Roles
 
 router = APIRouter()
 
 
 @router.get(
-    '/{uuid}',
+    '/{email}',
     response_model=UserResponse,
     summary=GetProfileInfo.summary,
     description=GetProfileInfo.description,
@@ -19,10 +20,10 @@ router = APIRouter()
     responses=cast(dict[int | str, dict[str, Any]], GetProfileInfo.responses),
 )
 async def get_profile_info(
-    uuid: str,
+    email: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserResponse:
-    profile = await profile_service.get_profile_info(uuid)
+    profile = await profile_service.get_profile_info(email)
     return profile
 
 
@@ -79,5 +80,11 @@ async def reset_login(
 async def get_history(
     uuid: str,
     profile_service: ProfileService = Depends(get_profile_service),
+    user_with_roles=Depends(Authorization(allowed_roles=[
+        Roles.SUPERUSER,
+        Roles.ADMIN,
+        Roles.PAID_USER,
+        Roles.USER
+    ]))
 ) -> List[LoginHistoryResponse]:
-    return await profile_service.get_history(uuid)
+    return await profile_service.get_history(uuid, user_with_roles)

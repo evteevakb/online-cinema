@@ -11,9 +11,13 @@ from werkzeug.security import generate_password_hash
 from db.postgre import get_session
 from db.redis import get_redis
 from models.entity import LoginHistory, User
+from schemas.auth import AuthorizationResponse
+from utils.auth import Roles
 
 
 class ProfileService:
+    SU_ROLES = [Roles.ADMIN, Roles.SUPERUSER]
+
     def __init__(
         self, redis: Redis = Depends(get_redis),
         postgres: AsyncSession = Depends(get_session)
@@ -21,15 +25,8 @@ class ProfileService:
         self.redis = redis
         self.postgres = postgres
 
-    async def get_profile_info(self, uuid_: str) -> UserResponse:
-        try:
-            profile_uuid = uuid.UUID(uuid_)
-        except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User not found"
-            )
-        stmt = select(User).where(User.uuid == profile_uuid)
+    async def get_profile_info(self, email: str) -> UserResponse:
+        stmt = select(User).where(User.email == email)
         info = await self.postgres.execute(stmt)
         user = info.scalar_one_or_none()
         if user is None:
@@ -39,7 +36,15 @@ class ProfileService:
             )
         return UserResponse.model_validate(user)
 
-    async def get_history(self, user_uuid: str) -> List[LoginHistoryResponse]:
+    async def get_history(
+            self,
+            user_uuid: str,
+            user_with_roles: AuthorizationResponse
+    ) -> List[LoginHistoryResponse]:
+        if user_with_roles.user_uuid != user_uuid and not any(
+                role in self.SU_ROLES for role in user_with_roles.roles):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
         try:
             result = await self.postgres.execute(
                 select(LoginHistory)
