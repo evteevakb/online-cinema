@@ -26,7 +26,6 @@ class TestGenres:
         assert response.status == HTTPStatus.OK
         assert len(response.body) == 0
 
-
     @pytest.mark.parametrize(
         "params",
         [

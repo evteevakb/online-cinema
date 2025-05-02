@@ -14,6 +14,7 @@ class VerifyResponse(BaseModel):
     exp: int
     iat: int
 
+
 class AuthorizationResponse(BaseModel):
     user_uuid: str
     roles: List[str]

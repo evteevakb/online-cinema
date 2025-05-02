@@ -3,9 +3,9 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.response_models import Film, PersonBase, GenreBase, FilmBase
-from openapi.films import FilmDetails, FilmsSearch, Films
-from services.film import FilmService, get_film_service, film_filters
+from api.v1.response_models import Film, FilmBase, GenreBase, PersonBase
+from openapi.films import FilmDetails, Films, FilmsSearch
+from services.film import film_filters, FilmService, get_film_service
 from utils.auth import Authorization, Roles
 
 router = APIRouter()
@@ -53,7 +53,9 @@ async def film_details(
         )
     ),
 ) -> Film:
-    film = await film_service.get_by_uuid(film_uuid=film_uuid, user_with_roles=user_with_roles)
+    film = await film_service.get_by_uuid(
+        film_uuid=film_uuid, user_with_roles=user_with_roles
+    )
 
     if not film:
         raise HTTPException(

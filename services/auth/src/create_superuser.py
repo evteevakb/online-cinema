@@ -1,11 +1,10 @@
 import asyncio
-from fastapi import Depends, HTTPException, status, Query, Header
+
 from sqlalchemy import select
 import typer
 
-from models.entity import User, Role
-
 from db.postgre import get_session
+from models.entity import Role, User
 
 app = typer.Typer()
 

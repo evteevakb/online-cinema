@@ -1,5 +1,4 @@
 class FilmElasticQueryBuilder:
-
     @staticmethod
     async def get_film_search_query(
         query: str = None,

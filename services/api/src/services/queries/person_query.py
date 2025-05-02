@@ -1,5 +1,4 @@
 class PersonElasticQueryBuilder:
-
     @staticmethod
     async def get_films_by_person_uuid_query(person_uuid: str) -> dict:
         query = {

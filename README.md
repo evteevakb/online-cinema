@@ -7,14 +7,14 @@ This is a repository for the online cinema platform.
 The repository is organized as follows:
 
 ```python
-├── init # shared infrastructure configs and entrypoints
+├── init  # shared infrastructure configs and entrypoints
 │
-├── services/ # core backend services
-│ ├── api/ # API gateway 
-│ └── auth/ # authentication and authorization service
+├── services  # core backend services
+│ ├── api  # API gateway 
+│ └── auth  # authentication and authorization service
 │
 ├── .gitignore
-├── pyproject.toml # shared dev tools configuration (linters, type checkers)
+├── pyproject.toml  # shared dev tools configuration (linters, type checkers)
 └── README.md
 ```
 
@@ -33,7 +33,13 @@ source .venv/bin/activate  # Linux/macOS
 **Install development tools:**
 
 ```bash
-uv sync --all-extras
+uv sync --group lint
+```
+
+**Sort imports:**
+
+```bash
+uv run isort .
 ```
 
 **Format code:**

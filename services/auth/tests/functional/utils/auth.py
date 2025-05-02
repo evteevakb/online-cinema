@@ -10,7 +10,6 @@ from jose import jwt
 from models.entity import User
 from settings import APISettings
 
-
 settings = APISettings()
 
 

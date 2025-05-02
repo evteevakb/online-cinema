@@ -10,7 +10,6 @@ from elasticsearch.exceptions import ConnectionError
 
 from settings import ElasticSettings
 
-
 logger = logging.getLogger(__name__)
 settings = ElasticSettings()
 

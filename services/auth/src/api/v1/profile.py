@@ -1,11 +1,11 @@
-from typing import List, cast, Any
+from typing import Any, cast, List
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
+from openapi.user import GetHistory, GetProfileInfo, ResetLogin, ResetPassword
 from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate
-from openapi.user import GetProfileInfo, GetHistory, ResetPassword, ResetLogin
-from services.profile import ProfileService, get_profile_service
+from services.profile import get_profile_service, ProfileService
 from utils.auth import Authorization, Roles
 
 router = APIRouter()

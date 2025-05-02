@@ -2,11 +2,16 @@
 PostgreSQL client setup.
 """
 
-from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from typing import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
+    AsyncSession,
+    create_async_engine,
+)
+from sqlalchemy.orm import declarative_base
 
 from core.config import PostgreSettings
-
 
 Base = declarative_base()
 
@@ -21,11 +26,18 @@ dsn_async = (
     + f"@{db_settings.host}:{db_settings.port}"
     + f"/{db_settings.db}"
 )
-engine = create_async_engine(dsn_async, echo=True, future=True)
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+engine = create_async_engine(
+    dsn_async,
+    echo=True,  # enable log output
+)
+async_session = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,  # don't expire objects after transaction commit
+)
 
 
-async def get_session() -> AsyncSession:
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Yields an asynchronous PostgreSQL session.
 
     Yields:

@@ -6,7 +6,7 @@ from typing import Any, ClassVar
 
 from pydantic import BaseModel
 
-from api.v1.response_models import GenreBase, Film, FilmBase, PersonBase
+from api.v1.response_models import Film, FilmBase, GenreBase, PersonBase
 
 
 class _FilmResponseContent(BaseModel):

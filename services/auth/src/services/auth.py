@@ -3,18 +3,21 @@ from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from jose import jwt
 from redis.asyncio import Redis
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.postgre import get_session
 from db.redis import get_redis
-from models.entity import User, RefreshTokens, Role, LoginHistory, AuthEventType
+from models.entity import (
+    AuthEventType,
+    LoginHistory,
+    RefreshTokens,
+    Role,
+    User,
+)
 from schemas.auth import (
-    UserRegister,
-    UserLogin,
-    TokenResponse,
-    LogoutRequest,
     LogoutResponse,
+    TokenResponse,
     VerifyRequest,
 )
 
