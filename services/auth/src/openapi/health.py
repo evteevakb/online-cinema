@@ -6,7 +6,6 @@ from typing import Any, ClassVar
 
 from pydantic import BaseModel
 
-
 __all__ = ["Health"]
 
 

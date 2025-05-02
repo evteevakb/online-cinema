@@ -9,7 +9,6 @@ from redis.asyncio import Redis
 
 from settings import RedisSettings
 
-
 redis_settings = RedisSettings()
 
 

@@ -2,16 +2,15 @@
 Role endpoints for the auth service.
 """
 
-from typing import List, Any, cast
+from typing import Any, cast, List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from schemas.role import RoleInDb, RoleCreateUpdate, UserRole
-from services.role import RoleService, get_role_service
-from openapi.roles import AssignRole, RevokeRole, ListRole
-from utils.auth import Roles, Authorization
-
+from openapi.roles import AssignRole, ListRole, RevokeRole
+from schemas.role import RoleCreateUpdate, RoleInDb, UserRole
+from services.role import get_role_service, RoleService
+from utils.auth import Authorization, Roles
 
 router = APIRouter()
 

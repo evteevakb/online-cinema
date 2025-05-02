@@ -10,7 +10,6 @@ from typing import Any
 from redis.asyncio import Redis
 from redis.exceptions import ConnectionError, TimeoutError
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -5,11 +5,10 @@ API fixtures for functional tests.
 from typing import Any, AsyncGenerator, Awaitable, Callable
 
 import aiohttp
-import pytest_asyncio
 from pydantic import BaseModel
+import pytest_asyncio
 
 from settings import APISettings
-
 
 api_settings = APISettings()
 

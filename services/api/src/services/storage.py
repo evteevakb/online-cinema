@@ -7,7 +7,7 @@ import logging
 from typing import Any
 
 from elastic_transport import ObjectApiResponse
-from elasticsearch import AsyncElasticsearch, NotFoundError, BadRequestError
+from elasticsearch import AsyncElasticsearch, BadRequestError, NotFoundError
 
 logger = logging.getLogger(__name__)
 

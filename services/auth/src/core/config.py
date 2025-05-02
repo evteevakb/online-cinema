@@ -2,13 +2,12 @@
 Configuration settings for the auth service.
 """
 
-import os
 from logging import config as logging_config
+import os
 
 from pydantic_settings import BaseSettings
 
 from core.logger import LOGGING
-
 
 logging_config.dictConfig(LOGGING)
 

@@ -110,7 +110,9 @@ class TestFilms:
         assert cache_before is None
 
         await es_write_data(index="movies", es_data=films_sample)
-        await make_get_request("films", params={"page_size": len(films_sample), "page_number": 1})
+        await make_get_request(
+            "films", params={"page_size": len(films_sample), "page_number": 1}
+        )
         cache = await redis_client.get(key)
 
         assert cache is not None
@@ -122,10 +124,13 @@ class TestFilms:
         """Ensure that genre param works correctly"""
         genre_id = films_sample[2]["genres"][1]["id"]
         response = await make_get_request("films", params={"genre": genre_id})
-        goal_len = len([
-            film for film in films_sample
-            if genre_id in [g["id"] for g in film["genres"]]
-        ])
+        goal_len = len(
+            [
+                film
+                for film in films_sample
+                if genre_id in [g["id"] for g in film["genres"]]
+            ]
+        )
 
         assert len(response.body) == goal_len
 
@@ -195,10 +200,7 @@ class TestSearchFilms:
     """Tests for /search of films endpoint"""
 
     async def test_films_search_empty_results(
-            self,
-            refresh,
-            make_get_request,
-            es_write_data
+        self, refresh, make_get_request, es_write_data
     ) -> None:
         await refresh("movies")
         await es_write_data(index="movies", es_data=films_sample)
@@ -210,10 +212,12 @@ class TestSearchFilms:
 
         response = await make_get_request(
             "films/search",
-            params={"query": query,
-                    "page_number": page_number,
-                    "page_size": page_size,
-                    "sort": sort}
+            params={
+                "query": query,
+                "page_number": page_number,
+                "page_size": page_size,
+                "sort": sort,
+            },
         )
 
         assert response.status == HTTPStatus.OK
@@ -224,7 +228,6 @@ class TestSearchFilms:
         make_get_request,
         es_write_data,
     ) -> None:
-
         await es_write_data(index="movies", es_data=films_sample)
 
         query = "wars"
@@ -234,10 +237,12 @@ class TestSearchFilms:
 
         response = await make_get_request(
             "films/search",
-            params={"query": query,
-                    "page_number": page_number,
-                    "page_size": page_size,
-                    "sort": sort}
+            params={
+                "query": query,
+                "page_number": page_number,
+                "page_size": page_size,
+                "sort": sort,
+            },
         )
 
         assert response.status == HTTPStatus.OK
@@ -247,20 +252,21 @@ class TestSearchFilms:
         for film in films:
             assert query.lower() in film["title"].lower()
 
-        goal_len = len([film for film in films_sample if query.lower() in film["title"].lower()])
+        goal_len = len(
+            [film for film in films_sample if query.lower() in film["title"].lower()]
+        )
         assert goal_len == len(films)
 
         ratings = [f["imdb_rating"] for f in films]
         assert ratings == sorted(ratings, reverse=True)
 
     async def test_films_search_cache(
-            self,
-            refresh,
-            make_get_request,
-            es_write_data,
-            redis_client,
+        self,
+        refresh,
+        make_get_request,
+        es_write_data,
+        redis_client,
     ) -> None:
-
         await refresh("movies")
         await es_write_data(index="movies", es_data=films_sample)
 
@@ -276,10 +282,12 @@ class TestSearchFilms:
 
         response = await make_get_request(
             "films/search",
-            params={"query": query,
-                    "page_number": page_number,
-                    "page_size": page_size,
-                    "sort": sort}
+            params={
+                "query": query,
+                "page_number": page_number,
+                "page_size": page_size,
+                "sort": sort,
+            },
         )
 
         assert response.status == HTTPStatus.OK

@@ -10,7 +10,6 @@ from redis.exceptions import ConnectionError
 
 from settings import RedisSettings
 
-
 settings = RedisSettings()
 
 
@@ -27,6 +26,7 @@ def is_redis_available(redis_client: Redis) -> bool:
         return redis_client.ping()
     except ConnectionError:
         return False
+
 
 @backoff.on_predicate(
     backoff.expo,

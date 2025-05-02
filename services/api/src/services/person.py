@@ -11,9 +11,8 @@ from db.redis import get_redis
 from models.film import FilmBase
 from models.person import FilmPerson, Person, PersonRole
 from services.cache import BaseCache, RedisCache
-from services.storage import BaseRepository, ElasticsearchRepository
-
 from services.queries.person_query import PersonElasticQueryBuilder
+from services.storage import BaseRepository, ElasticsearchRepository
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +101,6 @@ class PersonService:
         self,
         person_uuid: str,
     ) -> list[FilmBase]:
-
         query = await self.query_builder.get_films_by_person_uuid_query(
             person_uuid=person_uuid
         )
@@ -125,7 +123,6 @@ class PersonService:
         self,
         person_uuid: str,
     ) -> list[FilmPerson] | None:
-
         query = await self.query_builder.get_films_by_person_uuid_query(
             person_uuid=person_uuid
         )

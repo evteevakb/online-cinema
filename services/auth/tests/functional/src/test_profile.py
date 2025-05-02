@@ -1,18 +1,20 @@
-from http import HTTPStatus, HTTPMethod
+from http import HTTPMethod, HTTPStatus
 from typing import Any
 
 import pytest
 from sqlalchemy.future import select
 
 from models.entity import LoginHistory, User
+from testdata.samples.roles import all_role_names, Roles
 from testdata.samples.users import user, user_history
-from testdata.samples.roles import Roles, all_role_names
 from utils.auth import create_access_token
 
 
 @pytest.mark.asyncio
 async def test_profile(
-    pg_write_data: Any, make_request: Any, db_session: Any,
+    pg_write_data: Any,
+    make_request: Any,
+    db_session: Any,
 ) -> None:
     user_sample = user()
     await pg_write_data(User, user_sample)
@@ -84,7 +86,8 @@ async def test_history(
 
 @pytest.mark.asyncio
 async def test_reset_password(
-    pg_write_data: Any, make_request: Any,
+    pg_write_data: Any,
+    make_request: Any,
 ) -> None:
     user_sample = user()
     email = user_sample[0]["email"]
@@ -103,7 +106,8 @@ async def test_reset_password(
 
 @pytest.mark.asyncio
 async def test_reset_login(
-    pg_write_data: Any, make_request: Any,
+    pg_write_data: Any,
+    make_request: Any,
 ) -> None:
     user_sample = user()
     email = user_sample[0]["email"]

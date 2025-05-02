@@ -1,4 +1,4 @@
-from http import HTTPStatus, HTTPMethod
+from http import HTTPMethod, HTTPStatus
 
 import pytest
 

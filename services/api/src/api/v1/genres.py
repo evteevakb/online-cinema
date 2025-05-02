@@ -7,7 +7,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.v1.response_models import GenreBase
-from openapi.genres import Genres, GenreDetails
+from openapi.genres import GenreDetails, Genres
 from services.genre import GenreService, get_genre_service
 from utils.auth import Authorization, Roles
 

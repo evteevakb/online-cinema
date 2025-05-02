@@ -1,5 +1,4 @@
 class GenreElasticQueryBuilder:
-
     @staticmethod
     async def get_genre_search_query(page_size: int = 50, page_number: int = 1):
         query = {

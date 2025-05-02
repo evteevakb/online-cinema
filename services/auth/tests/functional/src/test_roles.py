@@ -9,7 +9,7 @@ import pytest
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
-from models.entity import User, Role, UserRole
+from models.entity import Role, User
 from testdata.samples.roles import all_role_names, Roles
 from testdata.samples.users import user as get_user_sample
 from utils.auth import create_access_token
