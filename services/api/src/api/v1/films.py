@@ -53,7 +53,9 @@ async def film_details(
         )
     ),
 ) -> Film:
-    film = await film_service.get_by_uuid(film_uuid=film_uuid, user_with_roles=user_with_roles)
+    film = await film_service.get_by_uuid(
+        film_uuid=film_uuid, user_with_roles=user_with_roles
+    )
 
     if not film:
         raise HTTPException(

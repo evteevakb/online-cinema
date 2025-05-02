@@ -27,6 +27,7 @@ def is_redis_available(redis_client: Redis) -> bool:
     except ConnectionError:
         return False
 
+
 @backoff.on_predicate(
     backoff.expo,
     predicate=lambda result: not result,

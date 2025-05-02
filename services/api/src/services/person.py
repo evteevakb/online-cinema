@@ -101,7 +101,6 @@ class PersonService:
         self,
         person_uuid: str,
     ) -> list[FilmBase]:
-
         query = await self.query_builder.get_films_by_person_uuid_query(
             person_uuid=person_uuid
         )
@@ -124,7 +123,6 @@ class PersonService:
         self,
         person_uuid: str,
     ) -> list[FilmPerson] | None:
-
         query = await self.query_builder.get_films_by_person_uuid_query(
             person_uuid=person_uuid
         )

@@ -1,6 +1,7 @@
 """
 API connection wait script.
 """
+
 import logging
 
 import backoff
@@ -49,5 +50,6 @@ def wait_for_api(url: str):
         logging.warning("API is not available.")
     return api_available
 
+
 if __name__ == "__main__":
-    wait_for_api(url=f"http://{settings.container_name}:{settings.port}/health")
+    wait_for_api(url=f"http://{settings.container_name}:{settings.port}/api/health")

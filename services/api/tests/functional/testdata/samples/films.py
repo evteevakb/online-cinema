@@ -38,7 +38,6 @@ films_sample = [
             {"id": "a5a8f573-3cee-4ccc-8a2b-91cb9f55250a", "name": "George Lucas"}
         ],
     },
-
     {
         "id": "c4c5e3de-c0c9-4091-b242-ceb331004dfd",
         "imdb_rating": 6.5,
@@ -75,7 +74,6 @@ films_sample = [
             {"id": "a5a8f573-3cee-4ccc-8a2b-91cb9f55250a", "name": "George Lucas"},
         ],
     },
-
     {
         "id": "a9ee0b3f-ec56-4107-9b6d-0458dfa3f415",
         "imdb_rating": 7,

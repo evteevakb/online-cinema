@@ -46,10 +46,10 @@ class TestPersonDetails:
             assert "actor" in response.body["films"][idx]["roles"]
 
     async def test_cache(
-            self,
-            make_get_request,
-            es_write_data,
-            redis_client,
+        self,
+        make_get_request,
+        es_write_data,
+        redis_client,
     ) -> None:
         await es_write_data(index="persons", es_data=person_sample)
         await es_write_data(index="movies", es_data=film_sample)
@@ -70,6 +70,7 @@ class TestPersonDetails:
 @pytest.mark.asyncio(loop_scope="session")
 class TestPersonFilms:
     """Tests for the `/persons/{uuid}/film` endpoint"""
+
     async def test_person_films(
         self,
         make_get_request,
@@ -81,7 +82,9 @@ class TestPersonFilms:
         for idx, person in enumerate(person_sample):
             uuid = person["id"]
             expected_films = [
-                film for film in film_sample if any(actor["id"] == uuid for actor in film["actors"])
+                film
+                for film in film_sample
+                if any(actor["id"] == uuid for actor in film["actors"])
             ]
 
             response = await make_get_request(f"persons/{uuid}/film")
@@ -96,10 +99,10 @@ class TestPersonFilms:
                 assert any(film_resp["uuid"] == film["id"] for film in expected_films)
 
     async def test_cache(
-            self,
-            make_get_request,
-            es_write_data,
-            redis_client,
+        self,
+        make_get_request,
+        es_write_data,
+        redis_client,
     ) -> None:
         await es_write_data(index="persons", es_data=person_sample)
         await es_write_data(index="movies", es_data=film_sample)
@@ -122,9 +125,7 @@ class TestPersonSearch:
     """Tests for the `/persons/search` endpoint"""
 
     async def test_persons_search_no_results(
-            self,
-            make_get_request,
-            es_write_data
+        self, make_get_request, es_write_data
     ) -> None:
         await es_write_data(index="persons", es_data=person_sample_search)
 
@@ -159,7 +160,9 @@ class TestPersonSearch:
 
         persons = response.body
         names = [p["full_name"] for p in persons]
-        goal_len = len([p for p in person_sample_search if query.lower() in p["full_name"].lower()])
+        goal_len = len(
+            [p for p in person_sample_search if query.lower() in p["full_name"].lower()]
+        )
 
         assert response.status == HTTPStatus.OK
         assert isinstance(persons, list)
@@ -171,10 +174,10 @@ class TestPersonSearch:
         assert names == sorted(names)
 
     async def test_persons_search_cache(
-            self,
-            make_get_request,
-            es_write_data,
-            redis_client,
+        self,
+        make_get_request,
+        es_write_data,
+        redis_client,
     ) -> None:
         await es_write_data(index="persons", es_data=person_sample_search)
         await es_write_data(index="movies", es_data=film_sample_search)

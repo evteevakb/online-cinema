@@ -9,7 +9,6 @@ logging_config.dictConfig(LOGGING)
 
 
 class APISettings(BaseSettings):
-
     auth_host: str
     auth_port: int
     project_name: str = "movies"

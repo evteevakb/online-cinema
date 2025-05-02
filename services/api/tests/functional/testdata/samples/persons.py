@@ -7,12 +7,7 @@ fake = Faker()
 
 person_id = str(uuid.uuid4())
 name = str(fake.name())
-person_sample = [
-    {
-        "id": person_id,
-        "full_name": name
-    }
-]
+person_sample = [{"id": person_id, "full_name": name}]
 
 film_sample = [
     {
@@ -26,7 +21,7 @@ film_sample = [
         "writers_names": [],
         "directors": [],
         "actors": [{"id": person_id, "name": name}],
-        "writers": []
+        "writers": [],
     },
     {
         "id": str(uuid.uuid4()),
@@ -39,7 +34,7 @@ film_sample = [
         "writers_names": [],
         "directors": [],
         "actors": [{"id": person_id, "name": name}],
-        "writers": []
+        "writers": [],
     },
     {
         "id": str(uuid.uuid4()),
@@ -52,24 +47,15 @@ film_sample = [
         "writers_names": [],
         "directors": [],
         "actors": [{"id": person_id, "name": name}],
-        "writers": []
-    }
+        "writers": [],
+    },
 ]
 
 
 person_sample_search = [
-    {
-        "id": str(uuid.uuid4()),
-        "full_name": 'Kacey Arnold'
-    },
-    {
-        "id": str(uuid.uuid4()),
-        "full_name": str(fake.name())
-    },
-    {
-        "id": str(uuid.uuid4()),
-        "full_name": str(fake.name())
-    },
+    {"id": str(uuid.uuid4()), "full_name": "Kacey Arnold"},
+    {"id": str(uuid.uuid4()), "full_name": str(fake.name())},
+    {"id": str(uuid.uuid4()), "full_name": str(fake.name())},
 ]
 
 film_sample_search = [
@@ -79,9 +65,9 @@ film_sample_search = [
         "imdb_rating": round(random.uniform(1, 10), 2),
         "actors": [
             {"id": str(uuid.uuid4()), "name": str(fake.name())},
-            {"id": str(uuid.uuid4()), "name": str(fake.name())}
+            {"id": str(uuid.uuid4()), "name": str(fake.name())},
         ],
         "writers": [],
-        "directors": []
+        "directors": [],
     }
 ]

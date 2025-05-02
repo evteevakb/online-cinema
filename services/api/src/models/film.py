@@ -1,6 +1,7 @@
 """
 Contains classes that describe the business entity of a movie.
 """
+
 from datetime import date
 
 from pydantic import BaseModel
