@@ -1,8 +1,6 @@
-import uuid
 from typing import List
 
 from fastapi import Depends, HTTPException, status
-from openapi.user import LoginHistoryResponse, UserResponse
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -11,6 +9,7 @@ from werkzeug.security import generate_password_hash
 from db.postgre import get_session
 from db.redis import get_redis
 from models.entity import LoginHistory, User
+from openapi.user import LoginHistoryResponse, UserResponse
 from schemas.auth import AuthorizationResponse
 from utils.auth import Roles
 

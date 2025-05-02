@@ -1,12 +1,10 @@
+from datetime import datetime, timedelta
 import enum
 import uuid
-from datetime import datetime, timedelta
 
-from sqlalchemy import Boolean, Column
-from sqlalchemy import ForeignKey, String, Text, func
+from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import declarative_base, relationship
-
 from werkzeug.security import check_password_hash, generate_password_hash
 
 Base = declarative_base()

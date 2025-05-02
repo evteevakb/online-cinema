@@ -10,7 +10,6 @@ from redis.exceptions import ConnectionError
 
 from settings import RedisSettings
 
-
 settings = RedisSettings()
 
 

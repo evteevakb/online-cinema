@@ -10,7 +10,6 @@ from pydantic import BaseModel
 
 from schemas.role import RoleInDb
 
-
 __all__ = ["AssignRole", "ListRole", "RevokeRole"]
 
 role_name = "user"

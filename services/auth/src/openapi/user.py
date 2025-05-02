@@ -1,7 +1,9 @@
 from datetime import datetime
 from http import HTTPStatus
 from typing import ClassVar
+
 from pydantic import BaseModel
+
 from schemas.user import LoginHistoryResponse, UserResponse
 
 __all__ = ["GetProfileInfo", "ResetPassword", "ResetLogin", "GetHistory"]

@@ -6,7 +6,6 @@ from fastapi import APIRouter
 
 from openapi.health import Health
 
-
 router = APIRouter()
 
 

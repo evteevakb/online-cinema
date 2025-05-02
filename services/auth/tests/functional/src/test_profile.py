@@ -1,12 +1,12 @@
-from http import HTTPStatus, HTTPMethod
+from http import HTTPMethod, HTTPStatus
 from typing import Any
 
 import pytest
 from sqlalchemy.future import select
 
 from models.entity import LoginHistory, User
+from testdata.samples.roles import all_role_names, Roles
 from testdata.samples.users import user, user_history
-from testdata.samples.roles import Roles, all_role_names
 from utils.auth import create_access_token
 
 

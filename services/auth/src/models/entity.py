@@ -1,9 +1,9 @@
+from datetime import datetime, timedelta
 import enum
 import uuid
-from datetime import datetime, timedelta
 
-from sqlalchemy import Boolean, Column, String, Text, ForeignKey, func
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text
+from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 

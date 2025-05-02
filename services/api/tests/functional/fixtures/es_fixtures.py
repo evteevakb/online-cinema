@@ -12,7 +12,6 @@ import pytest_asyncio
 from settings import ElasticSettings
 from testdata.es_mappings import ElasticMappings
 
-
 es_settings = ElasticSettings()
 ElasticMappings.load_all(Path("./schemas/"))
 

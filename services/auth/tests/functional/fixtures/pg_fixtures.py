@@ -5,16 +5,16 @@ PostgreSQL fixtures.
 from typing import Dict, List
 
 import pytest_asyncio
-from settings import PostgreSettings
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
-    AsyncSession,
     async_sessionmaker,
+    AsyncSession,
     create_async_engine,
 )
 from sqlalchemy.pool import NullPool
 
 from models.entity import Base
+from settings import PostgreSettings
 
 db_settings = PostgreSettings()
 

@@ -3,19 +3,19 @@ Contains service for role management.
 """
 
 from http import HTTPStatus
-from uuid import UUID
 from typing import List
+from uuid import UUID
 
 from fastapi import Depends, HTTPException
+from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
-from sqlalchemy import select, update, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from db.postgre import get_session
-from schemas.role import RoleCreateUpdate
 from models.entity import Role, User
+from schemas.role import RoleCreateUpdate
 
 
 class RoleService:

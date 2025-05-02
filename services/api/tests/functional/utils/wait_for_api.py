@@ -4,11 +4,9 @@ API connection wait script.
 import logging
 
 import backoff
-
 import requests
 
 from settings import APISettings
-
 
 settings = APISettings()
 

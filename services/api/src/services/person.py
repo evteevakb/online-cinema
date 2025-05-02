@@ -11,9 +11,8 @@ from db.redis import get_redis
 from models.film import FilmBase
 from models.person import FilmPerson, Person, PersonRole
 from services.cache import BaseCache, RedisCache
-from services.storage import BaseRepository, ElasticsearchRepository
-
 from services.queries.person_query import PersonElasticQueryBuilder
+from services.storage import BaseRepository, ElasticsearchRepository
 
 logger = logging.getLogger(__name__)
 

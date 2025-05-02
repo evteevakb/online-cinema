@@ -10,11 +10,9 @@ from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
 from api import health
-from api.v1 import auth, roles, profile
-
+from api.v1 import auth, profile, roles
 from core.config import APISettings, RedisSettings
 from db import redis
-
 
 api_settings = APISettings()
 redis_settings = RedisSettings()

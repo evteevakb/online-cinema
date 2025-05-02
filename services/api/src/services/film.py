@@ -2,18 +2,18 @@ from functools import lru_cache
 from typing import List, Type
 
 from elasticsearch import AsyncElasticsearch
-from fastapi import Depends, Query, HTTPException
+from fastapi import Depends, HTTPException, Query
 from redis.asyncio import Redis
+from starlette import status
 
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.film import Film
+from schemas.auth import AuthorizationResponse
 from services.cache import BaseCache, RedisCache
 from services.queries.film_query import FilmElasticQueryBuilder
 from services.storage import BaseRepository, ElasticsearchRepository
-from starlette import status
 from utils.auth import Roles
-from schemas.auth import AuthorizationResponse
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 ALLOWED_ROLES_PAID_FILMS = [Roles.ADMIN, Roles.SUPERUSER, Roles.PAID_USER]

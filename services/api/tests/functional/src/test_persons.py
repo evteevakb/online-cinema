@@ -2,12 +2,17 @@
 Test suite for the 'persons' API endpoints.
 """
 
-import uuid
 from http import HTTPStatus
+import uuid
 
 import pytest
 
-from testdata.samples.persons import person_sample, film_sample, person_sample_search, film_sample_search
+from testdata.samples.persons import (
+    film_sample,
+    film_sample_search,
+    person_sample,
+    person_sample_search,
+)
 
 
 @pytest.mark.asyncio(loop_scope="session")

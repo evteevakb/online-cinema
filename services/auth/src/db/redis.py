@@ -4,7 +4,6 @@ Redis client setup.
 
 from redis.asyncio import Redis
 
-
 redis: Redis | None = None
 
 

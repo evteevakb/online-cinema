@@ -1,12 +1,12 @@
 from enum import Enum
-from typing import List, Any
+from typing import Any, List
 
+from fastapi import Header, HTTPException
 import httpx
-from fastapi import HTTPException, Header
 from starlette import status
 
 from core.config import APISettings
-from schemas.auth import VerifyRequest, VerifyResponse, AuthorizationResponse
+from schemas.auth import AuthorizationResponse, VerifyRequest, VerifyResponse
 
 api_settings = APISettings()
 

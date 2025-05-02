@@ -1,10 +1,11 @@
 from http import HTTPStatus
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.response_models import PersonFilm, Person, FilmBase
+from api.v1.response_models import FilmBase, Person, PersonFilm
 from openapi.persons import PersonDetails, PersonFilms, PersonsSearch
-from services.person import PersonService, get_person_service, person_filters
+from services.person import get_person_service, person_filters, PersonService
 from utils.auth import Authorization, Roles
 
 router = APIRouter()
