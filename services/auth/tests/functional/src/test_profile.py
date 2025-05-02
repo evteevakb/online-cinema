@@ -62,7 +62,6 @@ async def test_history(
             select(User.uuid).where(User.email == user_sample[0]["email"])
         )
         user_uuid = result.scalar_one()
-        user_email = user_sample[0]["email"]
         second_result = await session.execute(select(User))
         users = second_result.scalars().all()
         user_history_sample = user_history(users)
@@ -72,14 +71,22 @@ async def test_history(
         )
         event_uuid = str(event_uuid.scalars().all()[0])
 
+    user_history_sample = [LoginHistory(user_uuid=user_uuid) for _ in range(15)]
+    await pg_write_data(LoginHistory, user_history_sample)
+
     response = await make_request(
         method=HTTPMethod.GET,
-        endpoint=f"profile/{user_uuid}/history",
+        endpoint=f"profile/{user_uuid}/history?page=2&size=10",
         token=user_token,
     )
 
     assert response.status == HTTPStatus.OK
-    assert isinstance(response.body, list)
+    assert isinstance(response.body, dict)
+    assert len(response.body["data"]) == 5
+    assert response.body["total"] == 15
+    assert response.body["page"] == 2
+    assert response.body["size"] == 10
+
     assert response.body[0]["uuid"] == event_uuid
     assert any(item["uuid"] == event_uuid for item in response.body)
 
