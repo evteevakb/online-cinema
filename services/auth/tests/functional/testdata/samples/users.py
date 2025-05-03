@@ -23,7 +23,7 @@ def user_history(user_sample):
             "user_agent": "Linux",
             "event_type": AuthEventType.LOGIN.value,
         }
-        for _ in range(15)
+        for _ in range(2)
         for user in user_sample
     ]
     return user_history_sample
