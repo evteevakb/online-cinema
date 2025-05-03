@@ -1,11 +1,11 @@
 from typing import Any, cast, List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Query
 from fastapi.responses import JSONResponse
 
 from openapi.user import GetHistory, GetProfileInfo, ResetLogin, ResetPassword
-from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate
 from schemas.auth import AuthorizationResponse
+from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate, PaginatedLoginHistoryResponse
 from services.profile import get_profile_service, ProfileService
 from utils.auth import Authorization, Roles
 
@@ -72,7 +72,7 @@ async def reset_login(
 
 @router.get(
     "/{uuid}/history",
-    response_model=List[LoginHistoryResponse],
+    response_model=PaginatedLoginHistoryResponse,
     summary=GetHistory.summary,
     description=GetHistory.description,
     response_description=GetHistory.response_description,
@@ -80,11 +80,13 @@ async def reset_login(
 )
 async def get_history(
     uuid: str,
+    page: int = Query(1, ge=1, description="Номер страницы"),
+    size: int = Query(10, ge=1, le=100, description="Количество элементов на странице"),
     profile_service: ProfileService = Depends(get_profile_service),
     user_with_roles: AuthorizationResponse = Depends(
         Authorization(
             allowed_roles=[Roles.SUPERUSER, Roles.ADMIN, Roles.PAID_USER, Roles.USER]
         )
     ),
-) -> List[LoginHistoryResponse]:
-    return await profile_service.get_history(uuid, user_with_roles)
+) -> PaginatedLoginHistoryResponse:
+    return await profile_service.get_history(uuid, user_with_roles, page, size)
