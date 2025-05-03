@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, status, Query
 from fastapi.responses import JSONResponse
 
 from openapi.user import GetHistory, GetProfileInfo, ResetLogin, ResetPassword
+from schemas.auth import AuthorizationResponse
 from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate, PaginatedLoginHistoryResponse
 from services.profile import get_profile_service, ProfileService
 from utils.auth import Authorization, Roles
@@ -82,7 +83,7 @@ async def get_history(
     page: int = Query(1, ge=1, description="Номер страницы"),
     size: int = Query(10, ge=1, le=100, description="Количество элементов на странице"),
     profile_service: ProfileService = Depends(get_profile_service),
-    user_with_roles=Depends(
+    user_with_roles: AuthorizationResponse = Depends(
         Authorization(
             allowed_roles=[Roles.SUPERUSER, Roles.ADMIN, Roles.PAID_USER, Roles.USER]
         )

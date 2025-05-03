@@ -1,11 +1,11 @@
 from faker import Faker
 
-from models.entity import AuthEventType
+from models.entity import AuthEventType, User
 
 fake = Faker()
 
 
-def user():
+def user() -> list[dict]:
     user_sample = [
         {
             "email": fake.email(),
@@ -16,7 +16,7 @@ def user():
     return user_sample
 
 
-def user_history(user_sample):
+def user_history(user_sample: User) -> list[dict]:
     user_history_sample = [
         {
             "user_uuid": user.uuid,

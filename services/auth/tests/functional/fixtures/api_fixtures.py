@@ -34,7 +34,7 @@ async def session() -> AsyncGenerator[aiohttp.ClientSession, None]:
 
 @pytest_asyncio.fixture(name="make_request")
 def make_request(
-    session,
+    session: AsyncGenerator[aiohttp.ClientSession, None],
 ) -> Callable[[HTTPMethod, str, dict[str, Any] | None], Awaitable[Response]]:
     """Fixture for making HTTP requests to the API.
 

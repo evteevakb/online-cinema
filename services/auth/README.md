@@ -31,6 +31,7 @@ Open each `.env` file and update the necessary values.
     POSTGRES_PASSWORD=password  # can be modified
     POSTGRES_HOST=auth-db  # must be equal to a container name
     POSTGRES_PORT=5432  # must be equal to a standard PostgreSQL port
+    POSTGRES_ECHO=True # responsible for displaying requests in logs
 
 ##### .redis.env
 
