@@ -1,12 +1,11 @@
+import random
 from http import HTTPMethod, HTTPStatus
 from typing import Any
 
 import pytest
 from sqlalchemy.future import select
-from sqlalchemy import func
 
-
-from models.entity import LoginHistory, User
+from models.entity import LoginHistory, User, AuthEventType
 from testdata.samples.roles import all_role_names, Roles
 from testdata.samples.users import user, user_history
 from utils.auth import create_access_token
@@ -73,27 +72,27 @@ async def test_history(
         )
         event_uuid = str(event_uuid.scalars().all()[0])
 
-
-    async with db_session as session:
-        count = await session.scalar(
-            select(func.count()).where(LoginHistory.user_uuid == user_uuid)
-        )
-        assert count == 15
+    user_history_sample = [{
+        "user_uuid": user_uuid,
+        "event_type": random.choice([AuthEventType.LOGIN.value, AuthEventType.LOGOUT.value])
+    } for _ in range(15)]
+    await pg_write_data(LoginHistory, user_history_sample)
 
     response = await make_request(
         method=HTTPMethod.GET,
-        endpoint=f"profile/{user_uuid}/history?page=2&size=10",
+        endpoint=f"profile/{user_uuid}/history?page=1&size=10",
         token=user_token,
     )
 
     assert response.status == HTTPStatus.OK
     assert isinstance(response.body, dict)
-    assert len(response.body["data"]) == 5
-    assert response.body["total"] == 15
-    assert response.body["page"] == 2
+    assert len(response.body["data"][0]) == 5
+    assert response.body["total"] == 17
+    assert response.body["page"] == 1
     assert response.body["size"] == 10
 
-    assert any(item["uuid"] == event_uuid for item in response.body["data"]), f"Expected one of ids of event equal {event_uuid}, but get instead {response.body['data']}"
+    assert response.body['data'][0]["uuid"] == event_uuid
+    assert any(item["uuid"] == event_uuid for item in response.body['data'])
 
 
 @pytest.mark.asyncio

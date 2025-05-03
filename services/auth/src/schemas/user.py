@@ -33,7 +33,7 @@ class LoginHistoryResponse(BaseModel):
     uuid: str
     user_uuid: str
     event_type: str
-    user_agent: str
+    user_agent: str | None
     occurred_at: datetime
 
     @field_validator("uuid", "user_uuid", "event_type", mode="before")

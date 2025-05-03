@@ -61,12 +61,24 @@ class ProfileService:
             total_result = await self.postgres.execute(count_query)
             total = total_result.scalar_one()
 
+            data = []
+            for h in history:
+                print(f"Original item: {h}, Type: {type(h)}")  # Выводим оригинальный элемент и его тип
+                validated_item = LoginHistoryResponse.model_validate(h)  # Применяем модель
+                print(f"Validated item: {validated_item}, Type: {type(validated_item)}")  # Выводим результат и его тип
+                data.append(validated_item)
+
+            # Убедитесь, что total, page, size - целые числа
+            print(f"Total: {total}, Page: {page}, Size: {size}")
+
+            # Возвращаем структуру PaginatedLoginHistoryResponse
             return PaginatedLoginHistoryResponse(
-                data=[LoginHistoryResponse.model_validate(h) for h in history],
-                total=total,
-                page=page,
-                size=size
+                data=data,  # Список LoginHistoryResponse
+                total=total,  # Целое число
+                page=page,  # Целое число
+                size=size  # Целое число
             )
+
 
         except Exception as e:
             raise HTTPException(
