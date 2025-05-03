@@ -28,7 +28,7 @@ dsn_async = (
 )
 engine = create_async_engine(
     dsn_async,
-    echo=True,  # enable log output
+    echo=db_settings.echo,  # enable log output
 )
 async_session = async_sessionmaker(
     engine,
@@ -44,4 +44,10 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         AsyncSession: an instance of the asynchronous session.
     """
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()

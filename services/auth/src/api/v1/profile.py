@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 
 from openapi.user import GetHistory, GetProfileInfo, ResetLogin, ResetPassword
 from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate
+from schemas.auth import AuthorizationResponse
 from services.profile import get_profile_service, ProfileService
 from utils.auth import Authorization, Roles
 
@@ -80,7 +81,7 @@ async def reset_login(
 async def get_history(
     uuid: str,
     profile_service: ProfileService = Depends(get_profile_service),
-    user_with_roles=Depends(
+    user_with_roles: AuthorizationResponse = Depends(
         Authorization(
             allowed_roles=[Roles.SUPERUSER, Roles.ADMIN, Roles.PAID_USER, Roles.USER]
         )

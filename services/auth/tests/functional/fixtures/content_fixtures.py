@@ -39,7 +39,7 @@ async def create_roles(db_session: AsyncSession) -> Callable[[list[str]], None]:
 @pytest_asyncio.fixture(name="create_user")
 async def create_user(
     db_session: AsyncSession,
-    create_roles,
+    create_roles: Callable,
 ) -> Callable[[str, str, list[str]], User]:
     """Fixture for creating a user with specific roles."""
 

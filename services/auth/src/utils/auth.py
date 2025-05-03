@@ -73,7 +73,7 @@ class Authorization:
             host=api_settings.container_name, port=api_settings.port
         )
 
-    async def __call__(self, authorization: str = Header(...)):
+    async def __call__(self, authorization: str = Header(...)) -> AuthorizationResponse:
         token = self.extract_token(authorization)
         payload = await self.verify_token(token)
 
