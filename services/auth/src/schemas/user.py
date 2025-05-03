@@ -3,9 +3,8 @@ OpenAPI schema definitions for the profile endpoint.
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, List
 from uuid import UUID
-from typing import List
 
 from pydantic import BaseModel, field_validator
 

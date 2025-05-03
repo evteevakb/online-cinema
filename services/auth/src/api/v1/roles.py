@@ -2,14 +2,14 @@
 Role endpoints for the auth service.
 """
 
-from typing import Any, cast, List, Annotated
+from typing import Annotated, Any, cast, List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 
 from openapi.roles import AssignRole, ListRole, RevokeRole
-from schemas.role import RoleCreateUpdate, RoleInDb, UserRole
 from schemas.auth import AuthorizationResponse
+from schemas.role import RoleCreateUpdate, RoleInDb, UserRole
 from services.role import get_role_service, RoleService
 from utils.auth import Authorization, Roles
 
@@ -26,7 +26,9 @@ router = APIRouter()
 async def assign_role(
     data: UserRole,
     role_service: RoleService = Depends(get_role_service),
-    _: AuthorizationResponse = Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(
+        Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])
+    ),
 ) -> dict[str, str]:
     """Assign a role to a user.
 
@@ -53,7 +55,9 @@ async def assign_role(
 async def revoke_role(
     data: UserRole,
     role_service: RoleService = Depends(get_role_service),
-    _: AuthorizationResponse = Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(
+        Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])
+    ),
 ) -> dict[str, str]:
     """Revoke a role from a user.
 

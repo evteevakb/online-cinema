@@ -154,7 +154,9 @@ class AuthService:
 
         return TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
 
-    async def logout(self, access_token: str, refresh_token: str, user_agent: str) -> LogoutResponse:
+    async def logout(
+        self, access_token: str, refresh_token: str, user_agent: str
+    ) -> LogoutResponse:
         try:
             payload = jwt.decode(
                 access_token, self.secret_key, algorithms=[self.algorithm]

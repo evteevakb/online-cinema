@@ -1,8 +1,8 @@
 from fastapi import Depends, HTTPException, status
 from redis.asyncio import Redis
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
 from werkzeug.security import generate_password_hash
 
 from db.postgre import get_session
@@ -36,7 +36,11 @@ class ProfileService:
         return UserResponse.model_validate(user)
 
     async def get_history(
-        self, user_uuid: str, user_with_roles: AuthorizationResponse, page: int, size: int
+        self,
+        user_uuid: str,
+        user_with_roles: AuthorizationResponse,
+        page: int,
+        size: int,
     ) -> PaginatedLoginHistoryResponse:
         if user_with_roles.user_uuid != user_uuid and not any(
             role in self.SU_ROLES for role in user_with_roles.roles
@@ -63,9 +67,15 @@ class ProfileService:
 
             data = []
             for h in history:
-                print(f"Original item: {h}, Type: {type(h)}")  # Выводим оригинальный элемент и его тип
-                validated_item = LoginHistoryResponse.model_validate(h)  # Применяем модель
-                print(f"Validated item: {validated_item}, Type: {type(validated_item)}")  # Выводим результат и его тип
+                print(
+                    f"Original item: {h}, Type: {type(h)}"
+                )  # Выводим оригинальный элемент и его тип
+                validated_item = LoginHistoryResponse.model_validate(
+                    h
+                )  # Применяем модель
+                print(
+                    f"Validated item: {validated_item}, Type: {type(validated_item)}"
+                )  # Выводим результат и его тип
                 data.append(validated_item)
 
             # Убедитесь, что total, page, size - целые числа
@@ -76,14 +86,12 @@ class ProfileService:
                 data=data,  # Список LoginHistoryResponse
                 total=total,  # Целое число
                 page=page,  # Целое число
-                size=size  # Целое число
+                size=size,  # Целое число
             )
-
 
         except Exception as e:
             raise HTTPException(
-                status_code=500,
-                detail={"message": f"Ошибка базы данных: {str(e)}"}
+                status_code=500, detail={"message": f"Ошибка базы данных: {str(e)}"}
             )
 
     async def reset_password(

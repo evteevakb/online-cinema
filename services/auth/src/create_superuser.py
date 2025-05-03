@@ -10,7 +10,9 @@ from models.entity import Role, User
 app = typer.Typer()
 
 
-async def create_superuser(email: str, password: str, session_gen: AsyncGenerator = get_session()) -> None:
+async def create_superuser(
+    email: str, password: str, session_gen: AsyncGenerator = get_session()
+) -> None:
     session = await anext(session_gen)
     try:
         result = await session.execute(select(User).where(User.email == email))

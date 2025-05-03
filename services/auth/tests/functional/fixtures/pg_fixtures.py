@@ -2,7 +2,7 @@
 PostgreSQL fixtures.
 """
 
-from typing import Dict, List, Any, AsyncGenerator, Type, Awaitable, Callable
+from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, List, Type
 
 import pytest_asyncio
 from sqlalchemy import text
@@ -47,7 +47,9 @@ async def db_session() -> AsyncGenerator[AsyncSession | Any, Any]:
 
 
 @pytest_asyncio.fixture(name="pg_write_data")
-async def pg_write_data(db_session: AsyncSession) -> Callable[[Type[DeclarativeMeta], List[Dict]], Awaitable[None]]:
+async def pg_write_data(
+    db_session: AsyncSession,
+) -> Callable[[Type[DeclarativeMeta], List[Dict]], Awaitable[None]]:
     """Фикстура для записи данных."""
 
     async def inner(model: Type[DeclarativeMeta], values: List[Dict]):

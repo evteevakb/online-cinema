@@ -1,11 +1,11 @@
-from typing import Any, cast, List
+from typing import Any, cast
 
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 
 from openapi.user import GetHistory, GetProfileInfo, ResetLogin, ResetPassword
 from schemas.auth import AuthorizationResponse
-from schemas.user import LoginHistoryResponse, UserResponse, UserUpdate, PaginatedLoginHistoryResponse
+from schemas.user import PaginatedLoginHistoryResponse, UserResponse, UserUpdate
 from services.profile import get_profile_service, ProfileService
 from utils.auth import Authorization, Roles
 
