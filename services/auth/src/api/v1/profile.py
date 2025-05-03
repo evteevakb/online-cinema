@@ -71,7 +71,7 @@ async def reset_login(
 
 @router.get(
     "/{uuid}/history",
-    response_model=List[LoginHistoryResponse],
+    response_model=PaginatedLoginHistoryResponse,
     summary=GetHistory.summary,
     description=GetHistory.description,
     response_description=GetHistory.response_description,

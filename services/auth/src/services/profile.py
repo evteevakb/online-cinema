@@ -70,7 +70,7 @@ class ProfileService:
 
         except Exception as e:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status_code=500,
                 detail={"message": f"Ошибка базы данных: {str(e)}"}
             )
 

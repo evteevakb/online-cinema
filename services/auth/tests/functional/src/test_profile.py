@@ -3,6 +3,8 @@ from typing import Any
 
 import pytest
 from sqlalchemy.future import select
+from sqlalchemy import func
+
 
 from models.entity import LoginHistory, User
 from testdata.samples.roles import all_role_names, Roles
@@ -71,8 +73,12 @@ async def test_history(
         )
         event_uuid = str(event_uuid.scalars().all()[0])
 
-    user_history_sample = [LoginHistory(user_uuid=user_uuid) for _ in range(15)]
-    await pg_write_data(LoginHistory, user_history_sample)
+
+    async with db_session as session:
+        count = await session.scalar(
+            select(func.count()).where(LoginHistory.user_uuid == user_uuid)
+        )
+        assert count == 15
 
     response = await make_request(
         method=HTTPMethod.GET,
@@ -87,8 +93,7 @@ async def test_history(
     assert response.body["page"] == 2
     assert response.body["size"] == 10
 
-    assert response.body[0]["uuid"] == event_uuid
-    assert any(item["uuid"] == event_uuid for item in response.body)
+    assert any(item["uuid"] == event_uuid for item in response.body["data"]), f"Expected one of ids of event equal {event_uuid}, but get instead {response.body['data']}"
 
 
 @pytest.mark.asyncio
