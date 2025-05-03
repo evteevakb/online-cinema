@@ -33,6 +33,7 @@ class PostgreSettings(BaseSettings):
     host: str
     port: int
     db: str
+    echo: bool = False
 
     model_config = ConfigDict(env_prefix="POSTGRES_")
 

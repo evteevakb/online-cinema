@@ -59,7 +59,7 @@ class AuthService:
         await self._save_refresh_token(user.uuid, refresh_token)
         return refresh_token
 
-    async def _save_refresh_token(self, user_uuid: str, token: str):
+    async def _save_refresh_token(self, user_uuid: str, token: str) -> None:
         token_entry = RefreshTokens(
             token=token,
             user_uuid=user_uuid,
@@ -68,7 +68,7 @@ class AuthService:
         self.db.add(token_entry)
         await self.db.commit()
 
-    async def register(self, email, password) -> TokenResponse:
+    async def register(self, email: str, password: str) -> TokenResponse:
         result = await self.db.execute(select(User).where(User.email == email))
         if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="User already exists")
@@ -154,7 +154,9 @@ class AuthService:
 
         return TokenResponse(access_token=access_token, refresh_token=new_refresh_token)
 
-    async def logout(self, access_token, refresh_token, user_agent) -> LogoutResponse:
+    async def logout(
+        self, access_token: str, refresh_token: str, user_agent: str
+    ) -> LogoutResponse:
         try:
             payload = jwt.decode(
                 access_token, self.secret_key, algorithms=[self.algorithm]

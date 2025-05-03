@@ -4,7 +4,11 @@ from typing import ClassVar
 
 from pydantic import BaseModel
 
-from schemas.user import LoginHistoryResponse, UserResponse
+from schemas.user import (
+    LoginHistoryResponse,
+    PaginatedLoginHistoryResponse,
+    UserResponse,
+)
 
 __all__ = ["GetProfileInfo", "ResetPassword", "ResetLogin", "GetHistory"]
 
@@ -141,15 +145,20 @@ class ResetLogin(BaseModel):
 class _HistoryResponseContent(BaseModel):
     """Пример контента истории входов"""
 
-    example: ClassVar[list[LoginHistoryResponse]] = [
-        LoginHistoryResponse(
-            uuid="cab1e9c5-39ca-4ed7-86a8-fd8be1f17504",
-            user_uuid=user_uuid,
-            event_type="login",
-            user_agent="Mozilla/5.0",
-            occurred_at=datetime(2025, 4, 27, 12, 0),
-        )
-    ]
+    example: ClassVar[PaginatedLoginHistoryResponse] = PaginatedLoginHistoryResponse(
+        data=[
+            LoginHistoryResponse(
+                uuid="cab1e9c5-39ca-4ed7-86a8-fd8be1f17504",
+                user_uuid=user_uuid,
+                event_type="login",
+                user_agent="Mozilla/5.0",
+                occurred_at=datetime(2025, 4, 27, 12, 0),
+            )
+        ],
+        total=100,
+        page=1,
+        size=10,
+    )
 
 
 class GetHistory(BaseModel):

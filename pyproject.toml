@@ -7,9 +7,10 @@ requires-python = ">=3.10"
 [dependency-groups]
 lint = [
     "isort==6.0.1",
+    "mypy==1.15.0",
     "pydantic-settings==2.8.1",
     "ruff==0.11.6",
-    "mypy==1.15.0",
+    "types-requests==2.32.0.20250328",
 ]
 
 [tool.isort]
@@ -42,6 +43,7 @@ sections = [
     ]
 
 [tool.mypy]
+explicit_package_bases = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 strict = true

@@ -2,12 +2,13 @@
 Role endpoints for the auth service.
 """
 
-from typing import Any, cast, List
+from typing import Annotated, Any, cast, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from openapi.roles import AssignRole, ListRole, RevokeRole
+from schemas.auth import AuthorizationResponse
 from schemas.role import RoleCreateUpdate, RoleInDb, UserRole
 from services.role import get_role_service, RoleService
 from utils.auth import Authorization, Roles
@@ -25,7 +26,9 @@ router = APIRouter()
 async def assign_role(
     data: UserRole,
     role_service: RoleService = Depends(get_role_service),
-    _=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(
+        Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])
+    ),
 ) -> dict[str, str]:
     """Assign a role to a user.
 
@@ -52,7 +55,9 @@ async def assign_role(
 async def revoke_role(
     data: UserRole,
     role_service: RoleService = Depends(get_role_service),
-    _=Depends(Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(
+        Authorization(allowed_roles=[Roles.ADMIN, Roles.SUPERUSER])
+    ),
 ) -> dict[str, str]:
     """Revoke a role from a user.
 
@@ -85,8 +90,8 @@ async def get_user_roles(
     responses=ListRole.responses,
 )
 async def list_roles(
-    skip: int = 0,
-    limit: int = 10,
+    skip: Annotated[int, Query(description="Number of items to skip", ge=0)] = 0,
+    limit: Annotated[int, Query(description="Pagination page size", ge=1)] = 10,
     role_service: RoleService = Depends(get_role_service),
 ) -> List[RoleInDb]:
     roles = await role_service.get_roles(skip, limit)
@@ -97,7 +102,7 @@ async def list_roles(
 async def get_role(
     role_name: str,
     role_service: RoleService = Depends(get_role_service),
-    _=Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
 ) -> RoleInDb:
     role = await role_service.get_role(role_name)
     return role
@@ -107,7 +112,7 @@ async def get_role(
 async def create_role(
     role_create: RoleCreateUpdate,
     role_service: RoleService = Depends(get_role_service),
-    _=Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
 ) -> RoleInDb:
     role_created = await role_service.create_role(role_create)
     return role_created
@@ -118,7 +123,7 @@ async def update_role(
     role_name: str,
     role_update: RoleCreateUpdate,
     role_service: RoleService = Depends(get_role_service),
-    _=Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
 ) -> RoleInDb:
     updated_role = await role_service.update_role(role_name, role_update)
     return updated_role
@@ -128,7 +133,7 @@ async def update_role(
 async def delete_role(
     role_name: str,
     role_service: RoleService = Depends(get_role_service),
-    _=Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
+    _: AuthorizationResponse = Depends(Authorization(allowed_roles=[Roles.SUPERUSER])),
 ) -> dict:
     await role_service.delete_role(role_name)
     return {"message": f"Role {role_name} deleted"}
