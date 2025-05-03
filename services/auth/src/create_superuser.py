@@ -1,4 +1,5 @@
 import asyncio
+from typing import AsyncGenerator
 
 from sqlalchemy import select
 import typer
@@ -9,7 +10,9 @@ from models.entity import Role, User
 app = typer.Typer()
 
 
-async def create_superuser(email: str, password: str, session_gen=get_session()):
+async def create_superuser(
+    email: str, password: str, session_gen: AsyncGenerator = get_session()
+) -> None:
     session = await anext(session_gen)
     try:
         result = await session.execute(select(User).where(User.email == email))
@@ -39,7 +42,7 @@ async def create_superuser(email: str, password: str, session_gen=get_session())
 
 
 @app.command()
-def create(email: str, password: str):
+def create(email: str, password: str) -> None:
     asyncio.run(create_superuser(email, password))
 
 

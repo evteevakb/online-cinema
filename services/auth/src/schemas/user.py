@@ -3,6 +3,7 @@ OpenAPI schema definitions for the profile endpoint.
 """
 
 from datetime import datetime
+from typing import Any, List
 from uuid import UUID
 
 from pydantic import BaseModel, field_validator
@@ -17,7 +18,7 @@ class UserResponse(BaseModel):
     is_active: bool
 
     @field_validator("uuid", mode="before")
-    def convert_uuid_to_str(cls, value):
+    def convert_uuid_to_str(cls, value: str | UUID) -> str:
         if isinstance(value, UUID):
             return str(value)
         return value
@@ -32,15 +33,22 @@ class LoginHistoryResponse(BaseModel):
     uuid: str
     user_uuid: str
     event_type: str
-    user_agent: str
+    user_agent: str | None
     occurred_at: datetime
 
     @field_validator("uuid", "user_uuid", "event_type", mode="before")
-    def convert_to_str(cls, value):
+    def convert_to_str(cls, value: Any) -> str:
         return str(value)
 
     class Config:
         from_attributes = True
+
+
+class PaginatedLoginHistoryResponse(BaseModel):
+    data: List[LoginHistoryResponse]
+    total: int
+    page: int
+    size: int
 
 
 class UserUpdate(BaseModel):

@@ -1,7 +1,6 @@
-from typing import List
-
 from fastapi import Depends, HTTPException, status
 from redis.asyncio import Redis
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from werkzeug.security import generate_password_hash
@@ -11,6 +10,7 @@ from db.redis import get_redis
 from models.entity import LoginHistory, User
 from openapi.user import LoginHistoryResponse, UserResponse
 from schemas.auth import AuthorizationResponse
+from schemas.user import PaginatedLoginHistoryResponse
 from utils.auth import Roles
 
 
@@ -36,25 +36,62 @@ class ProfileService:
         return UserResponse.model_validate(user)
 
     async def get_history(
-        self, user_uuid: str, user_with_roles: AuthorizationResponse
-    ) -> List[LoginHistoryResponse]:
+        self,
+        user_uuid: str,
+        user_with_roles: AuthorizationResponse,
+        page: int,
+        size: int,
+    ) -> PaginatedLoginHistoryResponse:
         if user_with_roles.user_uuid != user_uuid and not any(
             role in self.SU_ROLES for role in user_with_roles.roles
         ):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
         try:
-            result = await self.postgres.execute(
-                select(LoginHistory).where(LoginHistory.user_uuid == user_uuid)
+            data_query = (
+                select(LoginHistory)
+                .where(LoginHistory.user_uuid == user_uuid)
+                .limit(size)
+                .offset((page - 1) * size)
             )
+            result = await self.postgres.execute(data_query)
             history = result.scalars().all()
-            if not history:
-                return []
-            return [LoginHistoryResponse.model_validate(h) for h in history]
+
+            count_query = (
+                select(func.count())
+                .select_from(LoginHistory)
+                .where(LoginHistory.user_uuid == user_uuid)
+            )
+            total_result = await self.postgres.execute(count_query)
+            total = total_result.scalar_one()
+
+            data = []
+            for h in history:
+                print(
+                    f"Original item: {h}, Type: {type(h)}"
+                )  # Выводим оригинальный элемент и его тип
+                validated_item = LoginHistoryResponse.model_validate(
+                    h
+                )  # Применяем модель
+                print(
+                    f"Validated item: {validated_item}, Type: {type(validated_item)}"
+                )  # Выводим результат и его тип
+                data.append(validated_item)
+
+            # Убедитесь, что total, page, size - целые числа
+            print(f"Total: {total}, Page: {page}, Size: {size}")
+
+            # Возвращаем структуру PaginatedLoginHistoryResponse
+            return PaginatedLoginHistoryResponse(
+                data=data,  # Список LoginHistoryResponse
+                total=total,  # Целое число
+                page=page,  # Целое число
+                size=size,  # Целое число
+            )
 
         except Exception as e:
             raise HTTPException(
-                status_code=500, detail={"message": f"Database error: {str(e)}"}
+                status_code=500, detail={"message": f"Ошибка базы данных: {str(e)}"}
             )
 
     async def reset_password(

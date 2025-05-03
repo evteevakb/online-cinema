@@ -32,6 +32,7 @@ class PostgreSettings(BaseSettings):
     host: str
     port: int
     db: str
+    echo: bool = False
 
     class Config:
         env_prefix = "POSTGRES_"
