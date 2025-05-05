@@ -28,7 +28,7 @@ done
 response=$(curl -s -X POST "${BASE_URL}/_bulk" \
                 -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" \
                 -H "Content-Type: application/json" \
-                --data-binary "@/init/dump.json")
+                --data-binary "@/backup/dump.json")
 
 if echo "$response" | grep -q '"errors":false'; then
   echo "SUCCESS: Data successfully added to indexes"

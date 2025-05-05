@@ -1,8 +1,10 @@
-services:
+include:
+  - path: ../../etl/docker-compose.elastic.yml
 
+services:
   api:
     build:
-      context: src
+      context: ../../../services/api/src
       dockerfile: Dockerfile
     container_name: api
     depends_on:
@@ -11,11 +13,10 @@ services:
       api-redis:
         condition: service_healthy
     env_file:
-      - envs/.elastic.env
+      - ../../etl/envs/.elastic.env
       - envs/.redis.env
       - envs/.service.env
-    expose:
-      - 8000
+    expose: [8000]
     healthcheck:
       test: curl -s http://$${API_HOST}:$${API_PORT}/api/health || exit 1
       interval: 30s
@@ -23,27 +24,6 @@ services:
       retries: 3
     image: api:latest
     restart: always
-    networks: [shared_network]
-
-  elasticsearch:
-    container_name: elasticsearch
-    env_file:
-      - envs/.elastic.env
-    environment:
-      - discovery.type=single-node
-      - xpack.security.http.ssl.enabled=false
-    healthcheck:
-      test: curl -s -u $${ELASTIC_USER}:$${ELASTIC_PASSWORD} http://localhost:9200 >/dev/null || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    image: elasticsearch:8.17.2
-    expose:
-      - 9200
-    restart: always
-    volumes:
-      - elastic-data:/usr/share/elasticsearch/data
-    networks: [shared_network]
 
   elasticsearch-dump:
     container_name: elasticsearch-dump
@@ -52,30 +32,25 @@ services:
         condition: service_healthy
     entrypoint: ["/bin/sh", "-c", "/init/entrypoint.sh"]
     env_file:
-      - envs/.elastic.env
+      - ../../etl/envs/.elastic.env
     image: curlimages/curl:8.12.1
     restart: on-failure:5
     volumes:
       - ../../init/elasticsearch:/init
-    networks: [shared_network]
+      - ../../../backup/elastic:/backup
 
-  api-nginx:
-    container_name: api-nginx
+  nginx:
+    extends:
+      file: ../../admin/docker-compose.nginx.yml
+      service: nginx
     depends_on:
       api:
         condition: service_healthy
-    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
-    env_file:
-      - envs/.service.env
-    image: nginx:stable-alpine3.20-slim
     ports:
       - "80:80"
-    restart: always
     volumes:
-      - ../../init/nginx/entrypoint.sh:/entrypoint.sh
       - ../../init/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./site.conf:/etc/nginx/templates/site.conf.template
-    networks: [shared_network]
+      - ../configs/api-nginx.conf:/etc/nginx/conf.d/site.conf:ro
 
   api-redis:
     container_name: api-redis
@@ -88,18 +63,11 @@ services:
       timeout: 10s
       retries: 5
     image: redis:7.4.2
-    expose:
-      - 6379
+    expose: [6379]
     restart: always
     volumes:
       - api-redis-data:/data
       - ../../init/redis/entrypoint.sh:/entrypoint.sh
-    networks: [shared_network]
 
 volumes:
-  elastic-data:
   api-redis-data:
-
-networks:
-  shared_network:
-    external: true

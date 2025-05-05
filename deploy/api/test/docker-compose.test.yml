@@ -56,12 +56,12 @@ services:
     restart: always
     volumes:
       - api-redis-data-test:/data
-      - ../../../../init/redis/entrypoint.sh:/entrypoint.sh
+      - ../../init/redis/entrypoint.sh:/entrypoint.sh
 
   api-functional-tests:
     build:
-        context: .
-        dockerfile: test.Dockerfile
+        context: ../../../services/api/tests/functional
+        dockerfile: Dockerfile
     container_name: api-functional-tests
     depends_on:
       api-test:
@@ -71,9 +71,9 @@ services:
       - envs/.redis.test.env
       - envs/.service.test.env
     volumes:
-      - ../../../../init/elasticsearch/genres_schema.json:/tests/schemas/genres.json
-      - ../../../../init/elasticsearch/movies_schema.json:/tests/schemas/movies.json
-      - ../../../../init/elasticsearch/persons_schema.json:/tests/schemas/persons.json
+      - ../../init/elasticsearch/genres_schema.json:/tests/schemas/genres.json
+      - ../../init/elasticsearch/movies_schema.json:/tests/schemas/movies.json
+      - ../../init/elasticsearch/persons_schema.json:/tests/schemas/persons.json
 
 volumes:
   api-redis-data-test:

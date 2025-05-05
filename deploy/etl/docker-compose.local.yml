@@ -3,24 +3,11 @@ include:
 
 services:
   elasticsearch:
-    container_name: elasticsearch
+    extends:
+      file: docker-compose.elastic.yml
+      service: elasticsearch
     depends_on:
       - admin-db
-    env_file:
-      - envs/.elastic.env
-    environment:
-      - discovery.type=single-node # single instance
-      - xpack.security.enabled=false # disable security checks
-    healthcheck:
-      test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    image: elasticsearch:8.17.2
-    expose: [9200]
-    restart: always
-    volumes:
-      - elastic-data:/usr/share/elasticsearch/data
 
   etl:
     build:
@@ -31,7 +18,7 @@ services:
         condition: service_healthy
       admin-db:
         condition: service_healthy
-      admin-redis:
+      etl-redis:
         condition: service_healthy
     env_file:
       - ../admin/envs/.db.env
@@ -44,8 +31,8 @@ services:
       - ../init/elasticsearch/persons_schema.json:/etl/persons_schema.json
       - ../init/elasticsearch/genres_schema.json:/etl/genres_schema.json
 
-  admin-redis:
-    container_name: admin-redis
+  etl-redis:
+    container_name: etl-redis
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     env_file:
       - envs/.redis.env
@@ -58,7 +45,7 @@ services:
     expose: [6379]
     restart: always
     volumes:
-      - admin-redis-data:/data
+      - etl-redis-data:/data
       - ../init/redis/entrypoint.sh:/entrypoint.sh
 
   elasticdump:
@@ -72,4 +59,4 @@ services:
 
 volumes:
   elastic-data:
-  admin-redis-data:
+  etl-redis-data:
