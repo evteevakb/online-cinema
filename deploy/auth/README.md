@@ -5,13 +5,11 @@ For services description see:
 - [api service README](../../services/api/README.md);
 - [auth service README](../../services/auth/README.md).
 
-## Installation
-
-### Setting up environment variables
+## Setting up environment variables
 
 Before running the project, you need to create `.env` files based on the provided `.env.example` templates in `local/envs` directory of the current folder and of the `../admin` and `../api/local` folders.
 
-#### Step 1: Create .env files
+### Step 1: Create .env files
 
 Navigate to the `local/envs` directory and create the required `.env` files:
 
@@ -19,11 +17,11 @@ Navigate to the `local/envs` directory and create the required `.env` files:
     cp .redis.env.example .redis.env
     cp .service.env.example .service.env
 
-#### Step 2: Fill in the .env files
+### Step 2: Fill in the .env files
 
 Open each `.env` file and update the necessary values.
 
-##### .db.env
+#### .db.env
 
     POSTGRES_DB=test_database  # must be equal to a database name
     POSTGRES_USER=app  # can be modified
@@ -32,7 +30,7 @@ Open each `.env` file and update the necessary values.
     POSTGRES_PORT=5432  # must be equal to a standard PostgreSQL port
     POSTGRES_ECHO=True  # True for showing logs, otherwise False
 
-##### .redis.env
+#### .redis.env
 
     REDIS_PASSWORD=redis_password  # can be modified
     REDIS_USER_NAME=user  # can be modified
@@ -40,7 +38,7 @@ Open each `.env` file and update the necessary values.
     REDIS_HOST=auth-redis  # must be equal to container name
     REDIS_PORT=6379  # must be equal to the default Redis port
 
-##### .service.env
+#### .service.env
 
     API_PROJECT_NAME=auth-service  # can be modified
     API_HOST=0.0.0.0  # must be equal to FastAPI app host 

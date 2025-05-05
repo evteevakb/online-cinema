@@ -29,6 +29,10 @@ The repository is organized as follows:
 └── README.md
 ```
 
+## Running Services for the Current Sprint
+
+To run the services for the current sprint, follow the instructions  in sections "Setting up environment variables" and "Running" in the [`deploy/auth/README.md`](./deploy/auth/README.md)
+
 ## Development Setup
 
 Use [`uv`](https://github.com/astral-sh/uv) for dependency and virtual environment management.
