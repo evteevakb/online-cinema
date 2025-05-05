@@ -40,7 +40,7 @@ services:
       - ../../backup/admin/movies_database.sql:/docker-entrypoint-initdb.d/init.sql
       - admin-db-data:/var/lib/postgresql/data
 
-  nginx:
+  admin-nginx:
     extends:
       file: docker-compose.nginx.yml
       service: nginx
@@ -48,6 +48,7 @@ services:
       - admin
     ports:
       - "80:80"
+    profiles: ["standalone"]
     volumes:
       - ../init/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./configs/admin-nginx.conf:/etc/nginx/conf.d/site.conf:ro

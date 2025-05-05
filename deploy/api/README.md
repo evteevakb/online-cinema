@@ -38,9 +38,9 @@ Open each `.env` file and update the necessary values.
 
 Once the `.env` files are set up, run the following command to start all services:
 
-    docker-compose -f docker-compose.local.yml up --build
+    docker-compose --profile standalone -f docker-compose.local.yml up --build
 
-The app will be available at `localhost:80`.
+The app will be available at `localhost:81`.
 
 ## Testing
 

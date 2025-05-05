@@ -51,4 +51,4 @@ Open each `.env` file and update the necessary values.
 
 Once the `.env` files are set up, go to the folder `etl` and run the following command to start all components:
 
-    docker-compose -f docker-compose.local.yml up --build
+    docker-compose --profile standalone -f docker-compose.local.yml up --build
