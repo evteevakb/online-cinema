@@ -85,6 +85,6 @@ def convert(
 
 if __name__ == "__main__":
     convert(
-        input_file="dump.json",
+        input_file="initial-dump.json",
         output_file="dump.json",
     )
