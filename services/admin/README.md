@@ -28,7 +28,7 @@ The `admin` service includes Swagger OpenAPI documentation for all available API
 
 ## Running
 
-To start the `admin` service, follow the instructions in the [deployment documentation](../../deploy/sprint_2/README.md).
+To start the `admin` service, follow the instructions in the [deployment documentation](../../deploy/admin/README.md).
 
 ## Tests
 
