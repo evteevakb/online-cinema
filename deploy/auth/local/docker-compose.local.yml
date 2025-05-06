@@ -56,7 +56,17 @@ services:
     volumes:
       - auth-redis-data:/data
       - ../../init/redis/entrypoint.sh:/entrypoint.sh
-  
+
+  auth-jaeger:
+    container_name: auth-jaeger
+    expose: [4318]  # HTTP server
+    image: jaegertracing/jaeger:2.5.0
+    ports:
+      - 16686:16686  # UI
+    restart: always
+    volumes:
+      - auth-jaeger-data:/tmp
+
   nginx:
     extends:
       file: ../../admin/docker-compose.nginx.yml
@@ -78,4 +88,5 @@ services:
 
 volumes:
   auth-db-data:
+  auth-jaeger-data:
   auth-redis-data:

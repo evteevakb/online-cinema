@@ -2,6 +2,13 @@
 Logging configuration for the auth service.
 """
 
+from logging import LogRecord
+from typing import Any
+
+from uvicorn.logging import AccessFormatter
+
+from middlewares.request_middleware import get_request_id
+
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 LOG_DEFAULT_HANDLERS = [
     "console",
@@ -19,8 +26,8 @@ LOGGING = {
             "use_colors": None,
         },
         "access": {
-            "()": "uvicorn.logging.AccessFormatter",
-            "fmt": "%(levelprefix)s %(client_addr)s - '%(request_line)s' %(status_code)s",
+            "()": "core.logger.CustomAccessFormatter",
+            "fmt": "%(levelprefix)s [%(request_id)s] %(client_addr)s - '%(request_line)s' %(status_code)s",
         },
     },
     "handlers": {
@@ -60,3 +67,18 @@ LOGGING = {
         "handlers": LOG_DEFAULT_HANDLERS,
     },
 }
+
+
+class CustomAccessFormatter(AccessFormatter):
+    def formatMessage(self, record: LogRecord) -> Any:
+        """Injects the request ID into the log record before formatting the access log message.
+
+        Args:
+            record (LogRecord): The log record generated for an HTTP request.
+
+        Returns:
+            Any: The formatted log message including the request ID.
+        """
+        request_id = get_request_id() or "unknown"
+        record.request_id = request_id
+        return super().formatMessage(record)
