@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request
+from fastapi_limiter.depends import RateLimiter
 
 from schemas.auth import (
     LogoutResponse,
@@ -14,6 +15,7 @@ router = APIRouter()
 @router.post(
     "/registration",
     response_model=TokenResponse,
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
 )
 async def register_user(
     email: str,
@@ -23,7 +25,11 @@ async def register_user(
     return await auth_service.register(email, password)
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post(
+    "/login", 
+    response_model=TokenResponse,
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+)
 async def login(
     email: str,
     password: str,
@@ -34,14 +40,22 @@ async def login(
     return await auth_service.login(email, password, user_agent)
 
 
-@router.post("/refresh", response_model=TokenResponse)
+@router.post(
+    "/refresh",
+    response_model=TokenResponse,
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+)
 async def refresh_token(
-    refresh_token: str, service: AuthService = Depends(get_auth_service)
+    refresh_token: str, service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
     return await service.refresh_tokens(refresh_token)
 
 
-@router.post("/logout", response_model=LogoutResponse)
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+)
 async def logout(
     access_token: str,
     refresh_token: str,
@@ -52,7 +66,11 @@ async def logout(
     return await auth_service.logout(access_token, refresh_token, user_agent)
 
 
-@router.post("/verify_access_token", response_model=VerifyResponse)
+@router.post(
+    "/verify_access_token",
+    response_model=VerifyResponse,
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+)
 async def verify_access_token(
     data: VerifyRequest, auth_service: AuthService = Depends(get_auth_service)
 ) -> VerifyResponse:
