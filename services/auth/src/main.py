@@ -41,8 +41,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-add_tracer(app)
 app.add_middleware(RequestIDMiddleware)
+
+# tracer must be called after middlewares
+add_tracer(app)
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])
 app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])

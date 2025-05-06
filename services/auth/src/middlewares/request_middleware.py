@@ -6,6 +6,7 @@ from contextvars import ContextVar
 import uuid
 
 from fastapi import Request
+from opentelemetry import trace
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
@@ -19,6 +20,17 @@ def get_request_id() -> str:
         str: The request ID associated with the current request.
     """
     return request_id_ctx_var.get()
+
+
+def add_request_id_to_span(request_id: str) -> None:
+    """Adds the given request ID as an attribute to the current OpenTelemetry span.
+
+    Args:
+        request_id (str): The HTTP request ID to attach to the current tracing span.
+    """
+    current_span = trace.get_current_span()
+    if current_span.is_recording():
+        current_span.set_attribute("http.request_id", request_id)
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -40,4 +52,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         """
         request_id = request.headers.get("X-Request-Id", str(uuid.uuid4()))
         request_id_ctx_var.set(request_id)
+
+        add_request_id_to_span(request_id)
+
         return await call_next(request)
