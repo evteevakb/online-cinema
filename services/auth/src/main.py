@@ -12,7 +12,9 @@ from redis.asyncio import Redis
 from api import health
 from api.v1 import auth, profile, roles
 from core.config import APISettings, RedisSettings
+from core.tracing import add_tracer
 from db import redis
+from middlewares.request_middleware import RequestIDMiddleware
 
 api_settings = APISettings()
 redis_settings = RedisSettings()
@@ -38,6 +40,11 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan,
 )
+
+app.add_middleware(RequestIDMiddleware)
+
+# tracer must be called after middlewares
+add_tracer(app)
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])
 app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])
