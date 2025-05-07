@@ -22,12 +22,12 @@ LOGGING = {
         "verbose": {"format": LOG_FORMAT},
         "default": {
             "()": "uvicorn.logging.DefaultFormatter",
-            "fmt": "%(levelprefix)s %(message)s",
+            "fmt": "%(asctime)s %(levelprefix)s %(message)s",
             "use_colors": None,
         },
         "access": {
             "()": "core.logger.CustomAccessFormatter",
-            "fmt": "%(levelprefix)s [%(request_id)s] %(client_addr)s - '%(request_line)s' %(status_code)s",
+            "fmt": "%(asctime)s %(levelprefix)s [%(request_id)s] %(client_addr)s - '%(request_line)s' %(status_code)s",
         },
     },
     "handlers": {
