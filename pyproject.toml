@@ -26,6 +26,7 @@ known_first_party = [
     "core",
     "db",
     "functional",
+    "middlewares",
     "models",
     "openapi",
     "schemas",

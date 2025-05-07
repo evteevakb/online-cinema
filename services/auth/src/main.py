@@ -5,15 +5,17 @@ Main application setup for the authentication service.
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from redis.asyncio import Redis
 from fastapi_limiter import FastAPILimiter
+from redis.asyncio import Redis
 
 from api import health
 from api.v1 import auth, profile, roles
 from core.config import APISettings, RedisSettings
+from core.tracing import add_tracer
 from db import redis
+from middlewares.request_middleware import AddIdentifierMiddleware, RequestIDMiddleware
 
 api_settings = APISettings()
 redis_settings = RedisSettings()
@@ -42,12 +44,11 @@ app = FastAPI(
 )
 
 
-@app.middleware("http")
-async def add_identifier(request: Request, call_next):
-    identifier = request.client.host
-    request.state.identifier = identifier
-    response = await call_next(request)
-    return response
+app.add_middleware(RequestIDMiddleware)
+app.add_middleware(AddIdentifierMiddleware)
+
+add_tracer(app)
+
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])
 app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])

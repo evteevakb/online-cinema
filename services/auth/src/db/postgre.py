@@ -4,6 +4,7 @@ PostgreSQL client setup.
 
 from typing import AsyncGenerator
 
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     AsyncSession,
@@ -29,6 +30,9 @@ dsn_async = (
 engine = create_async_engine(
     dsn_async,
     echo=db_settings.echo,  # enable log output
+)
+SQLAlchemyInstrumentor().instrument(
+    engine=engine.sync_engine,
 )
 async_session = async_sessionmaker(
     engine,

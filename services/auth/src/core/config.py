@@ -24,6 +24,16 @@ class APISettings(BaseSettings):
         env_prefix = "API_"
 
 
+class TracingSettings(BaseSettings):
+    """Configuration settings for tracing service."""
+
+    container_name: str
+    port: int
+
+    class Config:
+        env_prefix = "TRACING_"
+
+
 class PostgreSettings(BaseSettings):
     """Configuration settings for PostgreSQL database."""
 

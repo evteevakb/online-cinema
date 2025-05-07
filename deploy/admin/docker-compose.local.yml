@@ -1,0 +1,59 @@
+services:
+  admin:
+    build:
+      context: ../../services/admin/src
+    container_name: admin
+    depends_on:
+      admin-db:
+        condition: service_healthy
+    env_file:
+      - envs/.service.env
+      - envs/.db.env
+    expose: [8000]
+    restart: always
+    volumes:
+      - admin-static-files:/app/staticfiles
+
+  admin-swagger:
+    container_name: admin-swagger
+    image: swaggerapi/swagger-ui:v5.19.0
+    environment:
+      - SWAGGER_JSON=/swagger.yaml
+    ports:
+      - "8080:8080"
+    restart: always
+    volumes:
+      - ../../services/admin/src/openapi.yaml:/swagger.yaml
+
+  admin-db:
+    container_name: admin-db
+    env_file: envs/.db.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    image: postgres:17.2
+    expose: [5432]
+    restart: always
+    volumes:
+      - ../../backup/admin/movies_database.sql:/docker-entrypoint-initdb.d/init.sql
+      - admin-db-data:/var/lib/postgresql/data
+
+  admin-nginx:
+    extends:
+      file: docker-compose.nginx.yml
+      service: nginx
+    depends_on:
+      - admin
+    ports:
+      - "80:80"
+    profiles: ["standalone"]
+    volumes:
+      - ../init/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./configs/admin-nginx.conf:/etc/nginx/conf.d/site.conf:ro
+      - admin-static-files:/app/staticfiles
+
+volumes:
+  admin-db-data:
+  admin-static-files:
