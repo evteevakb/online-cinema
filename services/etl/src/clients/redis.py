@@ -5,7 +5,6 @@ Provides functionality for connecting to a Redis instance.
 import logging
 
 from pydantic_settings import BaseSettings
-
 import redis
 
 

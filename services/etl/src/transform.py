@@ -3,11 +3,11 @@ Provides functionality for transforming raw data from PostgreSQL into a format s
 """
 
 from collections import defaultdict
+from datetime import date, datetime, timedelta
 from typing import Any, Optional
 from uuid import UUID
-from datetime import date, datetime, timedelta
 
-from pydantic import BaseModel, Field, field_validator, computed_field
+from pydantic import BaseModel, computed_field, Field, field_validator
 
 roles = {"actor", "director", "writer"}
 

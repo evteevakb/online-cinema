@@ -2,21 +2,21 @@
 ETL (Extract, Transform, Load) process for transferring data from PostgreSQL to Elasticsearch.
 """
 
-import logging
-import time
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
-
-import psycopg
-from psycopg import ClientCursor
-from psycopg.rows import dict_row
-from pydantic_settings import BaseSettings
+import logging
+import time
 
 from clients.redis import RedisClient
 from extract import PostgresExtractor
 from load import ElasticLoader
+import psycopg
+from psycopg import ClientCursor
+from psycopg.rows import dict_row
+from pydantic_settings import BaseSettings
 from state.redis_storage import RedisStorage
 from transform import transform_postgres_to_elastic
+
 from utils.logger import FileAndConsoleLogger
 
 

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi_limiter.depends import RateLimiter
 
+from core.config import RateLimiterSettings
 from schemas.auth import (
     LogoutResponse,
     TokenResponse,
@@ -10,12 +11,14 @@ from schemas.auth import (
 from services.auth import AuthService, get_auth_service
 
 router = APIRouter()
+settings = RateLimiterSettings()
 
 
 @router.post(
     "/registration",
     response_model=TokenResponse,
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def register_user(
     email: str,
@@ -26,9 +29,10 @@ async def register_user(
 
 
 @router.post(
-    "/login", 
+    "/login",
     response_model=TokenResponse,
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def login(
     email: str,
@@ -43,7 +47,8 @@ async def login(
 @router.post(
     "/refresh",
     response_model=TokenResponse,
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def refresh_token(
     refresh_token: str, service: AuthService = Depends(get_auth_service),
@@ -54,7 +59,8 @@ async def refresh_token(
 @router.post(
     "/logout",
     response_model=LogoutResponse,
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def logout(
     access_token: str,
@@ -69,7 +75,8 @@ async def logout(
 @router.post(
     "/verify_access_token",
     response_model=VerifyResponse,
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def verify_access_token(
     data: VerifyRequest, auth_service: AuthService = Depends(get_auth_service)

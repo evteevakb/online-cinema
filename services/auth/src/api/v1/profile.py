@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from fastapi_limiter.depends import RateLimiter
 
+from core.config import RateLimiterSettings
 from openapi.user import GetHistory, GetProfileInfo, ResetLogin, ResetPassword
 from schemas.auth import AuthorizationResponse
 from schemas.user import PaginatedLoginHistoryResponse, UserResponse, UserUpdate
@@ -11,6 +12,7 @@ from services.profile import get_profile_service, ProfileService
 from utils.auth import Authorization, Roles
 
 router = APIRouter()
+settings = RateLimiterSettings()
 
 
 @router.get(
@@ -20,7 +22,8 @@ router = APIRouter()
     description=GetProfileInfo.description,
     response_description=GetProfileInfo.response_description,
     responses=cast(dict[int | str, dict[str, Any]], GetProfileInfo.responses),
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def get_profile_info(
     email: str,
@@ -37,7 +40,8 @@ async def get_profile_info(
     description=ResetPassword.description,
     response_description=ResetPassword.response_description,
     responses=cast(dict[int | str, dict[str, Any]], ResetPassword.responses),
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def reset_password(
     login: str,
@@ -59,7 +63,8 @@ async def reset_password(
     description=ResetLogin.description,
     response_description=ResetLogin.response_description,
     responses=cast(dict[int | str, dict[str, Any]], ResetLogin.responses),
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def reset_login(
     login: str,
@@ -81,7 +86,8 @@ async def reset_login(
     description=GetHistory.description,
     response_description=GetHistory.response_description,
     responses=cast(dict[int | str, dict[str, Any]], ResetPassword.responses),
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))]
+    dependencies=[
+        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
 )
 async def get_history(
     uuid: str,

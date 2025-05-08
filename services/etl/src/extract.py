@@ -5,9 +5,16 @@ Provides functionality for extracting data from PostgreSQL in batches.
 import logging
 from typing import Any
 
-import psycopg
 from clients.postgres import PostgresClient
-from utils.queries import filmworks_data, modified_ids, related_filmworks, persons_data, genres_data
+import psycopg
+
+from utils.queries import (
+    filmworks_data,
+    genres_data,
+    modified_ids,
+    persons_data,
+    related_filmworks,
+)
 
 
 class PostgresExtractor:

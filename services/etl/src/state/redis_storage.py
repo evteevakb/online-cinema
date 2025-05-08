@@ -1,12 +1,11 @@
 """Provides implementation of ETL state storage, using Redis."""
 
-import json
 from contextlib import suppress
+import json
 from typing import Any, Dict
 
-from state.base_storage import BaseStorage
-
 import redis
+from state.base_storage import BaseStorage
 
 
 class RedisStorage(BaseStorage):

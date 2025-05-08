@@ -2,13 +2,13 @@
 Provides a decorator for adding exponential backoff with jitter to methods.
 """
 
-import traceback
 from functools import wraps
 from random import uniform
 from time import sleep
+import traceback
 from typing import Callable, cast, ParamSpec, Type, TypeVar
-from typing_extensions import Self
 
+from typing_extensions import Self
 
 E = TypeVar("E", bound=Exception)
 P = ParamSpec("P")

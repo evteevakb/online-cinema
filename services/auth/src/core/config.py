@@ -58,3 +58,11 @@ class RedisSettings(BaseSettings):
 
     class Config:
         env_prefix = "REDIS_"
+
+
+class RateLimiterSettings(BaseSettings):
+    times: int = 10
+    seconds: int = 60
+
+    class Config:
+        env_prefix = "RATE_LIMIT_"
