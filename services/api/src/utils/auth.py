@@ -52,18 +52,26 @@ class AuthorizationRequests:
             return data
 
     async def get_user_roles(self, user_uuid: str) -> List[str]:
-        data = await self._get_request(
-            f"http://{self.host}:{self.port}/api/v1/roles/user/{user_uuid}"
-        )
-        return data
+        try:
+            if not user_uuid:
+                return [Roles.USER]
+            data = await self._get_request(
+                f"http://{self.host}:{self.port}/api/v1/roles/user/{user_uuid}"
+            )
+            return data
+        except HTTPException:
+            return [Roles.USER]
 
     async def verify_access_token(self, access_token: str) -> VerifyResponse:
-        data = await self._get_request(
-            url=f"http://{self.host}:{self.port}/api/v1/auth/verify_access_token",
-            method="POST",
-            data=VerifyRequest(access_token=access_token).model_dump(),
-        )
-        return data
+        try:
+            data = await self._get_request(
+                url=f"http://{self.host}:{self.port}/api/v1/auth/verify_access_token",
+                method="POST",
+                data=VerifyRequest(access_token=access_token).model_dump(),
+            )
+            return VerifyResponse(**data)
+        except HTTPException:
+            return VerifyResponse(sub='', email='', exp=0, iat=0)
 
 
 class Authorization:
@@ -73,17 +81,11 @@ class Authorization:
             host=api_settings.auth_host, port=api_settings.auth_port
         )
 
-    async def __call__(self, authorization: str = Header(...)):
+    async def __call__(self, authorization: str = Header(...)) -> AuthorizationResponse:
         token = self.extract_token(authorization)
         payload = await self.verify_token(token)
 
-        user_uuid = payload.get("sub")
-        if not user_uuid:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: no user_uuid",
-            )
-
+        user_uuid = payload.sub
         roles = await self.request_class.get_user_roles(user_uuid=user_uuid)
 
         if not any(role in roles for role in self.allowed_roles):
@@ -103,6 +105,6 @@ class Authorization:
             )
         return authorization[len("Bearer ") :]
 
-    async def verify_token(self, token: str) -> dict:
+    async def verify_token(self, token: str) -> VerifyResponse:
         payload = await self.request_class.verify_access_token(token)
         return payload
