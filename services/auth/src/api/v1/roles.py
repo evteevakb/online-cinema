@@ -25,7 +25,7 @@ settings = RateLimiterSettings()
     description=AssignRole.description,
     response_description=AssignRole.response_description,
     responses=cast(dict[int | str, dict[str, Any]], AssignRole.responses),
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def assign_role(
     data: UserRole,
@@ -55,7 +55,7 @@ async def assign_role(
     description=RevokeRole.description,
     response_description=RevokeRole.response_description,
     responses=cast(dict[int | str, dict[str, Any]], RevokeRole.responses),
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def revoke_role(
     data: UserRole,
@@ -81,7 +81,7 @@ async def revoke_role(
 
 @router.get(
     path="/user/{user_uuid}",
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def get_user_roles(
     user_uuid: UUID, role_service: RoleService = Depends(get_role_service)
@@ -96,7 +96,7 @@ async def get_user_roles(
     description=ListRole.description,
     response_description=ListRole.response_description,
     responses=ListRole.responses,
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def list_roles(
     skip: Annotated[int, Query(description="Number of items to skip", ge=0)] = 0,
@@ -108,8 +108,9 @@ async def list_roles(
 
 
 @router.get(
-    path="/{role_name}", response_model=RoleInDb,
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    path="/{role_name}",
+    response_model=RoleInDb,
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def get_role(
     role_name: str,
@@ -123,7 +124,7 @@ async def get_role(
 @router.post(
     path="",
     response_model=RoleInDb,
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def create_role(
     role_create: RoleCreateUpdate,
@@ -137,7 +138,7 @@ async def create_role(
 @router.put(
     path="/{role_name}",
     response_model=RoleInDb,
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def update_role(
     role_name: str,
@@ -151,7 +152,7 @@ async def update_role(
 
 @router.delete(
     path="/{role_name}",
-    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def delete_role(
     role_name: str,

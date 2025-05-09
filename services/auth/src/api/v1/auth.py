@@ -17,8 +17,7 @@ settings = RateLimiterSettings()
 @router.post(
     "/registration",
     response_model=TokenResponse,
-    dependencies=[
-        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def register_user(
     email: str,
@@ -31,8 +30,7 @@ async def register_user(
 @router.post(
     "/login",
     response_model=TokenResponse,
-    dependencies=[
-        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def login(
     email: str,
@@ -47,11 +45,11 @@ async def login(
 @router.post(
     "/refresh",
     response_model=TokenResponse,
-    dependencies=[
-        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def refresh_token(
-    refresh_token: str, service: AuthService = Depends(get_auth_service),
+    refresh_token: str,
+    service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
     return await service.refresh_tokens(refresh_token)
 
@@ -59,8 +57,7 @@ async def refresh_token(
 @router.post(
     "/logout",
     response_model=LogoutResponse,
-    dependencies=[
-        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def logout(
     access_token: str,
@@ -75,8 +72,7 @@ async def logout(
 @router.post(
     "/verify_access_token",
     response_model=VerifyResponse,
-    dependencies=[
-        Depends(RateLimiter(times=settings.times, seconds=settings.seconds))]
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def verify_access_token(
     data: VerifyRequest, auth_service: AuthService = Depends(get_auth_service)
