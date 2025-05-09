@@ -75,7 +75,13 @@ class AddIdentifierMiddleware(BaseHTTPMiddleware):
         Returns:
             Response: The response returned by the route handler or next middleware.
         """
-        identifier = request.client.host
+        client = request.client
+        if client is None:
+            forwarded = request.headers.get("X-Forwarded-For")
+            if forwarded:
+                identifier = forwarded.split(",")[0]
+        else:
+            identifier = request.client.host
         request.state.identifier = identifier
         response = await call_next(request)
         return response
