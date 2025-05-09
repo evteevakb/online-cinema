@@ -47,6 +47,7 @@ app = FastAPI(
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(AddIdentifierMiddleware)
 
+# tracer must be called strictly after middlewares
 add_tracer(app)
 
 
