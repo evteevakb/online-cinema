@@ -5,9 +5,9 @@ Provides functionality for extracting data from PostgreSQL in batches.
 import logging
 from typing import Any
 
-from clients.postgres import PostgresClient
 import psycopg
 
+from clients.postgres import PostgresClient
 from utils.queries import (
     filmworks_data,
     genres_data,

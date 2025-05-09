@@ -61,6 +61,8 @@ class RedisSettings(BaseSettings):
 
 
 class RateLimiterSettings(BaseSettings):
+    """Configuration settings for rate limiter."""
+
     times: int = 10
     seconds: int = 60
 

@@ -5,10 +5,10 @@ Provides functionality for loading data into Elasticsearch in batches.
 import logging
 from typing import Any, Generator
 
-from clients.elastic import ElasticClient
 from elasticsearch import helpers
 from elasticsearch.exceptions import ConnectionError, ConnectionTimeout
 
+from clients.elastic import ElasticClient
 from utils.backoff import backoff
 
 
