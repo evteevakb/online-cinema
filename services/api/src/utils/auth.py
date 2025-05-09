@@ -24,7 +24,7 @@ class AuthorizationRequests:
         self.port = port
 
     async def _get_request(
-        self, url: str, method: str = "GET", data: dict = None
+        self, url: str, method: str = "GET", data: dict | None = None
     ) -> Any:
         async with httpx.AsyncClient() as client:
             try:
@@ -71,7 +71,7 @@ class AuthorizationRequests:
             )
             return VerifyResponse(**data)
         except HTTPException:
-            return VerifyResponse(sub='', email='', exp=0, iat=0)
+            return VerifyResponse(sub="", email="", exp=0, iat=0)
 
 
 class Authorization:

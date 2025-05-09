@@ -46,10 +46,14 @@ class FilmService:
             )
         return film
 
-    async def _check_film_is_paid(self, film: Film, user_with_roles: AuthorizationResponse) -> None:
+    async def _check_film_is_paid(
+        self,
+        film: Film,
+        user_with_roles: AuthorizationResponse,
+    ) -> None:
         film_is_paid = film.paid_only
         if film_is_paid and not any(
-                role in user_with_roles.roles for role in ALLOWED_ROLES_PAID_FILMS
+            role in user_with_roles.roles for role in ALLOWED_ROLES_PAID_FILMS
         ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
