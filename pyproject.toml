@@ -31,6 +31,7 @@ known_first_party = [
     "load",
     "middlewares",
     "models",
+    "movies",
     "openapi",
     "schemas",
     "services",
