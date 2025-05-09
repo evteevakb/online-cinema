@@ -81,7 +81,7 @@ class AddIdentifierMiddleware(BaseHTTPMiddleware):
             if forwarded:
                 identifier = forwarded.split(",")[0]
         else:
-            identifier = request.client.host
+            identifier = client.host
         request.state.identifier = identifier
         response = await call_next(request)
         return response
