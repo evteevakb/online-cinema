@@ -63,7 +63,7 @@ class AuthorizationRequests:
             method="POST",
             data=VerifyRequest(access_token=access_token).model_dump(),
         )
-        return data
+        return VerifyResponse(**data)
 
 
 class Authorization:
@@ -77,7 +77,7 @@ class Authorization:
         token = self.extract_token(authorization)
         payload = await self.verify_token(token)
 
-        user_uuid = payload.get("sub")
+        user_uuid = payload.sub
         if not user_uuid:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -103,6 +103,6 @@ class Authorization:
             )
         return authorization[len("Bearer ") :]
 
-    async def verify_token(self, token: str) -> dict:
+    async def verify_token(self, token: str) -> VerifyResponse:
         payload = await self.request_class.verify_access_token(token)
         return payload
