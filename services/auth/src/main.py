@@ -8,6 +8,7 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
+from starlette.middleware.sessions import SessionMiddleware
 
 from api import health
 from api.v1 import auth, profile, roles
@@ -42,6 +43,7 @@ app = FastAPI(
 )
 
 app.add_middleware(RequestIDMiddleware)
+app.add_middleware(SessionMiddleware, secret_key=api_settings.session_secret_key)
 
 # tracer must be called after middlewares
 add_tracer(app)
