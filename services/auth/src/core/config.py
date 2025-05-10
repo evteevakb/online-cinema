@@ -17,7 +17,6 @@ class APISettings(BaseSettings):
 
     port: int
     container_name: str
-    session_secret_key: str
     project_name: str = "auth-service"
     base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -59,3 +58,32 @@ class RedisSettings(BaseSettings):
 
     class Config:
         env_prefix = "REDIS_"
+
+
+class OAuthSessionSettings(BaseSettings):
+    """Configuration settings for OAuth session."""
+
+    secret_key: str
+
+    class Config:
+        env_prefix = "OAUTH_SESSION_"
+
+
+class OAuthBaseSettings(BaseSettings):
+    """Configuration settings for base OAuth client."""
+
+    client_id: str
+    client_secret: str
+    auth_uri: str
+    token_uri: str
+    redirect_uri: str
+
+
+class OAuthGoogleSettings(OAuthBaseSettings):
+    """Configuration settings for OAuth Google client."""
+
+    auth_uri: str = "https://accounts.google.com/o/oauth2/auth"
+    token_uri: str = "https://oauth2.googleapis.com/token"
+
+    class Config:
+        env_prefix = "OAUTH_GOOGLE_"
