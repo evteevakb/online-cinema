@@ -2,10 +2,10 @@
 ETL (Extract, Transform, Load) process for transferring data from PostgreSQL to Elasticsearch.
 """
 
-import logging
-import time
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
+import logging
+import time
 
 import psycopg
 from psycopg import ClientCursor

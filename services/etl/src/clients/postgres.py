@@ -2,8 +2,8 @@
 Provides functionality for connecting to a PostgreSQL instance.
 """
 
-import logging
 from contextlib import closing
+import logging
 from typing import Any
 
 import psycopg

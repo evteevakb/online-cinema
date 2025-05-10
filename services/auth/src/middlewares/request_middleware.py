@@ -56,3 +56,33 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         add_request_id_to_span(request_id)
 
         return await call_next(request)
+
+
+class AddIdentifierMiddleware(BaseHTTPMiddleware):
+    """Middleware to add Identifier to Request."""
+
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: RequestResponseEndpoint,
+    ) -> Response:
+        """Process the incoming request to add Identifier.
+
+        Args:
+            request (Request): The incoming HTTP request.
+            call_next (RequestResponseEndpoint): Function to proceed to the next middleware or route handler.
+
+        Returns:
+            Response: The response returned by the route handler or next middleware.
+        """
+        identifier = "unknown"
+        client = request.client
+        if client is None:
+            forwarded = request.headers.get("X-Forwarded-For")
+            if forwarded:
+                identifier = forwarded.split(",")[0]
+        else:
+            identifier = client.host
+        request.state.identifier = identifier
+        response = await call_next(request)
+        return response
