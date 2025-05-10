@@ -75,6 +75,7 @@ class AddIdentifierMiddleware(BaseHTTPMiddleware):
         Returns:
             Response: The response returned by the route handler or next middleware.
         """
+        identifier = "unknown"
         client = request.client
         if client is None:
             forwarded = request.headers.get("X-Forwarded-For")
