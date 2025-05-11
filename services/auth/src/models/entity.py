@@ -92,6 +92,7 @@ class UserSocialAccount(DateTimeBaseModel):
     __tablename__ = "user_social_accounts"
     __table_args__ = (
         UniqueConstraint("provider", "social_id", name="uq_provider_social_id"),
+        {"schema": AUTH_SCHEMA},
     )
 
     user_uuid = Column(
