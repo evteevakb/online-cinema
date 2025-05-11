@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from db.constants import AUTH_SCHEMA
 from models.entity import User
-from utils.username_generator import generate_fake_username
+from utils.fake_credentials import generate_username
 
 # revision identifiers, used by Alembic.
 revision: str = "06e3dc0d51e9"
@@ -33,7 +33,7 @@ def upgrade() -> None:
     session = Session(bind=connection)
     users = session.query(User).filter(User.username.is_(None)).all()
     for user in users:
-        user.username = generate_fake_username()
+        user.username = generate_username()
     session.commit()
     op.alter_column("users", "username", nullable=False, schema=AUTH_SCHEMA)
     op.create_unique_constraint(
