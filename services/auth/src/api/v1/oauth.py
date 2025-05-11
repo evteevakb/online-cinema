@@ -43,7 +43,7 @@ class OAuthProviders:
 
 
 @router.get(
-    "/login",
+    "/login/{provider_name}",
 )
 async def oauth_login(
     provider_name: str,
@@ -64,6 +64,26 @@ async def oauth_login(
     provider = OAuthProviders.get_provider(provider_name)
     if provider:
         return await provider.get_auth_url(request)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"{provider=} not found",
+    )
+
+
+@router.get("/callback/{provider_name}")
+async def callback(
+    provider_name: str,
+    request: Request,
+):
+    provider = OAuthProviders.get_provider(provider_name)
+    if provider:
+        user_info = await provider.get_user_info(request)
+        user_social_id = user_info["sub"]
+
+        # TODO: check if social ID already exists
+
+        #  'sub': '111699460460291326721', 'email': 'evteeva.kb@gmail.com', 'email_verified': True, 'at_hash': 'MWFzeLZwxfLyBis57nyWDQ', 'nonce': 'VhCgfHZLWyD95qO6g4TN', 'name': 'Ksenia Evteeva', 'picture': 'https://lh3.googleusercontent.com/a/ACg8ocLjuujvsZtqgyvMOhmd6VPAG8zsqaMpEM3f-NGuW7k97CRCIf0=s96-c', 'given_name': 'Ksenia', 'family_name': 'Evteeva', 'iat': 1746896433, 'exp': 1746900033}
+
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail=f"{provider=} not found",

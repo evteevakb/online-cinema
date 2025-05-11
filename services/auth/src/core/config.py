@@ -84,6 +84,9 @@ class OAuthGoogleSettings(OAuthBaseSettings):
 
     auth_uri: str = "https://accounts.google.com/o/oauth2/auth"
     token_uri: str = "https://oauth2.googleapis.com/token"
+    server_metadata_url: str = (
+        "https://accounts.google.com/.well-known/openid-configuration"
+    )
 
     class Config:
         env_prefix = "OAUTH_GOOGLE_"
