@@ -33,8 +33,24 @@ class FilmService:
         cache_key = f"film:{film_uuid}"
         film = await self.cache.get(key=cache_key)
         if film:
-            return Film.model_validate_json(film)
+            film_model = Film.model_validate_json(film)
+            await self._check_film_is_paid(film_model, user_with_roles)
+            return film_model
         film = await self._get_film_from_repository(film_uuid)
+        if film:
+            await self._check_film_is_paid(film, user_with_roles)
+            await self.cache.set(
+                key=cache_key,
+                value=film.model_dump_json(),
+                expire=FILM_CACHE_EXPIRE_IN_SECONDS,
+            )
+        return film
+
+    async def _check_film_is_paid(
+        self,
+        film: Film,
+        user_with_roles: AuthorizationResponse,
+    ) -> None:
         film_is_paid = film.paid_only
         if film_is_paid and not any(
             role in user_with_roles.roles for role in ALLOWED_ROLES_PAID_FILMS
@@ -43,13 +59,6 @@ class FilmService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="This operation is forbidden for you",
             )
-        if film:
-            await self.cache.set(
-                key=cache_key,
-                value=film.model_dump_json(),
-                expire=FILM_CACHE_EXPIRE_IN_SECONDS,
-            )
-        return film
 
     async def get_all(
         self,
