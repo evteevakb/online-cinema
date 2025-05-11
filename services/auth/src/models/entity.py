@@ -77,7 +77,8 @@ class User(DateTimeBaseModel):
     social_accounts = relationship("UserSocialAccount", back_populates="user")
     is_active = Column(Boolean, default=True, nullable=False)
 
-    def __init__(self, password: str, email: str) -> None:
+    def __init__(self, username: str, password: str, email: str | None) -> None:
+        self.username = username
         self.email = email
         self.password = generate_password_hash(password)
 

@@ -10,6 +10,7 @@ from fastapi import HTTPException, Request, status
 from core.config import OAuthGoogleSettings
 from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService
+from services.oauth import OAuthService
 from services.oauth_providers.base import BaseProvider
 
 
@@ -85,19 +86,29 @@ class GoogleProvider(BaseProvider):
         self,
         request: Request,
         auth_service: AuthService,
+        oauth_service: OAuthService,
     ) -> TokenResponse:
         """Authorize the user in the application based on their Google account.
 
         Args:
             request: The incoming FastAPI request with the authorization code.
             auth_service: The application-level authentication service used to issue tokens.
+            oauth_service: The service used to manage users with social accounts.
 
         Returns:
             TokenResponse: The application's access and refresh tokens for the user.
         """
         user_info = await self.get_user_info(request)
         user_agent = request.headers.get("user-agent", "unknown")
-        # TODO: need to finish logic
-        # user = get_or_create_social_user(social_id, email)
-        token = await auth_service.login("admin@admin.com", "1234", user_agent)
-        return token
+        user = await oauth_service.get_user(
+            social_id=user_info.social_id,
+            email=user_info.email,
+            provider=self.provider_name,
+        )
+        # TODO: fix bug
+        return await auth_service.login(
+            password=user.password,
+            user_agent=user_agent,
+            username=user.username,
+            email=user.email,
+        )

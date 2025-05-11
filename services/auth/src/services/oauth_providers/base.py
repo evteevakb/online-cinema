@@ -10,6 +10,7 @@ from fastapi import Request
 from core.config import OAuthBaseSettings
 from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService
+from services.oauth import OAuthService
 
 
 class BaseProvider(ABC):
@@ -61,12 +62,14 @@ class BaseProvider(ABC):
         self,
         request: Request,
         auth_service: AuthService,
+        oauth_service: OAuthService,
     ) -> TokenResponse:
         """Authorize the user within the application using the provider's user info.
 
         Args:
             request: The incoming HTTP request.
             auth_service: The internal authentication service used to issue application tokens.
+            oauth_service: The service used to manage users with social accounts.
 
         Returns:
             TokenResponse: Tokens representing the authenticated user session.

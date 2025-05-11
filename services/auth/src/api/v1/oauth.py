@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
 from core.config import OAuthBaseSettings, OAuthGoogleSettings, OAuthYandexSettings
 from schemas.auth import TokenResponse
 from services.auth import AuthService, get_auth_service
+from services.oauth import get_oauth_service, OAuthService
 from services.oauth_providers.base import BaseProvider
 from services.oauth_providers.google import GoogleProvider
 from services.oauth_providers.yandex import YandexProvider
@@ -70,6 +71,7 @@ async def callback(
     request: Request,
     provider: BaseProvider = Depends(get_oauth_provider),
     auth_service: AuthService = Depends(get_auth_service),
+    oauth_service: OAuthService = Depends(get_oauth_service),
 ) -> TokenResponse:
     """Handle the OAuth callback and exchange the authorization code for user data
         and application-specific tokens.
@@ -78,6 +80,7 @@ async def callback(
         request: The incoming HTTP request containing the OAuth callback parameters.
         provider: The OAuth provider instance.
         auth_service: The authentication service for issuing application-specific tokens.
+        oauth_service: The service used to manage users with social accounts.
 
     Returns:
         TokenResponse: Contains access and refresh tokens for the authenticated user.
@@ -85,4 +88,5 @@ async def callback(
     return await provider.authorize(
         request=request,
         auth_service=auth_service,
+        oauth_service=oauth_service,
     )
