@@ -5,10 +5,10 @@ Yandex OAuth provider implementation.
 from typing import Any
 
 from authlib.integrations.starlette_client import OAuth
-from fastapi import Request
+from fastapi import HTTPException, Request, status
 
 from core.config import OAuthYandexSettings
-from schemas.auth import TokenResponse
+from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService
 from services.oauth_providers.base import BaseProvider
 
@@ -56,22 +56,30 @@ class YandexProvider(BaseProvider):
     async def get_user_info(
         self,
         request: Request,
-    ) -> Any:
+    ) -> SocialUserData:
         """Exchange the authorization code for an access token and retrieve user information.
 
         Args:
             request: The incoming FastAPI request containing the authorization code.
 
         Returns:
-            Any: User information obtained from Yandex's userinfo endpoint.
+            SocialUserData: User information obtained from Yandex's userinfo endpoint.
 
         Raises:
             HTTPException: If token exchange or user info retrieval fails.
         """
-        token = await self.oauth.yandex.authorize_access_token(request)
-        user_info_response = await self.oauth.yandex.get("info", token=token)
-        user_info = user_info_response.json()
-        return user_info
+        try:
+            token = await self.oauth.yandex.authorize_access_token(request)
+            data = await self.oauth.yandex.get("info", token=token)
+            data = data.json()
+            social_id = data["id"]
+            email = data.get("default_email", None)
+            return SocialUserData(social_id=social_id, email=email)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Error getting user info: {str(e)}",
+            )
 
     async def authorize(
         self,
@@ -88,9 +96,6 @@ class YandexProvider(BaseProvider):
             TokenResponse: The application's access and refresh tokens for the user.
         """
         user_info = await self.get_user_info(request)
-        # TODO: move obtaining needed data to get_user_info and validate it with Pydantic model
-        social_id = user_info.get("id")
-        email = user_info.get("default_email")
         user_agent = request.headers.get("user-agent", "unknown")
         # TODO: need to finish logic
         # user = get_or_create_social_user(social_id, email)

@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import Request
 
 from core.config import OAuthBaseSettings
-from schemas.auth import TokenResponse
+from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService
 
 
@@ -46,14 +46,14 @@ class BaseProvider(ABC):
     async def get_user_info(
         self,
         request: Request,
-    ) -> Any:
+    ) -> SocialUserData:
         """Retrieve user information from the provider using the authorization code.
 
         Args:
             request: The incoming HTTP request containing query parameters.
 
         Returns:
-            Any: User attributes (e.g., email, name).
+            SocialUserData: User attributes (e.g., email, name).
         """
 
     @abstractmethod

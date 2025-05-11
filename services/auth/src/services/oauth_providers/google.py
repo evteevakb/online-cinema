@@ -5,10 +5,10 @@ Google OAuth 2.0 provider implementation.
 from typing import Any
 
 from authlib.integrations.starlette_client import OAuth
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, status
 
 from core.config import OAuthGoogleSettings
-from schemas.auth import TokenResponse
+from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService
 from services.oauth_providers.base import BaseProvider
 
@@ -57,23 +57,29 @@ class GoogleProvider(BaseProvider):
     async def get_user_info(
         self,
         request: Request,
-    ) -> Any:
+    ) -> SocialUserData:
         """Exchange the authorization code for an access token and retrieve user information.
 
         Args:
             request: The incoming FastAPI request containing the authorization code.
 
         Returns:
-            Any: User information obtained from Google's userinfo endpoint.
+            SocialUserData: User information obtained from Google's userinfo endpoint.
 
         Raises:
             HTTPException: If token exchange or user info retrieval fails.
         """
         try:
             data = await self.oauth.google.authorize_access_token(request)
-            return data["userinfo"]
+            data = data["userinfo"]
+            social_id = data["sub"]
+            email = data.get("email", None)
+            return SocialUserData(social_id=social_id, email=email)
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"OAuth error: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Error getting user info: {str(e)}",
+            )
 
     async def authorize(
         self,
@@ -90,9 +96,6 @@ class GoogleProvider(BaseProvider):
             TokenResponse: The application's access and refresh tokens for the user.
         """
         user_info = await self.get_user_info(request)
-        # TODO: move obtaining needed data to get_user_info and validate it with Pydantic model
-        social_id = user_info.get("sub")
-        email = user_info.get("email")
         user_agent = request.headers.get("user-agent", "unknown")
         # TODO: need to finish logic
         # user = get_or_create_social_user(social_id, email)

@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class TokenResponse(BaseModel):
@@ -28,3 +28,8 @@ class LogoutResponse(BaseModel):
 class AuthorizationResponse(BaseModel):
     user_uuid: str
     roles: List[str]
+
+
+class SocialUserData(BaseModel):
+    social_id: str
+    email: EmailStr | None = None
