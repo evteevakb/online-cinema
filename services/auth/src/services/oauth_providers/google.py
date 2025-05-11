@@ -9,7 +9,7 @@ from fastapi import HTTPException, Request, status
 
 from core.config import OAuthGoogleSettings
 from schemas.auth import SocialUserData, TokenResponse
-from services.auth import AuthService
+from services.auth import AuthService, LoginTypes
 from services.oauth import OAuthService
 from services.oauth_providers.base import BaseProvider
 
@@ -107,8 +107,8 @@ class GoogleProvider(BaseProvider):
         )
         # TODO: fix bug
         return await auth_service.login(
-            password=user.password,
             user_agent=user_agent,
             username=user.username,
             email=user.email,
+            login_type=LoginTypes.OAUTH_LOGIN
         )

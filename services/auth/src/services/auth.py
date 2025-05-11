@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from enum import Enum
 
 from fastapi import Depends, HTTPException, status
 from jose import jwt
@@ -21,6 +22,11 @@ from schemas.auth import (
     VerifyRequest,
 )
 from utils.fake_credentials import generate_username
+
+
+class LoginTypes(str, Enum):
+    STANDARD_LOGIN = 'standard_login'
+    OAUTH_LOGIN = 'oauth_login'
 
 
 class AuthService:
@@ -112,10 +118,11 @@ class AuthService:
 
     async def login(
         self,
-        password: str,
         user_agent: str,
+        password: str,
         username: str | None,
         email: str | None,
+        login_type: LoginTypes = LoginTypes.STANDARD_LOGIN
     ) -> TokenResponse:
         if username is None and email is None:
             raise HTTPException(
@@ -130,7 +137,7 @@ class AuthService:
             )
         )
         user = result.scalar_one_or_none()
-        if not user or not user.check_password(password):
+        if not user or (login_type == LoginTypes.STANDARD_LOGIN and not user.check_password(password)):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
             )

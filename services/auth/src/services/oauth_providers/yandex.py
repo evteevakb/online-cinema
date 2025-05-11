@@ -9,7 +9,7 @@ from fastapi import HTTPException, Request, status
 
 from core.config import OAuthYandexSettings
 from schemas.auth import SocialUserData, TokenResponse
-from services.auth import AuthService
+from services.auth import AuthService, LoginTypes
 from services.oauth_providers.base import BaseProvider
 
 
@@ -99,5 +99,9 @@ class YandexProvider(BaseProvider):
         user_agent = request.headers.get("user-agent", "unknown")
         # TODO: need to finish logic
         # user = get_or_create_social_user(social_id, email)
-        token = await auth_service.login("admin@admin.com", "1234", user_agent)
+        token = await auth_service.login(
+            email="admin@admin.com",
+            user_agent=user_agent,
+            login_type=LoginTypes.OAUTH_LOGIN
+        )
         return token
