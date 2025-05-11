@@ -17,7 +17,6 @@ from db.constants import AUTH_SCHEMA
 from models.entity import User
 from utils.username_generator import generate_fake_username
 
-
 # revision identifiers, used by Alembic.
 revision: str = "06e3dc0d51e9"
 down_revision: Union[str, None] = "656357d18cd3"

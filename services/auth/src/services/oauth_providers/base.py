@@ -5,20 +5,69 @@ Abstract base class for OAuth providers.
 from abc import ABC, abstractmethod
 from typing import Any
 
+from fastapi import Request
+
+from core.config import OAuthBaseSettings
+from schemas.auth import TokenResponse
+from services.auth import AuthService
+
 
 class BaseProvider(ABC):
-    """Abstract base class for OAuth providers."""
+    """Abstract class for implementing OAuth 2.0 providers."""
 
     provider_name: str
 
     @abstractmethod
-    async def get_auth_url(self, *args: Any, **kwargs: Any) -> Any:
-        """Generate the URL to initiate the OAuth authentication process.
+    def __init__(
+        self,
+        settings: OAuthBaseSettings,
+    ) -> None:
+        """Initialize the provider with the corresponding OAuth settings.
 
-        Returns:
-            Any: A provider-specific authentication URL or redirect instruction.
+        Args:
+            settings: The provider-specific OAuth configuration.
         """
 
     @abstractmethod
-    async def get_user_info(self, *args: Any, **kwargs: Any) -> Any:
-        pass
+    async def get_redirect_url(
+        self,
+        request: Request,
+    ) -> Any:
+        """Generate the URL to redirect the user to the provider's authorization page.
+
+        Args:
+            request: The incoming HTTP request.
+
+        Returns:
+            Any: A redirect response pointing to the provider's auth endpoint.
+        """
+
+    @abstractmethod
+    async def get_user_info(
+        self,
+        request: Request,
+    ) -> Any:
+        """Retrieve user information from the provider using the authorization code.
+
+        Args:
+            request: The incoming HTTP request containing query parameters.
+
+        Returns:
+            Any: User attributes (e.g., email, name).
+        """
+
+    @abstractmethod
+    async def authorize(
+        self,
+        request: Request,
+        auth_service: AuthService,
+    ) -> TokenResponse:
+        """Authorize the user within the application using the provider's user info.
+
+        Args:
+            request: The incoming HTTP request.
+            auth_service: The internal authentication service used to issue application tokens.
+
+        Returns:
+            TokenResponse: Tokens representing the authenticated user session.
+        """

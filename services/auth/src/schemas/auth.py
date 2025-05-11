@@ -28,8 +28,3 @@ class LogoutResponse(BaseModel):
 class AuthorizationResponse(BaseModel):
     user_uuid: str
     roles: List[str]
-
-
-class OAuthResponse(BaseModel):
-    social_id: str
-    email: str

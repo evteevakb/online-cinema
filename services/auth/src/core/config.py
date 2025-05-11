@@ -92,15 +92,12 @@ class OAuthGoogleSettings(OAuthBaseSettings):
         env_prefix = "OAUTH_GOOGLE_"
 
 
-class YandexProviderSettings(BaseSettings):
-    """Configuration settings for Yandex Provider."""
+class OAuthYandexSettings(OAuthBaseSettings):
+    """Configuration settings for OAuth Yandex client."""
 
-    client_id: str
-    client_secret: str
-    name: str = 'yandex'
-    access_token_url: str = 'https://oauth.yandex.ru/token'
-    authorize_url: str = 'https://oauth.yandex.ru/authorize'
-    api_base_url: str = 'https://login.yandex.ru'
+    token_uri: str = "https://oauth.yandex.ru/token"
+    auth_uri: str = "https://oauth.yandex.ru/authorize"
+    base_uri: str = "https://login.yandex.ru"
 
     class Config:
-        env_prefix = "YANDEX_"
+        env_prefix = "OAUTH_YANDEX_"
