@@ -74,7 +74,7 @@ class User(DateTimeBaseModel):
     roles = relationship(
         "Role", secondary=f"{AUTH_SCHEMA}.user_roles", back_populates="users"
     )
-    social_accounts = relationship("UserSocialAccount", back_populates="users")
+    social_accounts = relationship("UserSocialAccount", back_populates="user")
     is_active = Column(Boolean, default=True, nullable=False)
 
     def __init__(self, password: str, email: str) -> None:
@@ -99,7 +99,7 @@ class UserSocialAccount(DateTimeBaseModel):
     )
     provider = Column(String(50), nullable=False)
     social_id = Column(String(255), nullable=False)
-    users = relationship("User", back_populates="social_accounts")
+    user = relationship("User", back_populates="social_accounts")
 
 
 class AuthEventType(enum.Enum):
