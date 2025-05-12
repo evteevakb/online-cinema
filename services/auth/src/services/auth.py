@@ -14,11 +14,13 @@ from models.entity import (
     RefreshTokens,
     Role,
     User,
+    UserRole
 )
 from schemas.auth import (
     LogoutResponse,
     TokenResponse,
     VerifyRequest,
+    AuthorizationResponse,
 )
 
 
@@ -126,6 +128,31 @@ class AuthService:
         await self.db.commit()
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
+
+    async def login_django(self, email: str, password: str, user_agent: str) -> AuthorizationResponse:
+        result = await self.db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+
+        if not user or not user.check_password(password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+            )
+
+        role_result = await self.db.execute(select(UserRole).where(UserRole.user_uuid == str(user.uuid)))
+        user_role = role_result.scalar_one_or_none()
+        user_roles = [user_role.role_name]
+
+        return AuthorizationResponse(
+            user_uuid=str(user.uuid),
+            email=user.email,
+            first_name="",
+            last_name="",
+            is_staff=False,
+            is_active=user.is_active,
+            is_superuser=False,
+            roles=[roles for roles in user_roles],
+        )
+
 
     async def refresh_tokens(self, refresh_token: str) -> TokenResponse:
         token_entry = await self.db.execute(
