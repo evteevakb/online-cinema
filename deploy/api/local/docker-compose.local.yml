@@ -1,0 +1,74 @@
+include:
+  - path: ../../etl/docker-compose.elastic.yml
+
+services:
+  api:
+    build:
+      context: ../../../services/api/src
+      dockerfile: Dockerfile
+    container_name: api
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      api-redis:
+        condition: service_healthy
+    env_file:
+      - ../../etl/envs/.elastic.env
+      - envs/.redis.env
+      - envs/.service.env
+    expose: [8000]
+    healthcheck:
+      test: curl -s http://$${API_HOST}:$${API_PORT}/api/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    image: api:latest
+    restart: always
+
+  elasticsearch-dump:
+    container_name: elasticsearch-dump
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c", "/init/entrypoint.sh"]
+    env_file:
+      - ../../etl/envs/.elastic.env
+    image: curlimages/curl:8.12.1
+    restart: on-failure:5
+    volumes:
+      - ../../init/elasticsearch:/init
+      - ../../../backup/elastic:/backup
+
+  api-nginx:
+    extends:
+      file: ../../admin/docker-compose.nginx.yml
+      service: nginx
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "81:81"
+    profiles: ["standalone"]
+    volumes:
+      - ../../init/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../configs/api-nginx.conf:/etc/nginx/conf.d/site.conf:ro
+
+  api-redis:
+    container_name: api-redis
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    env_file:
+      - envs/.redis.env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    image: redis:7.4.2
+    expose: [6379]
+    restart: always
+    volumes:
+      - api-redis-data:/data
+      - ../../init/redis/entrypoint.sh:/entrypoint.sh
+
+volumes:
+  api-redis-data:

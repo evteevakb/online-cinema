@@ -1,0 +1,80 @@
+services:
+
+  elasticsearch-test:
+    container_name: elasticsearch-test
+    env_file:
+      - envs/.elasticsearch.test.env
+    environment:
+      - discovery.type=single-node
+      - xpack.security.http.ssl.enabled=false
+    healthcheck:
+      test: curl -s -u $${ELASTIC_USER}:$${ELASTIC_PASSWORD} http://localhost:9200 > /dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    image: elasticsearch:8.17.2
+    expose:
+      - 9200
+    restart: always
+    volumes:
+      - elastic-data-test:/usr/share/elasticsearch/data
+
+  api-test:
+    container_name: api-test
+    depends_on:
+      elasticsearch-test:
+        condition: service_healthy
+      api-redis-test:
+        condition: service_healthy
+    env_file:
+      - envs/.elasticsearch.test.env
+      - envs/.redis.test.env
+      - envs/.service.test.env
+    expose:
+      - 8000
+    healthcheck:
+      test: curl -s http://$${API_HOST}:$${API_PORT}/api/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    image: api:latest
+    restart: always
+
+  api-redis-test:
+    container_name: api-redis-test
+    entrypoint: ["/bin/sh", "-c", "/entrypoint.sh"]
+    env_file:
+      - envs/.redis.test.env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    image: redis:7.4.2
+    expose:
+      - 6379
+    restart: always
+    volumes:
+      - api-redis-data-test:/data
+      - ../../init/redis/entrypoint.sh:/entrypoint.sh
+
+  api-functional-tests:
+    build:
+        context: ../../../services/api/tests/functional
+        dockerfile: Dockerfile
+    container_name: api-functional-tests
+    depends_on:
+      api-test:
+        condition: service_healthy
+    env_file:
+      - envs/.elasticsearch.test.env
+      - envs/.redis.test.env
+      - envs/.service.test.env
+    volumes:
+      - ../../init/elasticsearch/genres_schema.json:/tests/schemas/genres.json
+      - ../../init/elasticsearch/movies_schema.json:/tests/schemas/movies.json
+      - ../../init/elasticsearch/persons_schema.json:/tests/schemas/persons.json
+
+volumes:
+  api-redis-data-test:
+  elastic-data-test:

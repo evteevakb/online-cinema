@@ -1,0 +1,62 @@
+include:
+  - path: ../admin/docker-compose.local.yml
+
+services:
+  elasticsearch:
+    extends:
+      file: docker-compose.elastic.yml
+      service: elasticsearch
+    depends_on:
+      - admin-db
+
+  etl:
+    build:
+      context: ../../services/etl/src/
+    container_name: etl
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      admin-db:
+        condition: service_healthy
+      etl-redis:
+        condition: service_healthy
+    env_file:
+      - ../admin/envs/.db.env
+      - envs/.elastic.env
+      - envs/.etl.env
+      - envs/.redis.env
+    restart: always
+    volumes:
+      - ../init/elasticsearch/movies_schema.json:/etl/movies_schema.json
+      - ../init/elasticsearch/persons_schema.json:/etl/persons_schema.json
+      - ../init/elasticsearch/genres_schema.json:/etl/genres_schema.json
+
+  etl-redis:
+    container_name: etl-redis
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    env_file:
+      - envs/.redis.env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    image: redis:7.4.2
+    expose: [6379]
+    restart: always
+    volumes:
+      - etl-redis-data:/data
+      - ../init/redis/entrypoint.sh:/entrypoint.sh
+
+  elasticdump:
+    container_name: elasticdump
+    depends_on:
+      - elasticsearch
+    entrypoint: ["/bin/sh", "-c", "sleep 90 && elasticdump --input=http://elasticsearch:9200 --output=/backup/elastic/initial-dump.json --type=data"]
+    image: elasticdump/elasticsearch-dump
+    volumes:
+      - ../../backup/elastic:/backup/elastic
+
+volumes:
+  elastic-data:
+  etl-redis-data:

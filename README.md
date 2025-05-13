@@ -10,16 +10,28 @@ This is a repository for the online cinema platform.
 The repository is organized as follows:
 
 ```python
-├── init  # shared infrastructure configs and entrypoints
+├── backup  # backup files
+│ ├── admin  # DB dumps
+│ └── elastic  # Elasticsearch dumps
+│
+├── deploy
+│ ├── init  # shared infrastructure configs and entrypoints
+│ └── admin, api, auth, etl  # service deployment files
 │
 ├── services  # core backend services
+│ ├── admin  # admin panel
 │ ├── api  # API gateway 
-│ └── auth  # authentication and authorization service
+│ ├── auth  # authentication and authorization service
+│ └── etl  # ETL pipeline
 │
 ├── .gitignore
 ├── pyproject.toml  # shared dev tools configuration (linters, type checkers)
 └── README.md
 ```
+
+## Running Services for the Current Sprint
+
+To run the services for the current sprint, follow the instructions  in sections "Setting up environment variables" and "Running" in the [`deploy/auth/README.md`](./deploy/auth/README.md)
 
 ## Development Setup
 

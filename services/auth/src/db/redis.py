@@ -2,9 +2,11 @@
 Redis client setup.
 """
 
+from opentelemetry.instrumentation.redis import RedisInstrumentor
 from redis.asyncio import Redis
 
 redis: Redis | None = None
+RedisInstrumentor().instrument()
 
 
 async def get_redis() -> Redis:
