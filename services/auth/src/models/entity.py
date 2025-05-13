@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import enum
 import uuid
 
-from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -109,8 +109,36 @@ class AuthEventType(enum.Enum):
     LOGOUT = "logout"
 
 
+def generate_year_ranges(start_year: int, num_years: int = 3):
+    ranges = []
+    for i in range(num_years):
+        year = start_year + i
+        start = date(year, 1, 1)
+        end = date(year + 1, 1, 1)
+        ranges.append((start.isoformat(), end.isoformat()))
+    return ranges
+
+
+def create_partition(target, connection, **kw):
+    year_ranges = generate_year_ranges(2023, num_years=3)  # например, 2023–2027
+
+    for start, end in year_ranges:
+        partition_name = f'login_history_{start[:4]}'
+        sql = f'''
+            CREATE TABLE IF NOT EXISTS {partition_name}
+            PARTITION OF login_history
+            FOR VALUES FROM ('{start}') TO ('{end}');
+        '''
+        connection.execute(text(sql))
+
 class LoginHistory(BaseModel):
     __tablename__ = "login_history"
+    __table_args__ = (
+        {
+            'postgresql_partition_by': 'RANGE (occurred_at)',
+            'listeners': [('after_create', create_partition)],
+        },
+    )
 
     uuid = Column(
         UUID(as_uuid=True),
