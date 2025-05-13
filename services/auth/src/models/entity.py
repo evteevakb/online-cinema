@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 import enum
 import uuid
 
-from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text, UniqueConstraint, text
+from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text, UniqueConstraint, text, PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -120,7 +120,7 @@ def generate_year_ranges(start_year: int, num_years: int = 3):
 
 
 def create_partition(target, connection, **kw):
-    year_ranges = generate_year_ranges(2023, num_years=3)  # например, 2023–2027
+    year_ranges = generate_year_ranges(2023, num_years=3)
 
     for start, end in year_ranges:
         partition_name = f'login_history_{start[:4]}'
@@ -134,6 +134,7 @@ def create_partition(target, connection, **kw):
 class LoginHistory(BaseModel):
     __tablename__ = "login_history"
     __table_args__ = (
+        PrimaryKeyConstraint('uuid', 'occurred_at'),
         {
             'postgresql_partition_by': 'RANGE (occurred_at)',
             'listeners': [('after_create', create_partition)],
