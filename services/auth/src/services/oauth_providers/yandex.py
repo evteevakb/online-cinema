@@ -11,6 +11,7 @@ from core.config import OAuthYandexSettings
 from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService, LoginTypes
 from services.oauth_providers.base import BaseProvider
+from services.oauth import OAuthService
 
 
 class YandexProvider(BaseProvider):
@@ -85,6 +86,7 @@ class YandexProvider(BaseProvider):
         self,
         request: Request,
         auth_service: AuthService,
+        oauth_service: OAuthService,
     ) -> TokenResponse:
         """Authorize the user in the application based on their Yandex account.
 
@@ -97,11 +99,15 @@ class YandexProvider(BaseProvider):
         """
         user_info = await self.get_user_info(request)
         user_agent = request.headers.get("user-agent", "unknown")
-        # TODO: need to finish logic
-        # user = get_or_create_social_user(social_id, email)
-        token = await auth_service.login(
-            email="admin@admin.com",
+        user = await oauth_service.get_user(
+            social_id=user_info.social_id,
+            email=user_info.email,
+            provider=self.provider_name
+        )
+
+        return await auth_service.login(
             user_agent=user_agent,
+            username=user.username,
+            email=user.email,
             login_type=LoginTypes.OAUTH_LOGIN
         )
-        return token

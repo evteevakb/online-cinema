@@ -105,7 +105,7 @@ class GoogleProvider(BaseProvider):
             email=user_info.email,
             provider=self.provider_name,
         )
-        # TODO: fix bug
+
         return await auth_service.login(
             user_agent=user_agent,
             username=user.username,

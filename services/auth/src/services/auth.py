@@ -119,9 +119,9 @@ class AuthService:
     async def login(
         self,
         user_agent: str,
-        password: str,
         username: str | None,
         email: str | None,
+        password: str | None = None,
         login_type: LoginTypes = LoginTypes.STANDARD_LOGIN
     ) -> TokenResponse:
         if username is None and email is None:
