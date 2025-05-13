@@ -68,3 +68,46 @@ class RateLimiterSettings(BaseSettings):
 
     class Config:
         env_prefix = "RATE_LIMIT_"
+
+
+class OAuthSessionSettings(BaseSettings):
+    """Configuration settings for OAuth session."""
+
+    secret_key: str
+
+    class Config:
+        env_prefix = "OAUTH_SESSION_"
+
+
+class OAuthBaseSettings(BaseSettings):
+    """Configuration settings for base OAuth client."""
+
+    client_id: str
+    client_secret: str
+    auth_uri: str
+    token_uri: str
+    redirect_uri: str
+
+
+class OAuthGoogleSettings(OAuthBaseSettings):
+    """Configuration settings for OAuth Google client."""
+
+    auth_uri: str = "https://accounts.google.com/o/oauth2/auth"
+    token_uri: str = "https://oauth2.googleapis.com/token"
+    server_metadata_url: str = (
+        "https://accounts.google.com/.well-known/openid-configuration"
+    )
+
+    class Config:
+        env_prefix = "OAUTH_GOOGLE_"
+
+
+class OAuthYandexSettings(OAuthBaseSettings):
+    """Configuration settings for OAuth Yandex client."""
+
+    token_uri: str = "https://oauth.yandex.ru/token"
+    auth_uri: str = "https://oauth.yandex.ru/authorize"
+    base_uri: str = "https://login.yandex.ru"
+
+    class Config:
+        env_prefix = "OAUTH_YANDEX_"
