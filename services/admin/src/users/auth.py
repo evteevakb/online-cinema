@@ -22,7 +22,7 @@ class Roles(StrEnum):
 
 class CustomBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None):
-        url = 'http://auth:8000/api/v1/auth/login_django/'
+        url = settings.AUTH_API_LOGIN_URL
         payload = {'email': username, 'password': password}
         response = requests.post(url, data=json.dumps(payload))
         if response.status_code != http.HTTPStatus.OK:
