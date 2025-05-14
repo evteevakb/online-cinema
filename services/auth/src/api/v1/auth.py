@@ -7,6 +7,16 @@ from schemas.auth import (
     TokenResponse,
     VerifyRequest,
     VerifyResponse,
+    AuthorizationResponse,
+)
+from schemas.auth import (
+    RegisterRequest,
+    LoginRequest,
+    LogoutRequest,
+    RefreshRequest,
+    TokenResponse,
+    VerifyRequest,
+    VerifyResponse,
 )
 from services.auth import AuthService, get_auth_service
 
@@ -47,6 +57,15 @@ async def login(
         user_agent=user_agent,
         username=username
     )
+
+@router.post("/login_django", response_model=AuthorizationResponse)
+async def login(
+    data: LoginRequest,
+    request: Request,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthorizationResponse:
+    user_agent = request.headers.get("user-agent", "unknown")
+    return await auth_service.login_django(data.email, data.password, user_agent)
 
 
 @router.post(
