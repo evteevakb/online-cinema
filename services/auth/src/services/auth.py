@@ -142,6 +142,14 @@ class AuthService:
         user_role = role_result.scalar_one_or_none()
         user_roles = [user_role.role_name]
 
+        login_event = LoginHistory(
+            user_uuid=user.uuid,
+            user_agent=user_agent,
+            event_type=AuthEventType.LOGIN.value,
+        )
+        self.db.add(login_event)
+        await self.db.commit()
+
         return AuthorizationResponse(
             user_uuid=str(user.uuid),
             email=user.email,
