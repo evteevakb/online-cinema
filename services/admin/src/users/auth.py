@@ -16,8 +16,8 @@ User = get_user_model()
 
 
 class Roles(StrEnum):
-    ADMIN = auto()
-    SUBSCRIBER = auto()
+    ADMIN = 'admin'
+    SUPERUSER = 'superuser'
 
 
 class CustomBackend(BaseBackend):
@@ -35,7 +35,7 @@ class CustomBackend(BaseBackend):
             user.email = data.get('email')
             user.first_name = data.get('first_name')
             user.last_name = data.get('last_name')
-            user.is_staff = Roles.ADMIN in data.get('roles', [])
+            user.is_staff = any(role in data.get('roles', []) for role in (Roles.ADMIN, Roles.SUPERUSER))
             user.is_active = data.get('is_active')
             user.save()
         except Exception:
