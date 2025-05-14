@@ -71,7 +71,7 @@ class AuthorizationRequests:
             )
             return VerifyResponse(**data)
         except HTTPException:
-            return VerifyResponse(sub="", email="", exp=0, iat=0)
+            return VerifyResponse(sub="", email="", username="", exp=0, iat=0)
 
 
 class Authorization:

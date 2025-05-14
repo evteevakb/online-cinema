@@ -24,24 +24,39 @@ router = APIRouter()
 settings = RateLimiterSettings()
 
 
-
-
-@router.post("/registration", response_model=TokenResponse)
+@router.post(
+    "/registration",
+    response_model=TokenResponse,
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
+)
 async def register_user(
-    data: RegisterRequest,
+    password: str,
+    email: str = None,
+    username: str = None,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
-    return await auth_service.register(data.email, data.password)
+    return await auth_service.register(email=email, password=password, username=username)
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
+)
 async def login(
-    data: LoginRequest,
+    password: str,
     request: Request,
+    email: str = None,
+    username: str = None,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
     user_agent = request.headers.get("user-agent", "unknown")
-    return await auth_service.login(data.email, data.password, user_agent)
+    return await auth_service.login(
+        email=email,
+        password=password,
+        user_agent=user_agent,
+        username=username
+    )
 
 @router.post("/login_django", response_model=AuthorizationResponse)
 async def login(
@@ -53,19 +68,39 @@ async def login(
     return await auth_service.login_django(data.email, data.password, user_agent)
 
 
-@router.post("/refresh", response_model=TokenResponse)
+@router.post(
+    "/refresh",
+    response_model=TokenResponse,
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
+)
 async def refresh_token(
-    data: RefreshRequest,
+    refresh_token: str,
     service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
-    return await service.refresh_tokens(data.refresh_token)
+    return await service.refresh_tokens(refresh_token)
 
 
-@router.post("/logout", response_model=LogoutResponse)
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
+)
 async def logout(
-    data: LogoutRequest,
+    access_token: str,
+    refresh_token: str,
     request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> LogoutResponse:
     user_agent = request.headers.get("user-agent", "unknown")
-    return await auth_service.logout(data.access_token, data.refresh_token, user_agent)
+    return await auth_service.logout(access_token, refresh_token, user_agent)
+
+
+@router.post(
+    "/verify_access_token",
+    response_model=VerifyResponse,
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
+)
+async def verify_access_token(
+    data: VerifyRequest, auth_service: AuthService = Depends(get_auth_service)
+) -> VerifyResponse:
+    return await auth_service.verify_access_token(data)

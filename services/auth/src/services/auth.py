@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from enum import Enum
 
 from fastapi import Depends, HTTPException, status
 from jose import jwt
@@ -22,6 +23,12 @@ from schemas.auth import (
     VerifyRequest,
     AuthorizationResponse,
 )
+from utils.fake_credentials import generate_username
+
+
+class LoginTypes(str, Enum):
+    STANDARD_LOGIN = 'standard_login'
+    OAUTH_LOGIN = 'oauth_login'
 
 
 class AuthService:
@@ -49,13 +56,13 @@ class AuthService:
 
     def _create_access_token(self, user: User) -> str:
         return self._create_token(
-            data={"sub": str(user.uuid), "email": user.email},
+            data={"sub": str(user.uuid), "email": user.email, "username": user.username},
             expires_delta=timedelta(minutes=self.access_exp),
         )
 
     async def _create_refresh_token(self, user: User) -> str:
         refresh_token = self._create_token(
-            data={"sub": str(user.uuid), "email": user.email},
+            data={"sub": str(user.uuid), "email": user.email, "username": user.username},
             expires_delta=timedelta(minutes=self.refresh_exp),
         )
         await self._save_refresh_token(user.uuid, refresh_token)
@@ -70,8 +77,22 @@ class AuthService:
         self.db.add(token_entry)
         await self.db.commit()
 
-    async def register(self, email: str, password: str) -> TokenResponse:
-        result = await self.db.execute(select(User).where(User.email == email))
+    async def register(
+        self,
+        password: str,
+        username: str | None = None,
+        email: str | None = None,
+    ) -> TokenResponse:
+        if username is None and email is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either username or email must be provided.",
+            )
+        if username is None:
+            username = generate_username()
+        result = await self.db.execute(
+            select(User).where(User.username == username, User.email == email)
+        )
         if result.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="User already exists")
 
@@ -84,7 +105,7 @@ class AuthService:
             await self.db.commit()
             await self.db.refresh(user_role)
 
-        user = User(email=email, password=password)
+        user = User(username=username, email=email, password=password)
         user.is_active = True
         user.roles = [user_role]
 
@@ -97,10 +118,28 @@ class AuthService:
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
-    async def login(self, email: str, password: str, user_agent: str) -> TokenResponse:
-        result = await self.db.execute(select(User).where(User.email == email))
+    async def login(
+        self,
+        user_agent: str,
+        username: str | None =  None,
+        email: str | None = None,
+        password: str | None = None,
+        login_type: LoginTypes = LoginTypes.STANDARD_LOGIN
+    ) -> TokenResponse:
+        if username is None and email is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either username or email must be provided.",
+            )
+        login_field = username or email
+
+        result = await self.db.execute(
+            select(User).where(
+                (User.username == login_field) | (User.email == login_field)
+            )
+        )
         user = result.scalar_one_or_none()
-        if not user or not user.check_password(password):
+        if not user or (login_type == LoginTypes.STANDARD_LOGIN and not user.check_password(password)):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
             )
@@ -122,7 +161,7 @@ class AuthService:
         login_event = LoginHistory(
             user_uuid=user.uuid,
             user_agent=user_agent,
-            event_type=AuthEventType.LOGIN.value,
+            event_type=AuthEventType.LOGIN.value
         )
         self.db.add(login_event)
         await self.db.commit()
@@ -237,7 +276,7 @@ class AuthService:
             logout_event = LoginHistory(
                 user_uuid=user_uuid,
                 user_agent=user_agent,
-                event_type=AuthEventType.LOGOUT.value,
+                event_type=AuthEventType.LOGOUT.value
             )
             self.db.add(logout_event)
             await self.db.commit()

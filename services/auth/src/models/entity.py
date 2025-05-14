@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import enum
 import uuid
 
-from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text, UniqueConstraint, text, PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -68,15 +68,17 @@ class UserRole(BaseModel):
 class User(DateTimeBaseModel):
     __tablename__ = "users"
 
-    email = Column(Text, unique=True, nullable=False)
+    username = Column(String(255), unique=True, nullable=False)
+    email = Column(Text, unique=True, nullable=True)
     password = Column(String(255), nullable=False)
     roles = relationship(
         "Role", secondary=f"{AUTH_SCHEMA}.user_roles", back_populates="users"
     )
-
+    social_accounts = relationship("UserSocialAccount", back_populates="user")
     is_active = Column(Boolean, default=True, nullable=False)
 
-    def __init__(self, password: str, email: str) -> None:
+    def __init__(self, username: str, password: str, email: str | None = None) -> None:
+        self.username = username
         self.email = email
         self.password = generate_password_hash(password)
 
@@ -84,7 +86,22 @@ class User(DateTimeBaseModel):
         return check_password_hash(self.password, password)
 
     def __repr__(self) -> str:
-        return f"<User {self.email}>"
+        return f"<User {self.username}>"
+
+
+class UserSocialAccount(DateTimeBaseModel):
+    __tablename__ = "user_social_accounts"
+    __table_args__ = (
+        UniqueConstraint("provider", "social_id", name="uq_provider_social_id"),
+        {"schema": AUTH_SCHEMA},
+    )
+
+    user_uuid = Column(
+        UUID(as_uuid=True), ForeignKey(f"{AUTH_SCHEMA}.users.uuid"), primary_key=True
+    )
+    provider = Column(String(50), nullable=False)
+    social_id = Column(String(255), nullable=False)
+    user = relationship("User", back_populates="social_accounts")
 
 
 class AuthEventType(enum.Enum):
@@ -92,8 +109,38 @@ class AuthEventType(enum.Enum):
     LOGOUT = "logout"
 
 
+def generate_year_ranges(start_year: int, num_years: int = 3):
+    ranges = []
+    for i in range(num_years):
+        year = start_year + i
+        start = date(year, 1, 1)
+        end = date(year + 1, 1, 1)
+        ranges.append((start.isoformat(), end.isoformat()))
+    return ranges
+
+
+def create_partition(target, connection, **kw):
+    year_ranges = generate_year_ranges(2023, num_years=3)
+
+    for start, end in year_ranges:
+        partition_name = f'login_history_{start[:4]}'
+        sql = f'''
+            CREATE TABLE IF NOT EXISTS {partition_name}
+            PARTITION OF login_history
+            FOR VALUES FROM ('{start}') TO ('{end}');
+        '''
+        connection.execute(text(sql))
+
 class LoginHistory(BaseModel):
     __tablename__ = "login_history"
+    __table_args__ = (
+        PrimaryKeyConstraint('uuid', 'occurred_at'),
+        {
+            'postgresql_partition_by': 'RANGE (occurred_at)',
+            'listeners': [('after_create', create_partition)],
+            'schema': AUTH_SCHEMA
+        },
+    )
 
     uuid = Column(
         UUID(as_uuid=True),

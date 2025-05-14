@@ -11,11 +11,11 @@ app = typer.Typer()
 
 
 async def create_superuser(
-    email: str, password: str, session_gen: AsyncGenerator = get_session()
+    username: str, password: str, session_gen: AsyncGenerator = get_session()
 ) -> None:
     session = await anext(session_gen)
     try:
-        result = await session.execute(select(User).where(User.email == email))
+        result = await session.execute(select(User).where(User.username == username))
         if result.scalar_one_or_none():
             raise Exception("User already exists")
 
@@ -30,7 +30,7 @@ async def create_superuser(
             await session.commit()
             await session.refresh(user_role)
 
-        user = User(email=email, password=password)
+        user = User(username=username, password=password)
         user.is_active = True
         user.roles = [user_role]
 
@@ -42,8 +42,8 @@ async def create_superuser(
 
 
 @app.command()
-def create(email: str, password: str) -> None:
-    asyncio.run(create_superuser(email, password))
+def create(username: str, password: str) -> None:
+    asyncio.run(create_superuser(username, password))
 
 
 if __name__ == "__main__":

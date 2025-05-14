@@ -1,7 +1,7 @@
 from typing import List
 
-from pydantic import BaseModel
 from pydantic import BaseModel, EmailStr
+
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -16,9 +16,10 @@ class VerifyRequest(BaseModel):
 
 class VerifyResponse(BaseModel):
     sub: str
-    email: str
     exp: int
     iat: int
+    email: str | None
+    username: str | None
 
 
 class LogoutResponse(BaseModel):
@@ -49,3 +50,8 @@ class RefreshRequest(BaseModel):
 class LogoutRequest(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class SocialUserData(BaseModel):
+    social_id: str
+    email: EmailStr | None = None

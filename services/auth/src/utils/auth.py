@@ -40,7 +40,7 @@ class AuthorizationRequests:
                 response.raise_for_status()
             except httpx.HTTPStatusError as e:
                 raise HTTPException(
-                    status_code=e.response.status_code, detail=e.response.json()
+                    status_code=e.response.status_code, detail=e.response.text
                 )
             except httpx.RequestError:
                 raise HTTPException(
