@@ -20,11 +20,12 @@ settings = RateLimiterSettings()
     dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def register_user(
-    email: str,
     password: str,
+    email: str = None,
+    username: str = None,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
-    return await auth_service.register(email, password)
+    return await auth_service.register(email=email, password=password, username=username)
 
 
 @router.post(
@@ -33,13 +34,19 @@ async def register_user(
     dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def login(
-    email: str,
     password: str,
     request: Request,
+    email: str = None,
+    username: str = None,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
     user_agent = request.headers.get("user-agent", "unknown")
-    return await auth_service.login(email, password, user_agent)
+    return await auth_service.login(
+        email=email,
+        password=password,
+        user_agent=user_agent,
+        username=username
+    )
 
 
 @router.post(

@@ -138,6 +138,7 @@ class LoginHistory(BaseModel):
         {
             'postgresql_partition_by': 'RANGE (occurred_at)',
             'listeners': [('after_create', create_partition)],
+            'schema': AUTH_SCHEMA
         },
     )
 

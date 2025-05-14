@@ -54,13 +54,13 @@ class AuthService:
 
     def _create_access_token(self, user: User) -> str:
         return self._create_token(
-            data={"sub": str(user.uuid), "email": user.email},
+            data={"sub": str(user.uuid), "email": user.email, "username": user.username},
             expires_delta=timedelta(minutes=self.access_exp),
         )
 
     async def _create_refresh_token(self, user: User) -> str:
         refresh_token = self._create_token(
-            data={"sub": str(user.uuid), "email": user.email},
+            data={"sub": str(user.uuid), "email": user.email, "username": user.username},
             expires_delta=timedelta(minutes=self.refresh_exp),
         )
         await self._save_refresh_token(user.uuid, refresh_token)
@@ -78,8 +78,8 @@ class AuthService:
     async def register(
         self,
         password: str,
-        username: str | None,
-        email: str | None,
+        username: str | None = None,
+        email: str | None = None,
     ) -> TokenResponse:
         if username is None and email is None:
             raise HTTPException(
@@ -119,8 +119,8 @@ class AuthService:
     async def login(
         self,
         user_agent: str,
-        username: str | None,
-        email: str | None,
+        username: str | None =  None,
+        email: str | None = None,
         password: str | None = None,
         login_type: LoginTypes = LoginTypes.STANDARD_LOGIN
     ) -> TokenResponse:
@@ -159,7 +159,7 @@ class AuthService:
         login_event = LoginHistory(
             user_uuid=user.uuid,
             user_agent=user_agent,
-            event_type=AuthEventType.LOGIN.value,
+            event_type=AuthEventType.LOGIN.value
         )
         self.db.add(login_event)
         await self.db.commit()
@@ -241,7 +241,7 @@ class AuthService:
             logout_event = LoginHistory(
                 user_uuid=user_uuid,
                 user_agent=user_agent,
-                event_type=AuthEventType.LOGOUT.value,
+                event_type=AuthEventType.LOGOUT.value
             )
             self.db.add(logout_event)
             await self.db.commit()

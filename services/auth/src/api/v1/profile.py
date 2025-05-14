@@ -16,7 +16,7 @@ settings = RateLimiterSettings()
 
 
 @router.get(
-    "/{email}",
+    "/{login}",
     response_model=UserResponse,
     summary=GetProfileInfo.summary,
     description=GetProfileInfo.description,
@@ -25,15 +25,15 @@ settings = RateLimiterSettings()
     dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def get_profile_info(
-    email: str,
+    login: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserResponse:
-    profile = await profile_service.get_profile_info(email)
+    profile = await profile_service.get_profile_info(login)
     return profile
 
 
 @router.post(
-    "/{email}/reset/password",
+    "/{login}/reset/password",
     response_model=UserUpdate,
     summary=ResetPassword.summary,
     description=ResetPassword.description,
@@ -47,7 +47,7 @@ async def reset_password(
     new_password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_password(login, password, new_password)
+    await profile_service.reset_password(login=login, old_password=password, new_password=new_password)
     return JSONResponse(
         content={"message": "Password updated successfully"},
         status_code=status.HTTP_200_OK,
@@ -69,7 +69,7 @@ async def reset_login(
     password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_login(login, new_login, password)
+    await profile_service.reset_login(login=login, new_login=new_login, password=password)
     return JSONResponse(
         content={"message": "Login updated successfully"},
         status_code=status.HTTP_200_OK,

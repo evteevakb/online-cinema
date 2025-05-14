@@ -13,9 +13,10 @@ class UserResponse(BaseModel):
     """Schema for user response."""
 
     uuid: str
-    email: str
     created_at: datetime
     is_active: bool
+    email: str | None = None
+    username: str | None = None
 
     @field_validator("uuid", mode="before")
     def convert_uuid_to_str(cls, value: str | UUID) -> str:
@@ -54,4 +55,4 @@ class PaginatedLoginHistoryResponse(BaseModel):
 class UserUpdate(BaseModel):
     """Schema to return when updating user."""
 
-    email: str | None = None
+    login: str | None = None
