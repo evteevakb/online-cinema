@@ -10,8 +10,8 @@ from fastapi import HTTPException, Request, status
 from core.config import OAuthYandexSettings
 from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService, LoginTypes
-from services.oauth_providers.base import BaseProvider
 from services.oauth import OAuthService
+from services.oauth_providers.base import BaseProvider
 
 
 class YandexProvider(BaseProvider):
@@ -102,12 +102,12 @@ class YandexProvider(BaseProvider):
         user = await oauth_service.get_user(
             social_id=user_info.social_id,
             email=user_info.email,
-            provider=self.provider_name
+            provider=self.provider_name,
         )
 
         return await auth_service.login(
             user_agent=user_agent,
             username=user.username,
             email=user.email,
-            login_type=LoginTypes.OAUTH_LOGIN
+            login_type=LoginTypes.OAUTH_LOGIN,
         )

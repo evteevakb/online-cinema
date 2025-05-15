@@ -110,5 +110,5 @@ class GoogleProvider(BaseProvider):
             user_agent=user_agent,
             username=user.username,
             email=user.email,
-            login_type=LoginTypes.OAUTH_LOGIN
+            login_type=LoginTypes.OAUTH_LOGIN,
         )

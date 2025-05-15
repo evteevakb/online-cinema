@@ -43,7 +43,7 @@ class FilmworkPostgres(BaseModel):
     def paid_only(self) -> bool:
         """Checks whether content is available via subscription."""
         if self.creation_date is not None:
-            three_years = timedelta(days=3*365)
+            three_years = timedelta(days=3 * 365)
             return datetime.now().date() - self.creation_date < three_years
         return False
 

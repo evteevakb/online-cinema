@@ -36,16 +36,20 @@ class AuthorizationResponse(BaseModel):
     is_superuser: bool | None = None
     last_name: str | None = None
 
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
 
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
 
+
 class RefreshRequest(BaseModel):
     refresh_token: str
+
 
 class LogoutRequest(BaseModel):
     access_token: str

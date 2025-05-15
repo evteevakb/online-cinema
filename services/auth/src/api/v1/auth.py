@@ -3,17 +3,12 @@ from fastapi_limiter.depends import RateLimiter
 
 from core.config import RateLimiterSettings
 from schemas.auth import (
-    LogoutResponse,
-    TokenResponse,
-    VerifyRequest,
-    VerifyResponse,
     AuthorizationResponse,
-)
-from schemas.auth import (
-    RegisterRequest,
     LoginRequest,
     LogoutRequest,
+    LogoutResponse,
     RefreshRequest,
+    RegisterRequest,
     TokenResponse,
     VerifyRequest,
     VerifyResponse,
@@ -35,7 +30,9 @@ async def register_user(
     username: str = None,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
-    return await auth_service.register(email=email, password=password, username=username)
+    return await auth_service.register(
+        email=email, password=password, username=username
+    )
 
 
 @router.post(
@@ -52,11 +49,9 @@ async def login(
 ) -> TokenResponse:
     user_agent = request.headers.get("user-agent", "unknown")
     return await auth_service.login(
-        email=email,
-        password=password,
-        user_agent=user_agent,
-        username=username
+        email=email, password=password, user_agent=user_agent, username=username
     )
+
 
 @router.post("/login_django", response_model=AuthorizationResponse)
 async def login(

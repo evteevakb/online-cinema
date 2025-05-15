@@ -15,20 +15,20 @@ from models.entity import (
     RefreshTokens,
     Role,
     User,
-    UserRole
+    UserRole,
 )
 from schemas.auth import (
+    AuthorizationResponse,
     LogoutResponse,
     TokenResponse,
     VerifyRequest,
-    AuthorizationResponse,
 )
 from utils.fake_credentials import generate_username
 
 
 class LoginTypes(str, Enum):
-    STANDARD_LOGIN = 'standard_login'
-    OAUTH_LOGIN = 'oauth_login'
+    STANDARD_LOGIN = "standard_login"
+    OAUTH_LOGIN = "oauth_login"
 
 
 class AuthService:
@@ -56,13 +56,21 @@ class AuthService:
 
     def _create_access_token(self, user: User) -> str:
         return self._create_token(
-            data={"sub": str(user.uuid), "email": user.email, "username": user.username},
+            data={
+                "sub": str(user.uuid),
+                "email": user.email,
+                "username": user.username,
+            },
             expires_delta=timedelta(minutes=self.access_exp),
         )
 
     async def _create_refresh_token(self, user: User) -> str:
         refresh_token = self._create_token(
-            data={"sub": str(user.uuid), "email": user.email, "username": user.username},
+            data={
+                "sub": str(user.uuid),
+                "email": user.email,
+                "username": user.username,
+            },
             expires_delta=timedelta(minutes=self.refresh_exp),
         )
         await self._save_refresh_token(user.uuid, refresh_token)
@@ -121,10 +129,10 @@ class AuthService:
     async def login(
         self,
         user_agent: str,
-        username: str | None =  None,
+        username: str | None = None,
         email: str | None = None,
         password: str | None = None,
-        login_type: LoginTypes = LoginTypes.STANDARD_LOGIN
+        login_type: LoginTypes = LoginTypes.STANDARD_LOGIN,
     ) -> TokenResponse:
         if username is None and email is None:
             raise HTTPException(
@@ -139,7 +147,10 @@ class AuthService:
             )
         )
         user = result.scalar_one_or_none()
-        if not user or (login_type == LoginTypes.STANDARD_LOGIN and not user.check_password(password)):
+        if not user or (
+            login_type == LoginTypes.STANDARD_LOGIN
+            and not user.check_password(password)
+        ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
             )
@@ -161,14 +172,16 @@ class AuthService:
         login_event = LoginHistory(
             user_uuid=user.uuid,
             user_agent=user_agent,
-            event_type=AuthEventType.LOGIN.value
+            event_type=AuthEventType.LOGIN.value,
         )
         self.db.add(login_event)
         await self.db.commit()
 
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
-    async def login_django(self, email: str, password: str, user_agent: str) -> AuthorizationResponse:
+    async def login_django(
+        self, email: str, password: str, user_agent: str
+    ) -> AuthorizationResponse:
         result = await self.db.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
 
@@ -177,7 +190,9 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
             )
 
-        role_result = await self.db.execute(select(UserRole).where(UserRole.user_uuid == str(user.uuid)))
+        role_result = await self.db.execute(
+            select(UserRole).where(UserRole.user_uuid == str(user.uuid))
+        )
         user_role = role_result.scalar_one_or_none()
         user_roles = [user_role.role_name]
 
@@ -199,7 +214,6 @@ class AuthService:
             is_superuser=False,
             roles=[roles for roles in user_roles],
         )
-
 
     async def refresh_tokens(self, refresh_token: str) -> TokenResponse:
         token_entry = await self.db.execute(
@@ -276,7 +290,7 @@ class AuthService:
             logout_event = LoginHistory(
                 user_uuid=user_uuid,
                 user_agent=user_agent,
-                event_type=AuthEventType.LOGOUT.value
+                event_type=AuthEventType.LOGOUT.value,
             )
             self.db.add(logout_event)
             await self.db.commit()

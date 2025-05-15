@@ -5,17 +5,18 @@ Revises: 06e3dc0d51e9
 Create Date: 2025-05-13 02:41:03.642845
 
 """
+
+from datetime import date
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from datetime import date
 
 from db.constants import AUTH_SCHEMA
 
 # revision identifiers, used by Alembic.
-revision: str = 'b646f8f08b9b'
-down_revision: Union[str, None] = '06e3dc0d51e9'
+revision: str = "b646f8f08b9b"
+down_revision: Union[str, None] = "06e3dc0d51e9"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -43,12 +44,13 @@ def upgrade():
         return ranges
 
     for start, end in generate_year_ranges(2023, 3):
-        partition_name = f'login_history_{start[:4]}'
-        op.execute(f'''
+        partition_name = f"login_history_{start[:4]}"
+        op.execute(f"""
             CREATE TABLE IF NOT EXISTS {AUTH_SCHEMA}.{partition_name}
             PARTITION OF {AUTH_SCHEMA}.login_history
             FOR VALUES FROM ('{start}') TO ('{end}');
-        ''')
+        """)
+
 
 def downgrade():
     for year in reversed(range(2023, 2025)):
