@@ -28,13 +28,13 @@ class LogoutResponse(BaseModel):
 
 class AuthorizationResponse(BaseModel):
     user_uuid: str
-    email: str
-    first_name: str
-    is_staff: bool
-    is_active: bool
-    is_superuser: bool
-    last_name: str
     roles: List[str]
+    email: str | None = None
+    first_name: str | None = None
+    is_staff: bool | None = None
+    is_active: bool | None = None
+    is_superuser: bool | None = None
+    last_name: str | None = None
 
 class LoginRequest(BaseModel):
     email: EmailStr
