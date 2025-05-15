@@ -3,11 +3,11 @@ Provides functionality for transforming raw data from PostgreSQL into a format s
 """
 
 from collections import defaultdict
+from datetime import date, datetime, timedelta
 from typing import Any, Optional
 from uuid import UUID
-from datetime import date, datetime, timedelta
 
-from pydantic import BaseModel, Field, field_validator, computed_field
+from pydantic import BaseModel, computed_field, Field, field_validator
 
 roles = {"actor", "director", "writer"}
 
@@ -43,7 +43,7 @@ class FilmworkPostgres(BaseModel):
     def paid_only(self) -> bool:
         """Checks whether content is available via subscription."""
         if self.creation_date is not None:
-            three_years = timedelta(days=3*365)
+            three_years = timedelta(days=3 * 365)
             return datetime.now().date() - self.creation_date < three_years
         return False
 

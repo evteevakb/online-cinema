@@ -16,9 +16,10 @@ class VerifyRequest(BaseModel):
 
 class VerifyResponse(BaseModel):
     sub: str
-    email: str
     exp: int
     iat: int
+    email: str | None
+    username: str | None
 
 
 class LogoutResponse(BaseModel):
@@ -28,6 +29,31 @@ class LogoutResponse(BaseModel):
 class AuthorizationResponse(BaseModel):
     user_uuid: str
     roles: List[str]
+    email: str | None = None
+    first_name: str | None = None
+    is_staff: bool | None = None
+    is_active: bool | None = None
+    is_superuser: bool | None = None
+    last_name: str | None = None
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class LogoutRequest(BaseModel):
+    access_token: str
+    refresh_token: str
 
 
 class SocialUserData(BaseModel):

@@ -6,9 +6,8 @@ import json
 import logging
 from types import TracebackType
 
-from pydantic_settings import BaseSettings
-
 from elasticsearch import Elasticsearch
+from pydantic_settings import BaseSettings
 
 
 class ElasticSettings(BaseSettings):

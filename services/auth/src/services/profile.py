@@ -25,8 +25,8 @@ class ProfileService:
         self.redis = redis
         self.postgres = postgres
 
-    async def get_profile_info(self, email: str) -> UserResponse:
-        stmt = select(User).where(User.email == email)
+    async def get_profile_info(self, login: str) -> UserResponse:
+        stmt = select(User).where((User.username == login) | (User.email == login))
         info = await self.postgres.execute(stmt)
         user = info.scalar_one_or_none()
         if user is None:
@@ -95,9 +95,10 @@ class ProfileService:
             )
 
     async def reset_password(
-        self, email: str, old_password: str, new_password: str
+        self, login: str, old_password: str, new_password: str
     ) -> None:
-        result = await self.postgres.execute(select(User).where(User.email == email))
+        stmt = select(User).where((User.username == login) | (User.email == login))
+        result = await self.postgres.execute(stmt)
         user = result.scalar_one_or_none()
         if not user:
             raise HTTPException(
@@ -109,15 +110,19 @@ class ProfileService:
         else:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
-    async def reset_login(self, email: str, new_login: str, password: str) -> None:
-        result = await self.postgres.execute(select(User).where(User.email == email))
+    async def reset_login(self, login: str, new_login: str, password: str) -> None:
+        stmt = select(User).where((User.username == login) | (User.email == login))
+        result = await self.postgres.execute(stmt)
         user = result.scalar_one_or_none()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         elif user.check_password(password):
-            user.email = new_login
+            if user.username == login:
+                user.username = new_login
+            else:
+                user.email = new_login
             await self.postgres.commit()
         else:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)

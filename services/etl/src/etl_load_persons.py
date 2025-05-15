@@ -2,10 +2,10 @@
 ETL (Extract, Transform, Load) process for transferring data from PostgreSQL to Elasticsearch.
 """
 
-import logging
-import time
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
+import logging
+import time
 
 import psycopg
 from psycopg import ClientCursor
@@ -66,8 +66,8 @@ loader = ElasticLoader(
 state_storage = RedisStorage(redis_adapter=RedisClient().client)
 
 while True:
-    table_name = 'person'
-    state_name = 'etl_person'
+    table_name = "person"
+    state_name = "etl_person"
     logger.info("Start ETL process for %s table", state_name)
     state = state_storage.retrieve_state(state_name)
     if state[state_name] is None:
@@ -108,7 +108,10 @@ while True:
             if len(batch) == 0:
                 logger.info("No new data for table %s, skipping", state_name)
                 break
-            elastic_batch = [{'id': row.get('id'), 'full_name': row.get('full_name')} for row in batch]
+            elastic_batch = [
+                {"id": row.get("id"), "full_name": row.get("full_name")}
+                for row in batch
+            ]
             loader.load(elastic_batch)
             state_storage.save_state(
                 {

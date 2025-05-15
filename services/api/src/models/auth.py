@@ -8,6 +8,7 @@ class VerifyRequest(BaseModel):
 
 class VerifyResponse(BaseModel):
     sub: str
-    email: str
     exp: int
     iat: int
+    email: str | None
+    username: str | None

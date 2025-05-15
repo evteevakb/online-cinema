@@ -30,7 +30,7 @@ async def create_superuser(
             await session.commit()
             await session.refresh(user_role)
 
-        user = User(email=email, password=password)
+        user = User(username=email, password=password, email=email)
         user.is_active = True
         user.roles = [user_role]
 

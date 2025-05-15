@@ -60,6 +60,16 @@ class RedisSettings(BaseSettings):
         env_prefix = "REDIS_"
 
 
+class RateLimiterSettings(BaseSettings):
+    """Configuration settings for rate limiter."""
+
+    times: int = 10
+    seconds: int = 60
+
+    class Config:
+        env_prefix = "RATE_LIMIT_"
+
+
 class OAuthSessionSettings(BaseSettings):
     """Configuration settings for OAuth session."""
 

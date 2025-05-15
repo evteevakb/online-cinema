@@ -2,7 +2,9 @@ from typing import Any, cast
 
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
+from fastapi_limiter.depends import RateLimiter
 
+from core.config import RateLimiterSettings
 from openapi.user import GetHistory, GetProfileInfo, ResetLogin, ResetPassword
 from schemas.auth import AuthorizationResponse
 from schemas.user import PaginatedLoginHistoryResponse, UserResponse, UserUpdate
@@ -10,31 +12,34 @@ from services.profile import get_profile_service, ProfileService
 from utils.auth import Authorization, Roles
 
 router = APIRouter()
+settings = RateLimiterSettings()
 
 
 @router.get(
-    "/{email}",
+    "/{login}",
     response_model=UserResponse,
     summary=GetProfileInfo.summary,
     description=GetProfileInfo.description,
     response_description=GetProfileInfo.response_description,
     responses=cast(dict[int | str, dict[str, Any]], GetProfileInfo.responses),
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def get_profile_info(
-    email: str,
+    login: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserResponse:
-    profile = await profile_service.get_profile_info(email)
+    profile = await profile_service.get_profile_info(login)
     return profile
 
 
 @router.post(
-    "/{email}/reset/password",
+    "/{login}/reset/password",
     response_model=UserUpdate,
     summary=ResetPassword.summary,
     description=ResetPassword.description,
     response_description=ResetPassword.response_description,
     responses=cast(dict[int | str, dict[str, Any]], ResetPassword.responses),
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def reset_password(
     login: str,
@@ -42,7 +47,9 @@ async def reset_password(
     new_password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_password(login, password, new_password)
+    await profile_service.reset_password(
+        login=login, old_password=password, new_password=new_password
+    )
     return JSONResponse(
         content={"message": "Password updated successfully"},
         status_code=status.HTTP_200_OK,
@@ -56,6 +63,7 @@ async def reset_password(
     description=ResetLogin.description,
     response_description=ResetLogin.response_description,
     responses=cast(dict[int | str, dict[str, Any]], ResetLogin.responses),
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def reset_login(
     login: str,
@@ -63,7 +71,9 @@ async def reset_login(
     password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_login(login, new_login, password)
+    await profile_service.reset_login(
+        login=login, new_login=new_login, password=password
+    )
     return JSONResponse(
         content={"message": "Login updated successfully"},
         status_code=status.HTTP_200_OK,
@@ -77,6 +87,7 @@ async def reset_login(
     description=GetHistory.description,
     response_description=GetHistory.response_description,
     responses=cast(dict[int | str, dict[str, Any]], ResetPassword.responses),
+    dependencies=[Depends(RateLimiter(times=settings.times, seconds=settings.seconds))],
 )
 async def get_history(
     uuid: str,

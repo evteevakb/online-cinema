@@ -7,6 +7,7 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_limiter import FastAPILimiter
 from redis.asyncio import Redis
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -15,7 +16,7 @@ from api.v1 import auth, oauth, profile, roles
 from core.config import APISettings, OAuthSessionSettings, RedisSettings
 from core.tracing import add_tracer
 from db import redis
-from middlewares.request_middleware import RequestIDMiddleware
+from middlewares.request_middleware import AddIdentifierMiddleware, RequestIDMiddleware
 
 api_settings = APISettings()
 oauth_session_settings = OAuthSessionSettings()
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         username=redis_settings.user_name,
         password=redis_settings.user_password,
     )
+    await FastAPILimiter.init(redis.redis)
     yield
     await redis.redis.close()
 
@@ -43,11 +45,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
 app.add_middleware(RequestIDMiddleware)
+app.add_middleware(AddIdentifierMiddleware)
 app.add_middleware(SessionMiddleware, secret_key=oauth_session_settings.secret_key)
 
-# tracer must be called after middlewares
+# tracer must be called strictly after middlewares
 add_tracer(app)
+
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])
 app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])

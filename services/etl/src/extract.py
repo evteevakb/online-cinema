@@ -6,8 +6,15 @@ import logging
 from typing import Any
 
 import psycopg
+
 from clients.postgres import PostgresClient
-from utils.queries import filmworks_data, modified_ids, related_filmworks, persons_data, genres_data
+from utils.queries import (
+    filmworks_data,
+    genres_data,
+    modified_ids,
+    persons_data,
+    related_filmworks,
+)
 
 
 class PostgresExtractor:
@@ -173,7 +180,6 @@ class PostgresExtractor:
             "Following data was extracted from PostgreSQL: %s", filmwork_data
         )
         return filmwork_data
-
 
     def extract_persons(
         self,

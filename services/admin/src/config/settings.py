@@ -51,3 +51,11 @@ STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "users.User"
+AUTHENTICATION_BACKENDS = [
+    "users.auth.CustomBackend",
+    #'django.contrib.auth.backends.ModelBackend',
+]
+
+AUTH_API_LOGIN_URL = os.environ.get("AUTH_API_LOGIN_URL")
