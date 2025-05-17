@@ -10,14 +10,14 @@ from fastapi import HTTPException, Request, status
 from core.config import OAuthYandexSettings
 from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService, LoginTypes
-from services.oauth import OAuthService
+from services.oauth import OAuthService, Provider
 from services.oauth_providers.base import BaseProvider
 
 
 class YandexProvider(BaseProvider):
     """OAuth 2.0 provider for Yandex."""
 
-    provider_name = "yandex"
+    provider_name = Provider.YANDEX
 
     def __init__(
         self,

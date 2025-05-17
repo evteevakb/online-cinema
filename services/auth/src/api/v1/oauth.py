@@ -9,20 +9,20 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
 from core.config import OAuthBaseSettings, OAuthGoogleSettings, OAuthYandexSettings
 from schemas.auth import TokenResponse
 from services.auth import AuthService, get_auth_service
-from services.oauth import get_oauth_service, OAuthService
+from services.oauth import get_oauth_service, OAuthService, Provider
 from services.oauth_providers.base import BaseProvider
 from services.oauth_providers.google import GoogleProvider
 from services.oauth_providers.yandex import YandexProvider
 
 router = APIRouter()
 _providers: dict[str, tuple[Type[BaseProvider], Type[OAuthBaseSettings]]] = {
-    "google": (GoogleProvider, OAuthGoogleSettings),
-    "yandex": (YandexProvider, OAuthYandexSettings),
+    Provider.GOOGLE: (GoogleProvider, OAuthGoogleSettings),
+    Provider.YANDEX: (YandexProvider, OAuthYandexSettings),
 }
 
 
 def get_oauth_provider(
-    provider_name: str = Path(..., alias="provider_name"),
+    provider_name: Provider = Path(..., alias="provider_name"),
 ) -> BaseProvider:
     """Retrieve an OAuth provider instance by name.
 

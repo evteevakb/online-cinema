@@ -1,3 +1,5 @@
+from enum import Enum
+
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +9,11 @@ from db.postgre import get_session
 from models.entity import User, UserSocialAccount
 from services.auth import AuthService, get_auth_service
 from utils.fake_credentials import generate_password, generate_username
+
+
+class Provider(str, Enum):
+    GOOGLE: str = "google"
+    YANDEX: str = "yandex"
 
 
 class OAuthService:
@@ -21,7 +28,7 @@ class OAuthService:
     async def get_user(
         self,
         social_id: str,
-        provider: str,
+        provider: Provider,
         email: str | None,
     ) -> User:
         stmt = (
