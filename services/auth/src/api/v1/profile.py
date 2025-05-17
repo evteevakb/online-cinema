@@ -47,7 +47,9 @@ async def reset_password(
     new_password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_password(login=login, old_password=password, new_password=new_password)
+    await profile_service.reset_password(
+        login=login, old_password=password, new_password=new_password
+    )
     return JSONResponse(
         content={"message": "Password updated successfully"},
         status_code=status.HTTP_200_OK,
@@ -69,7 +71,9 @@ async def reset_login(
     password: str,
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> UserUpdate:
-    await profile_service.reset_login(login=login, new_login=new_login, password=password)
+    await profile_service.reset_login(
+        login=login, new_login=new_login, password=password
+    )
     return JSONResponse(
         content={"message": "Login updated successfully"},
         status_code=status.HTTP_200_OK,

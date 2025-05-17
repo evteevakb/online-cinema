@@ -25,13 +25,8 @@ class ProfileService:
         self.redis = redis
         self.postgres = postgres
 
-    async def get_profile_info(
-            self,
-            login: str
-    ) -> UserResponse:
-        stmt = select(User).where(
-            (User.username == login) | (User.email == login)
-        )
+    async def get_profile_info(self, login: str) -> UserResponse:
+        stmt = select(User).where((User.username == login) | (User.email == login))
         info = await self.postgres.execute(stmt)
         user = info.scalar_one_or_none()
         if user is None:
@@ -102,9 +97,7 @@ class ProfileService:
     async def reset_password(
         self, login: str, old_password: str, new_password: str
     ) -> None:
-        stmt = select(User).where(
-            (User.username == login) | (User.email == login)
-        )
+        stmt = select(User).where((User.username == login) | (User.email == login))
         result = await self.postgres.execute(stmt)
         user = result.scalar_one_or_none()
         if not user:
@@ -117,10 +110,8 @@ class ProfileService:
         else:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
-    async def reset_login(self,  login: str, new_login: str, password: str) -> None:
-        stmt = select(User).where(
-            (User.username == login) | (User.email == login)
-        )
+    async def reset_login(self, login: str, new_login: str, password: str) -> None:
+        stmt = select(User).where((User.username == login) | (User.email == login))
         result = await self.postgres.execute(stmt)
         user = result.scalar_one_or_none()
         if not user:

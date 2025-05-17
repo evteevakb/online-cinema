@@ -181,7 +181,6 @@ class PostgresExtractor:
         )
         return filmwork_data
 
-
     def extract_persons(
         self,
         connection: psycopg.connection,

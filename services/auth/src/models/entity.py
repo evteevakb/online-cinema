@@ -1,8 +1,18 @@
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 import enum
 import uuid
 
-from sqlalchemy import Boolean, Column, ForeignKey, func, String, Text, UniqueConstraint, text, PrimaryKeyConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    func,
+    PrimaryKeyConstraint,
+    String,
+    Text,
+    text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -123,22 +133,23 @@ def create_partition(target, connection, **kw):
     year_ranges = generate_year_ranges(2023, num_years=3)
 
     for start, end in year_ranges:
-        partition_name = f'login_history_{start[:4]}'
-        sql = f'''
+        partition_name = f"login_history_{start[:4]}"
+        sql = f"""
             CREATE TABLE IF NOT EXISTS {partition_name}
             PARTITION OF login_history
             FOR VALUES FROM ('{start}') TO ('{end}');
-        '''
+        """
         connection.execute(text(sql))
+
 
 class LoginHistory(BaseModel):
     __tablename__ = "login_history"
     __table_args__ = (
-        PrimaryKeyConstraint('uuid', 'occurred_at'),
+        PrimaryKeyConstraint("uuid", "occurred_at"),
         {
-            'postgresql_partition_by': 'RANGE (occurred_at)',
-            'listeners': [('after_create', create_partition)],
-            'schema': AUTH_SCHEMA
+            "postgresql_partition_by": "RANGE (occurred_at)",
+            "listeners": [("after_create", create_partition)],
+            "schema": AUTH_SCHEMA,
         },
     )
 
