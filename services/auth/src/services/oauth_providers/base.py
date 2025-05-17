@@ -10,13 +10,13 @@ from fastapi import Request
 from core.config import OAuthBaseSettings
 from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService
-from services.oauth import OAuthService
+from services.oauth import OAuthService, Provider
 
 
 class BaseProvider(ABC):
     """Abstract class for implementing OAuth 2.0 providers."""
 
-    provider_name: str
+    provider_name: Provider
 
     @abstractmethod
     def __init__(
