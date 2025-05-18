@@ -13,7 +13,12 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from api import health
 from api.v1 import auth, oauth, profile, roles
-from core.config import APISettings, OAuthSessionSettings, RedisSettings
+from core.config import (
+    APISettings,
+    OAuthSessionSettings,
+    RedisSettings,
+    TracingSettings,
+)
 from core.tracing import add_tracer
 from db import redis
 from middlewares.request_middleware import AddIdentifierMiddleware, RequestIDMiddleware
@@ -21,6 +26,7 @@ from middlewares.request_middleware import AddIdentifierMiddleware, RequestIDMid
 api_settings = APISettings()
 oauth_session_settings = OAuthSessionSettings()
 redis_settings = RedisSettings()
+tracing_settings = TracingSettings()
 
 
 @asynccontextmanager
@@ -50,8 +56,9 @@ app.add_middleware(RequestIDMiddleware)
 app.add_middleware(AddIdentifierMiddleware)
 app.add_middleware(SessionMiddleware, secret_key=oauth_session_settings.secret_key)
 
-# tracer must be called strictly after middlewares
-add_tracer(app)
+# tracer must be called strictly after other middlewares
+if tracing_settings.is_enabled:
+    add_tracer(app)
 
 
 app.include_router(health.router, prefix="/api/health", tags=["health"])

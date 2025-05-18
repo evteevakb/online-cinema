@@ -29,6 +29,7 @@ class TracingSettings(BaseSettings):
 
     container_name: str
     port: int
+    is_enabled: bool
 
     class Config:
         env_prefix = "TRACING_"

@@ -10,14 +10,14 @@ from fastapi import HTTPException, Request, status
 from core.config import OAuthGoogleSettings
 from schemas.auth import SocialUserData, TokenResponse
 from services.auth import AuthService, LoginTypes
-from services.oauth import OAuthService
+from services.oauth import OAuthService, Provider
 from services.oauth_providers.base import BaseProvider
 
 
 class GoogleProvider(BaseProvider):
     """OAuth 2.0 provider for Google."""
 
-    provider_name = "google"
+    provider_name = Provider.GOOGLE
 
     def __init__(
         self,
