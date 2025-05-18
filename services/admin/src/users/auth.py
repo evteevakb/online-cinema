@@ -1,15 +1,16 @@
 import http
 import json
+import logging
+import requests
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
-from django.contrib.auth.models import AnonymousUser
-import requests
+from requests.exceptions import RequestException
 from strenum import StrEnum
 
 User = get_user_model()
-
+logger = logging.getLogger(__name__)
 
 class Roles(StrEnum):
     ADMIN = "admin"
@@ -20,11 +21,19 @@ class CustomBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None):
         url = settings.AUTH_API_LOGIN_URL
         payload = {"email": username, "password": password}
-        response = requests.post(url, data=json.dumps(payload))
-        if response.status_code != http.HTTPStatus.OK:
+
+        try:
+            response = requests.post(url, data=json.dumps(payload), timeout=5)
+            response.raise_for_status()
+        except RequestException as e:
+            logger.warning(f"Authentication request failed: {e}")
             return None
 
-        data = response.json()
+        try:
+            data = response.json()
+        except ValueError as e:
+            logger.warning(f"Invalid JSON response: {e}")
+            return None
 
         try:
             user, created = User.objects.get_or_create(
