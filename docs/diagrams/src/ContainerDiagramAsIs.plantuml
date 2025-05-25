@@ -18,9 +18,9 @@ component MovieService {
     database MovieDB
 }
 
-component ETLMovieService {
-    [ETL]
-    database ETLStateStorage
+component MoviesETLService {
+    [MoviesETL]
+    database StateStorage
     database Elasticsearch
 }
 
@@ -44,9 +44,9 @@ JaegerPort --> [Tracer]
 [MovieAPI] --> MovieDB
 [MovieAPI] --> Elasticsearch
 
-[ETL] --> MovieDB
-[ETL] --> Elasticsearch
-[ETL] --> ETLStateStorage
+[MoviesETL] --> MovieDB
+[MoviesETL] --> Elasticsearch
+[MoviesETL] --> StateStorage
 
 [AuthAPI] --> AuthDB
 [AuthAPI] --> AuthRAMStorage

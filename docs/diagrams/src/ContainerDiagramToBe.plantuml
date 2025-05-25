@@ -1,0 +1,25 @@
+@startuml ContainerDiagramToBe
+skinparam componentStyle uml2
+
+component "EventsService" {
+    [EventsAPI]
+    queue Kafka
+    interface "HTTP 83" as CollectorPort
+}
+
+component "EventsETLService" {
+
+    [KafkaConsumer]
+    database ClickHouse
+    interface "HTTP 8123" as ClickHouseHTTPPort
+    interface "HTTP 9000" as ClickHouseClientPort
+}
+
+[EventsAPI] --> Kafka : publishes events
+[KafkaConsumer] --> Kafka : consumes events
+[KafkaConsumer] --> ClickHouse : stores events
+CollectorPort --> [EventsAPI]
+ClickHouseHTTPPort --> ClickHouse
+ClickHouseClientPort --> ClickHouse
+
+@enduml
