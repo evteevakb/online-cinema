@@ -18,6 +18,11 @@ The repository is organized as follows:
 │ ├── init  # shared infrastructure configs and entrypoints
 │ └── admin, api, auth, etl  # service deployment files
 │
+├── docs  # documentation-related files
+│ └── diagrams  # diagrams used for documentation
+│   ├── out  # diagrams in PNG format (rendered output)
+│   └── src  # diagrams in PlantUML format (source files)
+│
 ├── services  # core backend services
 │ ├── admin  # admin panel
 │ ├── api  # API gateway 
