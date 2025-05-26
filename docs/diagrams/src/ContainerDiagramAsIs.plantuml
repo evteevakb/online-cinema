@@ -41,7 +41,7 @@ JaegerPort --> [Tracer]
 [AdminPanel] --> MovieDB
 [AdminPanel] --> [AuthAPI]
 
-[MovieAPI] --> MovieDB
+[MovieAPI] --> AuthAPI
 [MovieAPI] --> Elasticsearch
 
 [MoviesETL] --> MovieDB
