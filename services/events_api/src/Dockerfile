@@ -21,4 +21,4 @@ COPY . .
 
 USER flask
 
-CMD ["sh", "-c", "gunicorn -b ${API_HOST}:${API_PORT} app:app"]
+CMD ["sh", "-c", "gunicorn -b ${API_HOST}:${API_PORT} wsgi_app:app"]
