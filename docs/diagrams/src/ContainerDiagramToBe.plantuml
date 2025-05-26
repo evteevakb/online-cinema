@@ -8,7 +8,6 @@ component "EventsService" {
 }
 
 component "EventsETLService" {
-
     [KafkaConsumer]
     database ClickHouse
     interface "HTTP 8123" as ClickHouseHTTPPort
