@@ -10,12 +10,12 @@ component NGINX {
 component AdminService {
     [AdminPanel]
     [Swagger]
+    database MovieDB
     interface "HTTP 8080" as SwaggerPort
 }
 
 component MovieService {
     [MovieAPI]
-    database MovieDB
 }
 
 component MoviesETLService {
