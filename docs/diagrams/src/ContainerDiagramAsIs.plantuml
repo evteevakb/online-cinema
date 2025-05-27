@@ -1,0 +1,55 @@
+@startuml ContainerDiagramAsIs
+skinparam componentStyle uml2
+
+component NGINX {
+    interface "HTTP 80" as AdminPort
+    interface "HTTP 81" as MovieAPIPort
+    interface "HTTP 82" as AuthPort
+}
+
+component AdminService {
+    [AdminPanel]
+    [Swagger]
+    database MovieDB
+    interface "HTTP 8080" as SwaggerPort
+}
+
+component MovieService {
+    [MovieAPI]
+}
+
+component MoviesETLService {
+    [MoviesETL]
+    database StateStorage
+    database Elasticsearch
+}
+
+component AuthService {
+    [AuthAPI]
+    [Tracer]
+    database AuthDB
+    database AuthRAMStorage
+    interface "HTTP 16686" as JaegerPort
+}
+
+AdminPort --> [AdminPanel]
+MovieAPIPort --> [MovieAPI]
+AuthPort --> [AuthAPI]
+SwaggerPort --> [Swagger]
+JaegerPort --> [Tracer]
+
+[AdminPanel] --> MovieDB
+[AdminPanel] --> [AuthAPI]
+
+[MovieAPI] --> AuthAPI
+[MovieAPI] --> Elasticsearch
+
+[MoviesETL] --> MovieDB
+[MoviesETL] --> Elasticsearch
+[MoviesETL] --> StateStorage
+
+[AuthAPI] --> AuthDB
+[AuthAPI] --> AuthRAMStorage
+[AuthAPI] --> [Tracer]
+
+@enduml
