@@ -16,7 +16,7 @@ The repository is organized as follows:
 │
 ├── deploy
 │ ├── init  # shared infrastructure configs and entrypoints
-│ └── admin, api, auth, etl  # service deployment files
+│ └── admin, api, auth, etl, events_api  # service deployment files
 │
 ├── docs  # documentation-related files
 │ └── diagrams  # diagrams used for documentation
