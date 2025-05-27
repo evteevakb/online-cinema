@@ -27,7 +27,8 @@ The repository is organized as follows:
 │ ├── admin  # admin panel
 │ ├── api  # API gateway 
 │ ├── auth  # authentication and authorization service
-│ └── etl  # ETL pipeline
+│ ├── etl  # ETL pipeline
+│ └── events_api  # service for collecting user events
 │
 ├── .gitignore
 ├── pyproject.toml  # shared dev tools configuration (linters, type checkers)
