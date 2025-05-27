@@ -12,7 +12,7 @@ from kafka_utils import KafkaTopicManager, KafkaProducerClient
 app = Flask(__name__)
 ma = Marshmallow(app)
 
-BOOTSTRAP_SERVERS = "kafka-0:9092,kafka-1:9092,kafka-2:9092"
+BOOTSTRAP_SERVERS = "kafka-node-0:9092,kafka-node-1:9092,kafka-node-2:9092"
 
 
 @app.route("/api/health", methods=["GET"])  # type: ignore[misc]

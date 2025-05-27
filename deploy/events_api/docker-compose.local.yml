@@ -11,70 +11,101 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
     ports:
       - "83:8000"
     restart: always
-  
-  kafka-0:
-    image: bitnami/kafka:3.4
+
+  kafka-node-0:
+    container_name: kafka-node-0
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9094"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    image: bitnami/kafka:4.0.0
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-node-0:9093,1@kafka-node-1:9093,2@kafka-node-2:9093
       - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
 
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-0:9092,EXTERNAL://127.0.0.1:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-node-0:9092,EXTERNAL://127.0.0.1:9094
     volumes:
-      - kafka_0_data:/bitnami/kafka
+      - kafka-node-0-data:/bitnami/kafka
 
-  kafka-1:
-    image: bitnami/kafka:3.4
+  kafka-node-1:
+    container_name: kafka-node-1
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9095"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    image: bitnami/kafka:4.0.0
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_NODE_ID=1
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-node-0:9093,1@kafka-node-1:9093,2@kafka-node-2:9093
       - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
 
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9095
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-1:9092,EXTERNAL://127.0.0.1:9095
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-node-1:9092,EXTERNAL://127.0.0.1:9095
     volumes:
-      - kafka_1_data:/bitnami/kafka
+      - kafka-node-1-data:/bitnami/kafka
    
-  kafka-2:
-    image: bitnami/kafka:3.4
+  kafka-node-2:
+    container_name: kafka-node-2
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9096"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    image: bitnami/kafka:4.0.0
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_NODE_ID=2
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-node-0:9093,1@kafka-node-1:9093,2@kafka-node-2:9093
       - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
   
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9096
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-2:9092,EXTERNAL://127.0.0.1:9096
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-node-2:9092,EXTERNAL://127.0.0.1:9096
     volumes:
-      - kafka_2_data:/bitnami/kafka  
+      - kafka-node-2-data:/bitnami/kafka  
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:v0.7.0
+    container_name: kafka-ui
+    depends_on:
+      kafka-node-0:
+        condition: service_healthy
+      kafka-node-1:
+        condition: service_healthy
+      kafka-node-2:
+        condition: service_healthy
+    environment:
+      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka-node-0:9092,kafka-node-1:9092,kafka-node-2:9092
+      - KAFKA_CLUSTERS_0_NAME=kraft
+    image: provectuslabs/kafka-ui:v0.7.2
     ports:
       - "8081:8080"
-    environment:
-      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka-0:9092
-      - KAFKA_CLUSTERS_0_NAME=kraft  
+    restart: always
 
 volumes:
-  kafka_0_data:
-  kafka_1_data:
-  kafka_2_data:
+  kafka-node-0-data:
+  kafka-node-1-data:
+  kafka-node-2-data:
