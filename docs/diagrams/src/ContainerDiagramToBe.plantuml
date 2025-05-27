@@ -3,8 +3,10 @@ skinparam componentStyle uml2
 
 component "EventsService" {
     [EventsAPI]
+    [KafkaUI]
     queue Kafka
     interface "HTTP 83" as CollectorPort
+    interface "HTTP 8081" as KafkaUIPort
 }
 
 component "EventsETLService" {
@@ -15,9 +17,11 @@ component "EventsETLService" {
 }
 
 [EventsAPI] --> Kafka : publishes events
+[KafkaUI] --> Kafka
 [KafkaConsumer] --> Kafka : consumes events
 [KafkaConsumer] --> ClickHouse : stores events
 CollectorPort --> [EventsAPI]
+KafkaUIPort --> [KafkaUI]
 ClickHouseHTTPPort --> ClickHouse
 ClickHouseClientPort --> ClickHouse
 
