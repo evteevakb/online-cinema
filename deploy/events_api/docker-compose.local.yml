@@ -1,0 +1,95 @@
+services:
+  events-api:
+    build:
+      context: ../../services/events_api/src
+      dockerfile: Dockerfile
+    container_name: events-api
+    depends_on:
+      kafka-node-0:
+        condition: service_healthy
+      kafka-node-1:
+        condition: service_healthy
+      kafka-node-2:
+        condition: service_healthy
+    env_file:
+      - envs/.service.env
+    expose: [8000]
+    healthcheck:
+      test: curl -s http://$${API_HOST}:$${API_PORT}/api/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    ports:
+      - "83:8000"
+    restart: always
+
+  kafka-node-0:
+    container_name: kafka-node-0
+    env_file:
+      - envs/.common.kafka.env
+      - envs/.node0.kafka.env
+    expose: [9092]
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9094"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    image: bitnami/kafka:4.0.0
+    volumes:
+      - kafka-node-0-data:/bitnami/kafka
+
+  kafka-node-1:
+    container_name: kafka-node-1
+    env_file:
+      - envs/.common.kafka.env
+      - envs/.node1.kafka.env
+    expose: [9092]
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9095"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    image: bitnami/kafka:4.0.0
+    volumes:
+      - kafka-node-1-data:/bitnami/kafka
+
+  kafka-node-2:
+    container_name: kafka-node-2
+    env_file:
+      - envs/.common.kafka.env
+      - envs/.node2.kafka.env
+    expose: [9092]
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9096"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    image: bitnami/kafka:4.0.0
+    volumes:
+      - kafka-node-2-data:/bitnami/kafka  
+
+  kafka-ui:
+    container_name: kafka-ui
+    depends_on:
+      kafka-node-0:
+        condition: service_healthy
+      kafka-node-1:
+        condition: service_healthy
+      kafka-node-2:
+        condition: service_healthy
+    env_file:
+      - envs/.ui.kafka.env
+    expose: [8080]
+    image: provectuslabs/kafka-ui:v0.7.2
+    ports:
+      - "8081:8080"
+    restart: always
+
+volumes:
+  kafka-node-0-data:
+  kafka-node-1-data:
+  kafka-node-2-data:
