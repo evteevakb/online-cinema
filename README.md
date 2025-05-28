@@ -38,7 +38,7 @@ The repository is organized as follows:
 
 ## Running Services for the Current Sprint
 
-To run the services for the current sprint, follow the instructions  in sections "Setting up environment variables" and "Running" in the [`deploy/auth/README.md`](./deploy/auth/README.md)
+To run the services for the current sprint, follow the instructions in the [`deploy/events_etl/README.md`](./deploy/events_etl/README.md)
 
 ## Development Setup
 
