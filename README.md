@@ -16,7 +16,7 @@ The repository is organized as follows:
 │
 ├── deploy
 │ ├── init  # shared infrastructure configs and entrypoints
-│ └── admin, api, auth, etl, events_api  # service deployment files
+│ └── admin, api, auth, etl, events_api, events_etl  # service deployment files
 │
 ├── docs  # documentation-related files
 │ └── diagrams  # diagrams used for documentation
@@ -27,8 +27,9 @@ The repository is organized as follows:
 │ ├── admin  # admin panel
 │ ├── api  # API gateway 
 │ ├── auth  # authentication and authorization service
-│ ├── etl  # ETL pipeline
-│ └── events_api  # service for collecting user events
+│ ├── etl  # ETL pipeline from PostgreSQL to Elasticsearch
+│ ├── events_api  # service for collecting user events
+│ └── events_etl  # ETL pipeline from Kafka to ClickHouse
 │
 ├── .gitignore
 ├── pyproject.toml  # shared dev tools configuration (linters, type checkers)
