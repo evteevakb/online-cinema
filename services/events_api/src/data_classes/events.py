@@ -1,11 +1,9 @@
+from dataclasses import asdict, dataclass
 import datetime
+from enum import Enum
 import json
 import logging
 import uuid
-
-from dataclasses import asdict, dataclass
-from enum import Enum
-
 
 UTC = datetime.timezone.utc
 

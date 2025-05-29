@@ -9,11 +9,9 @@ from flask_marshmallow import Marshmallow
 from kafka.errors import KafkaError
 from marshmallow import ValidationError
 
-# TODO: update isort settings if config and kafka_utils remain in the root dir
 from config import kafka_settings
-from schemas import kafka_message_schema
 from kafka_utils import KafkaProducerClient, KafkaTopicManager
-
+from schemas import kafka_message_schema
 
 app = Flask(__name__)
 ma = Marshmallow(app)

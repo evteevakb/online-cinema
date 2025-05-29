@@ -2,9 +2,9 @@ from http import HTTPStatus
 
 from app import app
 from flask import Response
-from kafka_utils import KafkaProducerClient, KafkaTopicManager
 
-from data_classes.events import FilterEvent, FilterType
+from data_classes.events import FilterEvent
+from kafka_utils import KafkaProducerClient, KafkaTopicManager
 
 kafka_producer = KafkaProducerClient(
     bootstrap_servers=['localhost:9094'], topic="filter"
