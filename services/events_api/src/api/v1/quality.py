@@ -1,32 +1,30 @@
 from http import HTTPStatus
 
-from app import app
-from flask import Response
+from flask import Blueprint, jsonify, request, Response
 
+from config import kafka_settings
 from data_classes.events import QualityVideoChangeEvent
-from kafka_utils import KafkaProducerClient, KafkaTopicManager
+from kafka_utils import KafkaProducerClient
 
+quality_route = Blueprint("quality_route", __name__)
 kafka_producer = KafkaProducerClient(
-    bootstrap_servers=["localhost:9094"], topic="video_quality"
+    bootstrap_servers=kafka_settings.bootstrap_servers, topic="video_quality"
 )
 
-kafka_topic = KafkaTopicManager(bootstrap_servers=["localhost:9094"])
 
-
-@app.before_first_request
-def create_tables():
-    kafka_topic.create_topic("video_quality")
-
-
-@app.route("/api/events/video_quality", methods=["POST"])
-def create_vid_quality_event(
-    user_id: str, film_id: str, before_quality: str, after_quality: str
-) -> tuple[Response, HTTPStatus]:
+@quality_route.route("/events/video_quality", methods=["POST"])
+def create_vid_quality_event() -> tuple[Response, HTTPStatus]:
     """Creates video quality event.
 
     Returns:
         tuple: A tuple containing a JSON response with status.
     """
+    data = request.get_json()
+    user_id = data.get("user_id")
+    film_id = data.get("film_id")
+    before_quality = data.get("before_quality")
+    after_quality = data.get("after_quality")
+
     event = QualityVideoChangeEvent(
         user_id=user_id,
         film_id=film_id,
@@ -35,4 +33,4 @@ def create_vid_quality_event(
     ).to_json()
     event_in_bytes = str.encode(event)
     kafka_producer.send(event_in_bytes)
-    return (event, HTTPStatus.OK)
+    return jsonify(event=event), HTTPStatus.OK

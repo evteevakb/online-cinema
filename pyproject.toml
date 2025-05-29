@@ -23,6 +23,7 @@ lines_between_types = 1
 src_paths = ["services"]
 known_first_party = [
     "api",
+    "app",
     "clients",
     "config",
     "core",

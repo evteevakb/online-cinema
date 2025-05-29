@@ -74,7 +74,7 @@ class FilterEvent(BaseClass):
     event_type: str = "filter"
 
     @classmethod
-    def create(cls, user_id: str, film_id: str, filter_by: FilterType.value):
+    def create(cls, user_id: str, film_id: str, filter_by: FilterType):
         try:
             if filter_by not in VALUES:
                 raise ValueError("filter_by should be one of values: ", VALUES)

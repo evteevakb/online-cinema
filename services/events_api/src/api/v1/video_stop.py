@@ -1,35 +1,32 @@
 from http import HTTPStatus
 
-from app import app
-from flask import Response
+from flask import Blueprint, jsonify, request, Response
 
+from config import kafka_settings
 from data_classes.events import VideoStopEvent
-from kafka_utils import KafkaProducerClient, KafkaTopicManager
+from kafka_utils import KafkaProducerClient
 
+video_stop_route = Blueprint("video_stop_route", __name__)
 kafka_producer = KafkaProducerClient(
-    bootstrap_servers=["localhost:9094"], topic="video_stop"
+    bootstrap_servers=kafka_settings.bootstrap_servers, topic="video_stop"
 )
 
-kafka_topic = KafkaTopicManager(bootstrap_servers=["localhost:9094"])
 
-
-@app.before_first_request
-def create_tables():
-    kafka_topic.create_topic("video_stop")
-
-
-@app.route("/api/events/video_stop", methods=["POST"])
-def create_vid_stop_event(
-    user_id: str, film_id: str, stop_time: str
-) -> tuple[Response, HTTPStatus]:
+@video_stop_route.route("/events/video_stop", methods=["POST"])
+def create_vid_stop_event() -> tuple[Response, HTTPStatus]:
     """Creates video quality event.
 
     Returns:
         tuple: A tuple containing a JSON response with status.
     """
+    data = request.get_json()
+    user_id = data.get("user_id")
+    film_id = data.get("film_id")
+    stop_time = data.get("stop_time")
+
     event = VideoStopEvent(
         user_id=user_id, film_id=film_id, stop_time=stop_time
     ).to_json()
     event_in_bytes = str.encode(event)
     kafka_producer.send(event_in_bytes)
-    return (event, HTTPStatus.OK)
+    return jsonify(event=event), HTTPStatus.OK
