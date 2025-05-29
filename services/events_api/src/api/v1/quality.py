@@ -7,10 +7,10 @@ from data_classes.events import QualityVideoChangeEvent
 from kafka_utils import KafkaProducerClient, KafkaTopicManager
 
 kafka_producer = KafkaProducerClient(
-    bootstrap_servers=['localhost:9094'], topic="video_quality"
+    bootstrap_servers=["localhost:9094"], topic="video_quality"
 )
 
-kafka_topic = KafkaTopicManager(bootstrap_servers=['localhost:9094'])
+kafka_topic = KafkaTopicManager(bootstrap_servers=["localhost:9094"])
 
 
 @app.before_first_request
@@ -19,7 +19,9 @@ def create_tables():
 
 
 @app.route("/api/events/video_quality", methods=["POST"])
-def create_vid_quality_event(user_id: str, film_id: str, before_quality: str, after_quality: str) -> tuple[Response, HTTPStatus]:
+def create_vid_quality_event(
+    user_id: str, film_id: str, before_quality: str, after_quality: str
+) -> tuple[Response, HTTPStatus]:
     """Creates video quality event.
 
     Returns:
@@ -29,7 +31,7 @@ def create_vid_quality_event(user_id: str, film_id: str, before_quality: str, af
         user_id=user_id,
         film_id=film_id,
         before_quality=before_quality,
-        after_quality=after_quality
+        after_quality=after_quality,
     ).to_json()
     event_in_bytes = str.encode(event)
     kafka_producer.send(event_in_bytes)
