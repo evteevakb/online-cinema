@@ -28,7 +28,8 @@ services:
       - "9000:9000"
     restart: always
     volumes:
-      - ./configs/clickhouse-node-1:/etc/clickhouse-server
+      - ./configs/clickhouse-node-1/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-1/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-node-1-data:/var/lib/clickhouse
 
   clickhouse-node-2:
@@ -50,7 +51,8 @@ services:
       - "9001:9000"
     restart: always
     volumes:
-      - ./configs/clickhouse-node-2:/etc/clickhouse-server
+      - ./configs/clickhouse-node-2/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-2/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-node-2-data:/var/lib/clickhouse
 
   clickhouse-node-3:
@@ -72,7 +74,8 @@ services:
       - "9002:9000"
     restart: always
     volumes:
-      - ./configs/clickhouse-node-3:/etc/clickhouse-server
+      - ./configs/clickhouse-node-3/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-3/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-node-3-data:/var/lib/clickhouse
 
   clickhouse-node-4:
@@ -94,7 +97,8 @@ services:
       - "9003:9000"
     restart: always
     volumes:
-      - ./configs/clickhouse-node-4:/etc/clickhouse-server
+      - ./configs/clickhouse-node-4/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-4/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-node-4-data:/var/lib/clickhouse
 
   zookeeper:
