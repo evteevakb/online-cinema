@@ -19,7 +19,7 @@ def create_tables():
 
 
 @app.route("/api/events/filter", methods=["POST"])
-def filter_event(user_id: str, film_id: str, stop_time: str, filter_by: str) -> tuple[Response, HTTPStatus]:
+def filter_event(user_id: str, film_id: str, filter_by: str) -> tuple[Response, HTTPStatus]:
     """Creates video quality event.
 
     Returns:
@@ -29,7 +29,7 @@ def filter_event(user_id: str, film_id: str, stop_time: str, filter_by: str) -> 
         event = FilterEvent(
             user_id=user_id,
             film_id=film_id,
-            filter_by=filter_by
+            filter_by=filter_by,
         ).to_json()
         event_in_bytes = str.encode(event)
         kafka_producer.send(event_in_bytes)
