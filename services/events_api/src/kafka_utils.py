@@ -2,6 +2,7 @@
 Contains Kafka utility classes.
 """
 
+import logging
 from types import TracebackType
 from typing import Self, Type
 
@@ -90,9 +91,9 @@ class KafkaTopicManager:
                 replication_factor=replication_factor,
             )
             self.admin_client.create_topics([topic])
-            print(f"Topic '{topic_name}' created.")
-        except TopicAlreadyExistsError:
-            print(f"Topic '{topic_name}' already exists.")
+            logging.info(f"Topic '{topic_name}' created.")
+        except TopicAlreadyExistsError as err:
+            logging.error(f"Topic '{topic_name}' already exists.", err)
 
 
 class KafkaProducerClient:

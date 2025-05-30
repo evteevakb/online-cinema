@@ -26,9 +26,12 @@ def filter_event() -> tuple[Response, HTTPStatus]:
     try:
         event = FilterEvent(
             user_id=user_id, film_id=film_id, filter_by=filter_by
-        ).to_json()
+        ).model_dump_json()
         event_in_bytes = str.encode(event)
-        kafka_producer.send(event_in_bytes)
+        with kafka_producer as producer:
+            producer.send(event_in_bytes)
         return jsonify(event=event), HTTPStatus.OK
+    except ValueError as err:
+        return jsonify(error=str(err)), HTTPStatus.UNPROCESSABLE_ENTITY
     except Exception as err:
         return jsonify(error=str(err)), HTTPStatus.INTERNAL_SERVER_ERROR

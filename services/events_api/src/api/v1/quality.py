@@ -25,12 +25,18 @@ def create_vid_quality_event() -> tuple[Response, HTTPStatus]:
     before_quality = data.get("before_quality")
     after_quality = data.get("after_quality")
 
-    event = QualityVideoChangeEvent(
-        user_id=user_id,
-        film_id=film_id,
-        before_quality=before_quality,
-        after_quality=after_quality,
-    ).to_json()
-    event_in_bytes = str.encode(event)
-    kafka_producer.send(event_in_bytes)
-    return jsonify(event=event), HTTPStatus.OK
+    try:
+        event = QualityVideoChangeEvent(
+            user_id=user_id,
+            film_id=film_id,
+            before_quality=before_quality,
+            after_quality=after_quality,
+        ).model_dump_json()
+        event_in_bytes = str.encode(event)
+        with kafka_producer as producer:
+            producer.send(event_in_bytes)
+        return jsonify(event=event), HTTPStatus.OK
+    except ValueError as err:
+        return jsonify(error=str(err)), HTTPStatus.UNPROCESSABLE_ENTITY
+    except Exception as err:
+        return jsonify(error=str(err)), HTTPStatus.INTERNAL_SERVER_ERROR

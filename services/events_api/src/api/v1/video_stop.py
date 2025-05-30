@@ -24,9 +24,15 @@ def create_vid_stop_event() -> tuple[Response, HTTPStatus]:
     film_id = data.get("film_id")
     stop_time = data.get("stop_time")
 
-    event = VideoStopEvent(
-        user_id=user_id, film_id=film_id, stop_time=stop_time
-    ).to_json()
-    event_in_bytes = str.encode(event)
-    kafka_producer.send(event_in_bytes)
-    return jsonify(event=event), HTTPStatus.OK
+    try:
+        event = VideoStopEvent(
+            user_id=user_id, film_id=film_id, stop_time=stop_time
+        ).model_dump_json()
+        event_in_bytes = str.encode(event)
+        with kafka_producer as producer:
+            producer.send(event_in_bytes)
+        return jsonify(event=event), HTTPStatus.OK
+    except ValueError as err:
+        return jsonify(error=str(err)), HTTPStatus.UNPROCESSABLE_ENTITY
+    except Exception as err:
+        return jsonify(error=str(err)), HTTPStatus.INTERNAL_SERVER_ERROR

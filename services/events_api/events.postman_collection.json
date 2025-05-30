@@ -1,0 +1,159 @@
+{
+	"info": {
+		"_postman_id": "fa6d5fcf-13fa-4e6a-8556-6cdffccc4c6e",
+		"name": "events",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "38224835"
+	},
+	"item": [
+		{
+			"name": "bad_requests",
+			"item": [
+				{
+					"name": "event_quality",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"123\",\n    \"film_id\": \"123\",\n    \"before_quality\": \"180p\",\n    \"after_quality\": \"720p\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://0.0.0.0:83/api/v1/events/video_quality"
+					},
+					"response": []
+				},
+				{
+					"name": "event_filter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"123\",\n    \"film_id\": \"123\",\n    \"filter_by\": \"cars\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://0.0.0.0:83/api/v1/events/filter"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "event_filter",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"123\",\n    \"film_id\": \"123\",\n    \"filter_by\": \"rating\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://0.0.0.0:83/api/v1/events/filter"
+			},
+			"response": []
+		},
+		{
+			"name": "event_quality",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"123\",\n    \"film_id\": \"123\",\n    \"before_quality\": \"360p\",\n    \"after_quality\": \"720p\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://0.0.0.0:83/api/v1/events/video_quality"
+			},
+			"response": []
+		},
+		{
+			"name": "event_vid_stop",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"123\",\n    \"film_id\": \"123\",\n    \"stop_time\": \"12000\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://0.0.0.0:83/api/v1/events/video_stop"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000/",
+			"type": "string"
+		}
+	]
+}

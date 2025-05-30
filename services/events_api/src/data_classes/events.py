@@ -1,22 +1,12 @@
-from dataclasses import asdict, dataclass
 import datetime
 from enum import Enum
-import json
 import logging
+from typing import Any
 import uuid
 
+from pydantic import BaseModel, Field, field_validator
+
 UTC = datetime.timezone.utc
-
-
-@dataclass
-class BaseClass:
-    event_id: str
-    user_id: str
-    film_id: str
-
-    @classmethod
-    def to_json(obj) -> str:
-        return json.dumps(asdict(obj))
 
 
 class FilterType(Enum):
@@ -25,66 +15,89 @@ class FilterType(Enum):
     ACTOR = "actor"
 
 
-VALUES = [i.value for i in FilterType]
+class QualityType(Enum):
+    LOW = "360p"
+    MID = "720p"
+    HIGH = "1080p"
 
 
-@dataclass
-class QualityVideoChangeEvent(BaseClass):
+class BaseEvent(BaseModel):
+    """Base class for all events"""
+
+    user_id: str
+    film_id: str
+    event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    timestamp: datetime.datetime = Field(
+        default_factory=lambda: datetime.datetime.now(UTC)
+    )
+
+    @field_validator("event_id", mode="before")
+    def convert_string_to_uuid(cls: Any, value: str) -> uuid.UUID:
+        """Convert string UUID to UUID object if needed"""
+        if isinstance(value, str):
+            try:
+                return uuid.UUID(value)
+            except ValueError as err:
+                logging.error(err)
+                raise ValueError("Invalid UUID format")
+        return value
+
+
+class QualityVideoChangeEvent(BaseEvent):
     """Helps tracking video quality change."""
 
-    before_quality: str
-    after_quality: str
+    before_quality: QualityType
+    after_quality: QualityType
     event_type: str = "quality_change"
 
-    @classmethod
-    def create(
-        cls, user_id: str, film_id: str, before_quality: str, after_quality: str
-    ):
-        return cls(
-            event_id=str(uuid.uuid4()),
-            user_id=user_id,
-            film_id=film_id,
-            before_quality=before_quality,
-            after_quality=after_quality,
-            timestamp=datetime.datetime.now(UTC).isoformat(),
-        )
+    @field_validator("before_quality", "after_quality", mode="before")
+    def validate_quality(cls: Any, value: QualityType) -> QualityType | str:
+        """Validate quality values against enum"""
+        if isinstance(value, QualityType):
+            return value
+
+        try:
+            return QualityType(value)
+        except ValueError as err:
+            valid_values = [e.value for e in QualityType]
+            logging.error(err)
+            raise ValueError(
+                f"Неправильное значение качества. "
+                f"Допустимые значения: {', '.join(valid_values)}"
+            )
 
 
-@dataclass
-class VideoStopEvent(BaseClass):
-    """Helps tracking when user stoped film."""
+class VideoStopEvent(BaseEvent):
+    """Helps tracking when user stopped film."""
 
     stop_time: int
     event_type: str = "video_stop"
 
-    @classmethod
-    def create(cls, user_id: str, film_id: str, stop_time: int):
-        return cls(
-            event_id=str(uuid.uuid4()),
-            user_id=user_id,
-            film_id=film_id,
-            stop_time=stop_time,
-            timestamp=datetime.datetime.now(UTC).isoformat(),
-        )
+    @field_validator("stop_time")
+    def validate_stop_time(cls: Any, value: int) -> int:
+        """Validate stop time is non-negative"""
+        if value < 0:
+            raise ValueError("Stop time cannot be negative")
+        return value
 
 
-@dataclass
-class FilterEvent(BaseClass):
-    filter_by: str
+class FilterEvent(BaseEvent):
+    """Tracks filter usage events"""
+
+    filter_by: FilterType
     event_type: str = "filter"
 
-    @classmethod
-    def create(cls, user_id: str, film_id: str, filter_by: FilterType):
+    @field_validator("filter_by", mode="before")
+    def validate_filter_type(cls: Any, value: FilterType) -> FilterType | str:
+        """Validate filter values against enum"""
+        if isinstance(value, FilterType):
+            return value
         try:
-            if filter_by not in VALUES:
-                raise ValueError("filter_by should be one of values: ", VALUES)
-            return cls(
-                event_id=str(uuid.uuid4()),
-                user_id=user_id,
-                film_id=film_id,
-                filter_by=filter_by,
-                timestamp=datetime.datetime.now(UTC).isoformat(),
-            )
+            return FilterType(value)
         except ValueError as err:
+            valid_values = [e.value for e in FilterType]
             logging.error(err)
-            return ""
+            raise ValueError(
+                f"Неправильное значение фильтра. "
+                f"Допустимые значения: {', '.join(valid_values)}"
+            )
