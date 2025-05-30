@@ -1,17 +1,15 @@
+from dataclasses import asdict, dataclass
 import datetime
+from enum import Enum
 import json
 import logging
 import uuid
-
-from dataclasses import asdict, dataclass
-from enum import Enum
-
 
 UTC = datetime.timezone.utc
 
 
 @dataclass
-class BaseClass():
+class BaseClass:
     event_id: str
     user_id: str
     film_id: str
@@ -33,14 +31,14 @@ VALUES = [i.value for i in FilterType]
 @dataclass
 class QualityVideoChangeEvent(BaseClass):
     """Helps tracking video quality change."""
+
     before_quality: str
     after_quality: str
     event_type: str = "quality_change"
 
     @classmethod
     def create(
-        cls, user_id: str, film_id: str,
-        before_quality: str, after_quality: str
+        cls, user_id: str, film_id: str, before_quality: str, after_quality: str
     ):
         return cls(
             event_id=str(uuid.uuid4()),
@@ -48,13 +46,14 @@ class QualityVideoChangeEvent(BaseClass):
             film_id=film_id,
             before_quality=before_quality,
             after_quality=after_quality,
-            timestamp=datetime.datetime.now(UTC).isoformat()
+            timestamp=datetime.datetime.now(UTC).isoformat(),
         )
 
 
 @dataclass
 class VideoStopEvent(BaseClass):
     """Helps tracking when user stoped film."""
+
     stop_time: int
     event_type: str = "video_stop"
 
@@ -65,7 +64,7 @@ class VideoStopEvent(BaseClass):
             user_id=user_id,
             film_id=film_id,
             stop_time=stop_time,
-            timestamp=datetime.datetime.now(UTC).isoformat()
+            timestamp=datetime.datetime.now(UTC).isoformat(),
         )
 
 
@@ -75,7 +74,7 @@ class FilterEvent(BaseClass):
     event_type: str = "filter"
 
     @classmethod
-    def create(cls, user_id: str, film_id: str, filter_by: FilterType.value):
+    def create(cls, user_id: str, film_id: str, filter_by: FilterType):
         try:
             if filter_by not in VALUES:
                 raise ValueError("filter_by should be one of values: ", VALUES)
@@ -84,7 +83,7 @@ class FilterEvent(BaseClass):
                 user_id=user_id,
                 film_id=film_id,
                 filter_by=filter_by,
-                timestamp=datetime.datetime.now(UTC).isoformat()
+                timestamp=datetime.datetime.now(UTC).isoformat(),
             )
         except ValueError as err:
             logging.error(err)

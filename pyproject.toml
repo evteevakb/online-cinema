@@ -23,11 +23,15 @@ lines_between_types = 1
 src_paths = ["services"]
 known_first_party = [
     "api",
+    "app",
     "clients",
+    "config",
     "core",
+    "data_classes",
     "db",
     "extract",
     "functional",
+    "kafka_utils",
     "load",
     "middlewares",
     "models",
@@ -40,7 +44,6 @@ known_first_party = [
     "testdata",
     "transform",
     "utils",
-    "data_classes",
     ]
 sections = [
     "FUTURE",
