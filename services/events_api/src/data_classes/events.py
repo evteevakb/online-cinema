@@ -62,8 +62,7 @@ class QualityVideoChangeEvent(BaseEvent):
             valid_values = [e.value for e in QualityType]
             logging.error(err)
             raise ValueError(
-                f"Invalid quality value. "
-                f"Allowed values: {', '.join(valid_values)}"
+                f"Invalid quality value. Allowed values: {', '.join(valid_values)}"
             )
 
 
@@ -98,6 +97,5 @@ class FilterEvent(BaseEvent):
             valid_values = [e.value for e in FilterType]
             logging.error(err)
             raise ValueError(
-                f"Invalid filter value. "
-                f"Allowed values: {', '.join(valid_values)}"
+                f"Invalid filter value. Allowed values: {', '.join(valid_values)}"
             )
