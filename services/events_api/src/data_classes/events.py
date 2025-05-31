@@ -62,8 +62,7 @@ class QualityVideoChangeEvent(BaseEvent):
             valid_values = [e.value for e in QualityType]
             logging.error(err)
             raise ValueError(
-                f"Неправильное значение качества. "
-                f"Допустимые значения: {', '.join(valid_values)}"
+                f"Invalid quality value. Allowed values: {', '.join(valid_values)}"
             )
 
 
@@ -100,8 +99,7 @@ class FilterEvent(BaseEvent):
             valid_values = [e.value for e in FilterType]
             logging.error(err)
             raise ValueError(
-                f"Неправильное значение фильтра. "
-                f"Допустимые значения: {', '.join(valid_values)}"
+                f"Invalid filter value. Allowed values: {', '.join(valid_values)}"
             )
 
 

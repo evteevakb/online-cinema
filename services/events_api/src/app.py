@@ -18,11 +18,32 @@ from kafka_utils import KafkaTopicManager
 with KafkaTopicManager(
     bootstrap_servers=kafka_settings.bootstrap_servers
 ) as kafka_topic:
-    kafka_topic.create_topic("filter")
-    kafka_topic.create_topic("video_quality")
-    kafka_topic.create_topic("video_stop")
-    kafka_topic.create_topic("click")
-    kafka_topic.create_topic("dwell_time")
+    kafka_topic.create_topic(
+        topic_name="filter",
+        replication_factor=kafka_settings.topic_replication_factor,
+        num_partitions=kafka_settings.topic_num_partitions,
+    )
+    kafka_topic.create_topic(
+        topic_name="video_quality",
+        replication_factor=kafka_settings.topic_replication_factor,
+        num_partitions=kafka_settings.topic_num_partitions,
+    )
+    kafka_topic.create_topic(
+        topic_name="video_stop",
+        replication_factor=kafka_settings.topic_replication_factor,
+        num_partitions=kafka_settings.topic_num_partitions,
+    )
+    kafka_topic.create_topic(
+        topic_name="click",
+        replication_factor=kafka_settings.topic_replication_factor,
+        num_partitions=kafka_settings.topic_num_partitions,
+    )
+    kafka_topic.create_topic(
+        topic_name="dwell_time",
+        replication_factor=kafka_settings.topic_replication_factor,
+        num_partitions=kafka_settings.topic_num_partitions,
+    )
+
 
 app = Flask(__name__)
 
