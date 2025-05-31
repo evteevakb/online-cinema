@@ -125,6 +125,52 @@
 				"url": "http://0.0.0.0:83/api/v1/events/video_stop"
 			},
 			"response": []
+		},
+		{
+			"name": "event_click",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"123\",\n    \"x\": \"300\",\n    \"y\": \"400\",\n    \"element\": \"A\",\n    \"element_id\": \"promo-link\",\n    \"element_classes\": \"banner cta\",\n    \"url\": \"/actors/1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://0.0.0.0:83/api/v1/events/click"
+			},
+			"response": []
+		},
+		{
+			"name": "event_dwell_time",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": \"123\",\n    \"dwell_time\": \"5000\",\n    \"url\": \"/films/1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://0.0.0.0:83/api/v1/events/dwell_time"
+			},
+			"response": []
 		}
 	],
 	"event": [

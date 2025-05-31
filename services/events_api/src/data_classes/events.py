@@ -22,10 +22,9 @@ class QualityType(Enum):
 
 
 class BaseEvent(BaseModel):
-    """Base class for all events"""
+    """Base class for all events."""
 
     user_id: str
-    film_id: str
     event_id: uuid.UUID = Field(default_factory=uuid.uuid4)
     timestamp: datetime.datetime = Field(
         default_factory=lambda: datetime.datetime.now(UTC)
@@ -46,13 +45,14 @@ class BaseEvent(BaseModel):
 class QualityVideoChangeEvent(BaseEvent):
     """Helps tracking video quality change."""
 
+    film_id: str
     before_quality: QualityType
     after_quality: QualityType
     event_type: str = "quality_change"
 
     @field_validator("before_quality", "after_quality", mode="before")
     def validate_quality(cls: Any, value: QualityType) -> QualityType | str:
-        """Validate quality values against enum"""
+        """Validate quality values against enum."""
         if isinstance(value, QualityType):
             return value
 
@@ -70,6 +70,7 @@ class QualityVideoChangeEvent(BaseEvent):
 class VideoStopEvent(BaseEvent):
     """Helps tracking when user stopped film."""
 
+    film_id: str
     stop_time: int
     event_type: str = "video_stop"
 
@@ -82,8 +83,9 @@ class VideoStopEvent(BaseEvent):
 
 
 class FilterEvent(BaseEvent):
-    """Tracks filter usage events"""
+    """Tracks filter usage events."""
 
+    film_id: str
     filter_by: FilterType
     event_type: str = "filter"
 
@@ -101,3 +103,41 @@ class FilterEvent(BaseEvent):
                 f"Неправильное значение фильтра. "
                 f"Допустимые значения: {', '.join(valid_values)}"
             )
+
+
+class CLickEvent(BaseEvent):
+    """
+    Tracks clicks.
+
+    :Example:
+
+    .. code-block:: python
+        event = CLickEvent(
+                x=245,
+                y=320,
+                element="A",
+                element_id="promo-link",
+                element_classes="banner cta",
+                url="/films"
+            )
+
+    :param int x: abscissa of click
+    :param int y: ordinate of click
+    :param str element: the clicked element name
+    :param str element_id: the clicked element id
+    :param str element_classes: the clicked element classes
+    :param str url: url where user clicked
+    """
+
+    x: int
+    y: int
+    element: str
+    element_id: str
+    element_classes: str
+    url: str
+    event_type: str = "click"
+
+
+class DwellTime(BaseEvent):
+    dwell_time: int
+    url: str

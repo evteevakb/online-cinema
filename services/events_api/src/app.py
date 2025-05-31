@@ -4,8 +4,11 @@ Flask application for events collection.
 
 from flask import Flask
 from flask_marshmallow import Marshmallow
+from logger import logger
 
 from api.health import health_route
+from api.v1.click import click_route
+from api.v1.dwell_time import dwell_route
 from api.v1.filter import filter_route
 from api.v1.quality import quality_route
 from api.v1.video_stop import video_stop_route
@@ -18,11 +21,19 @@ with KafkaTopicManager(
     kafka_topic.create_topic("filter")
     kafka_topic.create_topic("video_quality")
     kafka_topic.create_topic("video_stop")
+    kafka_topic.create_topic("click")
+    kafka_topic.create_topic("dwell_time")
 
 app = Flask(__name__)
+
+app.logger.handlers = logger.handlers
+app.logger.setLevel(logger.level)
+
 ma = Marshmallow(app)
 
 app.register_blueprint(health_route, url_prefix="/api")
 app.register_blueprint(filter_route, url_prefix="/api/v1")
 app.register_blueprint(quality_route, url_prefix="/api/v1")
 app.register_blueprint(video_stop_route, url_prefix="/api/v1")
+app.register_blueprint(click_route, url_prefix="/api/v1")
+app.register_blueprint(dwell_route, url_prefix="/api/v1")
