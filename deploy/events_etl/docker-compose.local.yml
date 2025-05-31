@@ -7,7 +7,11 @@ services:
       context: ../../services/events_etl/src
       dockerfile: Dockerfile
     container_name: events-etl
+    env_file:
+      - envs/.etl.env
     restart: always
+    volumes:
+      - ../../services/events_etl/src/data:/etl/data
 
   clickhouse-node-1:
     container_name: clickhouse-node-1
