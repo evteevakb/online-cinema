@@ -13,8 +13,14 @@ max_retries = kafka_settings.connection_max_retries
 
 
 class KafkaConsumerContext:
-    def __init__(self, **consumer_kwargs):
-        self.topics = kafka_settings.topics
+    def __init__(
+        self,
+        topic_name: str,
+        **consumer_kwargs,
+    ) -> None:
+        # self.topics = kafka_settings.topics
+        # print(self.topics)
+        self.topic = topic_name
         self.bootstrap_servers = kafka_settings.bootstrap_servers
         self.consumer_kwargs = consumer_kwargs
         self.consumer = None
@@ -28,7 +34,7 @@ class KafkaConsumerContext:
     def _connect(self):
         logger.debug(f"Trying to connect to Kafka at {self.bootstrap_servers}...")
         return KafkaConsumer(
-            *self.topics,
+            self.topic,
             bootstrap_servers=self.bootstrap_servers,
             auto_offset_reset='earliest',
             enable_auto_commit=False,

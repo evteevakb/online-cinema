@@ -25,4 +25,4 @@ class JsonFileStorage(BaseStorage):
             with open(self.filepath, "r") as f:
                 state = json.load(f)
             return {key: state[key]}
-        return {key: 0}
+        return {key: None}

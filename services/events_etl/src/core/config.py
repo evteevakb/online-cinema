@@ -12,6 +12,10 @@ class ETLSettings(BaseSettings):
     log_level: int
     sleep_interval_sec: int
     state_storage_file: str
+    batch_size: int
+    min_timestamptz: str = "2020-01-01 00:00:00.000 +0200"
+    timezone_hours: int = 2
+    timestamptz_format: str = "%Y-%m-%d %H:%M:%S.%f %z"
 
     @field_validator("log_level")
     @classmethod
