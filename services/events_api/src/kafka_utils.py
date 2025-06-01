@@ -8,6 +8,7 @@ from typing import Self, Type
 from kafka import KafkaProducer
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
+from logger import logger
 
 
 class KafkaTopicManager:
@@ -90,9 +91,9 @@ class KafkaTopicManager:
                 replication_factor=replication_factor,
             )
             self.admin_client.create_topics([topic])
-            print(f"Topic '{topic_name}' created.")
-        except TopicAlreadyExistsError:
-            print(f"Topic '{topic_name}' already exists.")
+            logger.info(f"Topic '{topic_name}' created.")
+        except TopicAlreadyExistsError as err:
+            logger.warning(f"Topic '{topic_name}' already exists.", err)
 
 
 class KafkaProducerClient:
