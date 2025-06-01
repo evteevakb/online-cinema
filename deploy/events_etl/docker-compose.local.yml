@@ -13,122 +13,122 @@ services:
     volumes:
       - ../../services/events_etl/src/data:/etl/data
 
-#   clickhouse-node-1:
-#     container_name: clickhouse-node-1
-#     depends_on:
-#       zookeeper:
-#         condition: service_healthy
-#     expose: [8123, 9000, 9009]
-#     healthcheck:
-#       test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
-#       interval: 15s
-#       timeout: 5s
-#       retries: 5
-#       start_period: 60s
-#     hostname: clickhouse-node-1
-#     image: clickhouse/clickhouse-server:23
-#     ports:
-#       - "8123:8123"
-#       - "9000:9000"
-#     restart: always
-#     volumes:
-#       - ./configs/clickhouse-node-1/config.xml:/etc/clickhouse-server/config.xml
-#       - ./configs/clickhouse-node-1/users.xml:/etc/clickhouse-server/users.xml
-#       - clickhouse-node-1-data:/var/lib/clickhouse
+  clickhouse-node-1:
+    container_name: clickhouse-node-1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    expose: [8123, 9000, 9009]
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    hostname: clickhouse-node-1
+    image: clickhouse/clickhouse-server:23
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    restart: always
+    volumes:
+      - ./configs/clickhouse-node-1/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-1/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-node-1-data:/var/lib/clickhouse
 
-#   clickhouse-node-2:
-#     container_name: clickhouse-node-2
-#     depends_on:
-#       zookeeper:
-#         condition: service_healthy
-#     expose: [8123, 9000, 9009]
-#     healthcheck:
-#       test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
-#       interval: 15s
-#       timeout: 5s
-#       retries: 5
-#       start_period: 60s
-#     hostname: clickhouse-node-2
-#     image: clickhouse/clickhouse-server:23
-#     ports:
-#       - "8124:8123"
-#       - "9001:9000"
-#     restart: always
-#     volumes:
-#       - ./configs/clickhouse-node-2/config.xml:/etc/clickhouse-server/config.xml
-#       - ./configs/clickhouse-node-2/users.xml:/etc/clickhouse-server/users.xml
-#       - clickhouse-node-2-data:/var/lib/clickhouse
+  clickhouse-node-2:
+    container_name: clickhouse-node-2
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    expose: [8123, 9000, 9009]
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    hostname: clickhouse-node-2
+    image: clickhouse/clickhouse-server:23
+    ports:
+      - "8124:8123"
+      - "9001:9000"
+    restart: always
+    volumes:
+      - ./configs/clickhouse-node-2/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-2/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-node-2-data:/var/lib/clickhouse
 
-#   clickhouse-node-3:
-#     container_name: clickhouse-node-3
-#     depends_on:
-#       zookeeper:
-#         condition: service_healthy
-#     expose: [8123, 9000, 9009]
-#     healthcheck:
-#       test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
-#       interval: 15s
-#       timeout: 5s
-#       retries: 5
-#       start_period: 60s
-#     hostname: clickhouse-node-3
-#     image: clickhouse/clickhouse-server:23
-#     ports:
-#       - "8125:8123"
-#       - "9002:9000"
-#     restart: always
-#     volumes:
-#       - ./configs/clickhouse-node-3/config.xml:/etc/clickhouse-server/config.xml
-#       - ./configs/clickhouse-node-3/users.xml:/etc/clickhouse-server/users.xml
-#       - clickhouse-node-3-data:/var/lib/clickhouse
+  clickhouse-node-3:
+    container_name: clickhouse-node-3
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    expose: [8123, 9000, 9009]
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    hostname: clickhouse-node-3
+    image: clickhouse/clickhouse-server:23
+    ports:
+      - "8125:8123"
+      - "9002:9000"
+    restart: always
+    volumes:
+      - ./configs/clickhouse-node-3/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-3/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-node-3-data:/var/lib/clickhouse
 
-#   clickhouse-node-4:
-#     container_name: clickhouse-node-4
-#     depends_on:
-#       zookeeper:
-#         condition: service_healthy
-#     expose: [8123, 9000, 9009]
-#     healthcheck:
-#       test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
-#       interval: 15s
-#       timeout: 5s
-#       retries: 5
-#       start_period: 60s
-#     hostname: clickhouse-node-4
-#     image: clickhouse/clickhouse-server:23
-#     ports:
-#       - "8126:8123"
-#       - "9003:9000"
-#     restart: always
-#     volumes:
-#       - ./configs/clickhouse-node-4/config.xml:/etc/clickhouse-server/config.xml
-#       - ./configs/clickhouse-node-4/users.xml:/etc/clickhouse-server/users.xml
-#       - clickhouse-node-4-data:/var/lib/clickhouse
+  clickhouse-node-4:
+    container_name: clickhouse-node-4
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    expose: [8123, 9000, 9009]
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    hostname: clickhouse-node-4
+    image: clickhouse/clickhouse-server:23
+    ports:
+      - "8126:8123"
+      - "9003:9000"
+    restart: always
+    volumes:
+      - ./configs/clickhouse-node-4/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-4/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-node-4-data:/var/lib/clickhouse
 
-#   zookeeper:
-#     container_name: zookeeper
-#     environment:
-#       ZOO_4LW_COMMANDS_WHITELIST: "ruok"
-#     expose: [2181, 2888, 3888, 8080]
-#     healthcheck:
-#       test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
-#       interval: 15s
-#       timeout: 5s
-#       retries: 5
-#       start_period: 30s
-#     hostname: zookeeper
-#     image: zookeeper:3.8
-#     restart: always
-#     volumes:	
-#       - zookeeper-logs:/logs
-#       - zookeeper-data:/data
-#       - zookeeper-datalog:/datalog
+  zookeeper:
+    container_name: zookeeper
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: "ruok"
+    expose: [2181, 2888, 3888, 8080]
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    hostname: zookeeper
+    image: zookeeper:3.8
+    restart: always
+    volumes:	
+      - zookeeper-logs:/logs
+      - zookeeper-data:/data
+      - zookeeper-datalog:/datalog
 
-# volumes:
-#   clickhouse-node-1-data:
-#   clickhouse-node-2-data:
-#   clickhouse-node-3-data:
-#   clickhouse-node-4-data:
-#   zookeeper-logs:
-#   zookeeper-data:
-#   zookeeper-datalog:
+volumes:
+  clickhouse-node-1-data:
+  clickhouse-node-2-data:
+  clickhouse-node-3-data:
+  clickhouse-node-4-data:
+  zookeeper-logs:
+  zookeeper-data:
+  zookeeper-datalog:

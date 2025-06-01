@@ -2,8 +2,10 @@
 ETL (Extract, Transform, Load) process for transferring data from Kafka to ClickHouse.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from time import sleep
+
+from dateutil import parser as dtparser
 
 from core.config import etl_settings, kafka_settings
 from state.json_storage import JsonFileStorage
@@ -15,23 +17,10 @@ logger = Logger.get_logger(name=__name__, prefix="Main loop: ")
 file_storage = JsonFileStorage(filepath=etl_settings.state_storage_file)
 
 
-def get_formated_time(
-    timezone_hours: int,
-    timestamptz_format: str,
-) -> str:
-    """Get the current time formatted according to the given timestamp format.
-
-    Args:
-        timezone_hours (int): the offset from UTC in hours for the desired timezone;
-        timestamptz_format (str): the format string used to format the timestamp.
-
-    Returns:
-        str: the current time formatted as a string according to the given format.
-    """
-    current_time = datetime.now(timezone(timedelta(hours=timezone_hours)))
-    dtparser.parse(current_time).astimezone(timezone.utc)
-    return current_time.strftime(timestamptz_format)
-
+def format_time(
+    timestamptz: str,
+    ) -> datetime:
+    return dtparser.parse(timestamptz).astimezone(timezone.utc)
 
 
 while True:
@@ -44,60 +33,33 @@ while True:
                 }
             )
             state = file_storage.retrieve_state(topic)
-        last_timestamptz = state[topic]
-        current_timestamptz = get_formated_time(
-            timezone_hours=etl_settings.timezone_hours,
-            timestamptz_format=etl_settings.timestamptz_format,
-        )
+        last_timestamptz = format_time(timestamptz=state[topic])
+        current_timestamptz = format_time(timestamptz=datetime.now(timezone.utc).isoformat())
 
-        print(last_timestamptz)
-        print(current_timestamptz)
+        logger.info(f"Start ETL pipeline for {topic=} from {last_timestamptz} to {current_timestamptz}")
 
-        with KafkaConsumerContext(topic_name=topic) as consumer:
+        with KafkaConsumerContext() as consumer:
             if not consumer:
-                logger.warning("Skipping ETL due to Kafka connection failure")
+                logger.error("Skipping ETL due to Kafka connection failure")
+            else:
+                for batch in extract_batch(
+                        consumer=consumer,
+                        topic=topic,
+                        start_timestamptz=last_timestamptz,
+                        stop_timestamptz=current_timestamptz,
+                        batch_size=etl_settings.batch_size,
+                    ):
+                    logger.info("Received batch with %s messages", len(batch))
 
-            while True:
-                batch = extract_batch(
-                    consumer=consumer,
-                    topic=topic,
-                    start_timestamptz=last_timestamptz,
-                    stop_timestamptz=current_timestamptz,
-                    batch_size=etl_settings.batch_size,
-                    # connection=pg_conn,
-                    # table_name=table_name,
-                    # start_timestamptz=last_process_timestamptz,
-                    # stop_timestamptz=current_timestamptz,
-                    # limit=settings.limit,
-                    # offset=offset,
-                )
-                if len(batch) == 0:
-                    logger.info("No new data for topic %s, skipping", topic)
-                    break
+                    # TODO: transform
+                    # TODO: load
 
-                # TODO: transform
-                # TODO: load
-
-            #     state_storage.save_state(
-            #         {
-            #             table_name: {
-            #                 "last_process_timestamptz": last_process_timestamptz,
-            #                 "offset": offset,
-            #             }
-            #         }
-            #     )
-            #     offset += settings.limit
-            #     if len(batch) != settings.limit:
-            #         break
-            # state_storage.save_state(
-            #     {
-            #         table_name: {
-            #             "last_process_timestamptz": current_timestamptz,
-            #             "offset": 0,
-            #         }
-            #     }
-            # )
-            logger.info("ETL process for %s topic finished", topic)
+        file_storage.save_state(
+            {
+                topic: str(current_timestamptz),
+            }
+            )
+        logger.info("ETL process for %s topic finished", topic)
 
     logger.info(
         "ETL process finished for all tables, sleeping %s sec",

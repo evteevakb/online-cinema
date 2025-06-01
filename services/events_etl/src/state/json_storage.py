@@ -16,13 +16,25 @@ class JsonFileStorage(BaseStorage):
 
     def save_state(self, state: dict[str, Any]) -> None:
         """Save the state to JSON file."""
+        current_state = {}
+
+        if os.path.exists(self.filepath):
+            with open(self.filepath, "r") as f:
+                try:
+                    current_state = json.load(f)
+                except json.JSONDecodeError:
+                    pass
+
+        current_state.update(state)
+
         with open(self.filepath, "w") as f:
-            json.dump(state, f)
+            json.dump(current_state, f)
 
     def retrieve_state(self, key: str) -> Any:
         """Retrieve the state from JSON file."""
-        if os.path.exists(self.filepath):
+        if os.path.exists(self.filepath) and os.path.getsize(self.filepath) > 0:
             with open(self.filepath, "r") as f:
                 state = json.load(f)
-            return {key: state[key]}
+            if key in state:
+                return {key: state[key]}
         return {key: None}

@@ -11,18 +11,11 @@ logger = Logger.get_logger("kafka_consumer", prefix="KafkaConsumer: ")
 max_retries = kafka_settings.connection_max_retries
 
 
-
 class KafkaConsumerContext:
     def __init__(
         self,
-        topic_name: str,
-        **consumer_kwargs,
     ) -> None:
-        # self.topics = kafka_settings.topics
-        # print(self.topics)
-        self.topic = topic_name
         self.bootstrap_servers = kafka_settings.bootstrap_servers
-        self.consumer_kwargs = consumer_kwargs
         self.consumer = None
 
     @backoff.on_exception(
@@ -31,25 +24,27 @@ class KafkaConsumerContext:
         max_tries=max_retries,
         jitter=None,
     )
-    def _connect(self):
+    def _connect(self) -> KafkaConsumer:
         logger.debug(f"Trying to connect to Kafka at {self.bootstrap_servers}...")
         return KafkaConsumer(
-            self.topic,
             bootstrap_servers=self.bootstrap_servers,
             auto_offset_reset='earliest',
             enable_auto_commit=False,
             consumer_timeout_ms=1000,
-            **self.consumer_kwargs,
         )
 
     def __enter__(self) -> KafkaConsumer | None:
         try:
             self.consumer = self._connect()
+            logger.debug("Kafka was successfully connected")
             return self.consumer
         except (KafkaError, NoBrokersAvailable) as exc:
             logger.exception(f"Failed to connect after {max_retries} retries: {exc}")
             return None
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            logger.error(f"{exc_type}: {exc_val}. Traceback: {exc_tb}")
         if self.consumer:
             self.consumer.close()
+            logger.debug("Kafka was successfully disconnected")

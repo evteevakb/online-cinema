@@ -7,16 +7,14 @@ WORKDIR /etl
 
 COPY requirements.txt .
 
-# RUN groupadd -r etl \
-#  && useradd -r -g etl etl \ 
-#  && chown -R etl:etl /etl \
-#  && 
-RUN pip3 install --no-cache-dir --upgrade pip==23.2.1 \
+RUN groupadd -r etl \
+ && useradd -r -g etl etl \ 
+ && chown -R etl:etl /etl \
+ && pip3 install --no-cache-dir --upgrade pip==23.2.1 \
  && pip3 install --no-cache-dir --requirement requirements.txt
 
 COPY . .
 
-# USER etl
+USER etl
 
-# CMD ["python", "main.py"]
-CMD ["sleep", "infinity"]
+CMD ["python", "main.py"]
