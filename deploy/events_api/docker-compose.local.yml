@@ -35,7 +35,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 90s
     image: bitnami/kafka:4.0.0
     volumes:
       - kafka-node-0-data:/bitnami/kafka
@@ -51,7 +51,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 90s
     image: bitnami/kafka:4.0.0
     volumes:
       - kafka-node-1-data:/bitnami/kafka
@@ -67,7 +67,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 90s
     image: bitnami/kafka:4.0.0
     volumes:
       - kafka-node-2-data:/bitnami/kafka  
