@@ -1,16 +1,17 @@
 import http
 import json
 import logging
-import requests
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
+import requests
 from requests.exceptions import RequestException
 from strenum import StrEnum
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
 
 class Roles(StrEnum):
     ADMIN = "admin"

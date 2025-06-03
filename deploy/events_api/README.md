@@ -74,3 +74,7 @@ Once the `.env` files are set up, go to the folder `events_api` and run the foll
     docker-compose -f docker-compose.local.yml up --build
 
 The API is available now at `localhost:83`. User interface for Kafka is available at `localhost:8081`.
+
+## Testing
+
+Use [test collection](../../services/events_api/tests/postman_tests.json) for Postman.
