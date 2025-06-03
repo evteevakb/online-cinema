@@ -1,0 +1,73 @@
+services:
+  clickhouse-node-1:
+    container_name: clickhouse-node-1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    expose: [8123, 9000, 9009]
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --host=localhost --query='SELECT 1'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    hostname: clickhouse-node-1
+    image: clickhouse/clickhouse-server:23
+    restart: always
+    volumes:
+      - ./configs/clickhouse-node-1/config.xml:/etc/clickhouse-server/config.xml
+      - ./configs/clickhouse-node-1/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-node-1-data:/var/lib/clickhouse
+
+  zookeeper:
+    container_name: zookeeper
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: "ruok"
+    expose: [2181, 2888, 3888, 8080]
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    hostname: zookeeper
+    image: zookeeper:3.8
+    restart: always
+    volumes:
+      - zookeeper-logs:/logs
+      - zookeeper-data:/data
+      - zookeeper-datalog:/datalog
+
+  vertica-node:
+    container_name: vertica-node
+    image: jbfavre/vertica:latest
+    volumes:
+      - vertica-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/vertica/bin/vsql -U dbadmin -c 'SELECT 1;' || exit 1"]
+      interval: 20s
+      timeout: 20s
+      retries: 10
+      start_period: 60s
+    restart: always
+
+  research:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: research
+    depends_on:
+      clickhouse-node-1:
+        condition: service_healthy
+      zookeeper:
+        condition: service_healthy
+      vertica-node:
+        condition: service_healthy
+
+
+volumes:
+  clickhouse-node-1-data:
+  zookeeper-logs:
+  zookeeper-data:
+  zookeeper-datalog:
+  vertica-data:
