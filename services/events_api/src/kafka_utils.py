@@ -92,8 +92,8 @@ class KafkaTopicManager:
             )
             self.admin_client.create_topics([topic])
             logger.info(f"Topic '{topic_name}' created.")
-        except TopicAlreadyExistsError as err:
-            logger.warning(f"Topic '{topic_name}' already exists.", err)
+        except TopicAlreadyExistsError:
+            logger.warning(f"Topic '{topic_name}' already exists.")
 
 
 class KafkaProducerClient:
