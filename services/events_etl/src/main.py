@@ -10,6 +10,7 @@ from dateutil import parser as dtparser
 from clients.kafka import KafkaConsumerContext
 from core.config import etl_settings, kafka_settings
 from pipeline.extract import extract_batch
+from pipeline.transform import transform_batch
 from state.json_storage import JsonFileStorage
 from utils.logger import Logger
 
@@ -55,7 +56,7 @@ while True:
                 ):
                     logger.info("Received batch with %s messages", len(batch))
 
-                    # TODO: transform
+                    transformed_batch = transform_batch(batch)
                     # TODO: load
 
         file_storage.save_state(
