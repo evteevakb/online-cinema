@@ -79,5 +79,16 @@ class KafkaSettings(BaseSettings):
         return [t.strip() for t in self.topics.split(",") if t.strip()]
 
 
+class ClickHouseSettings(BaseSettings):
+    """Configuration settings for Kafka."""
+
+    host: str
+    cluster: str
+    db: str
+
+    model_config = SettingsConfigDict(env_prefix="CLICKHOUSE_")
+
+
 etl_settings = ETLSettings()
 kafka_settings = KafkaSettings()
+clickhouse_settings = ClickHouseSettings()
