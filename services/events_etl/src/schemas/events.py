@@ -1,7 +1,7 @@
 import datetime
 from enum import Enum
 import logging
-from typing import Any
+from typing import Any, Optional
 import uuid
 
 from pydantic import BaseModel, Field, field_validator
@@ -140,3 +140,30 @@ class DwellTime(BaseEvent):
     dwell_time: int
     url: str
     event_type: str = "dwell_time"
+
+
+
+class CustomEvent(BaseModel):
+    event_id: uuid.UUID
+    user_id: str
+    timestamp: datetime.datetime
+    event_type: str
+    film_id: str | None = None
+    filter_by: str | None = None
+    before_quality: str | None = None
+    after_quality: str | None = None
+    stop_time: int | None = None
+
+    @classmethod
+    def from_event(cls, event: BaseEvent) -> "CustomEvent":
+        return cls(
+            event_id=event.event_id,
+            user_id=event.user_id,
+            timestamp=event.timestamp,
+            event_type=event.event_type,
+            film_id=getattr(event, "film_id", ""),
+            filter_by=getattr(event, "filter_by", ""),
+            before_quality=getattr(event, "before_quality", ""),
+            after_quality=getattr(event, "after_quality", ""),
+            stop_time=getattr(event, "stop_time", 0),
+        )

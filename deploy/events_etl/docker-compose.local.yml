@@ -7,6 +7,11 @@ services:
       context: ../../services/events_etl/src
       dockerfile: Dockerfile
     container_name: events-etl
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+      clickhouse-node-1:
+        condition: service_healthy
     env_file:
       - envs/.etl.env
     restart: always

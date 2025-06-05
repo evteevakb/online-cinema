@@ -1,4 +1,6 @@
+import datetime
 import json
+import uuid
 from typing import Type
 
 from pydantic import BaseModel
@@ -8,7 +10,7 @@ from core.config import clickhouse_settings
 
 
 class ClickHouseLoader:
-    def __init__(self, cluster_name: str = clickhouse_settings.cluser, db_name: str = clickhouse_settings.db) -> None:
+    def __init__(self, cluster_name: str = clickhouse_settings.cluster, db_name: str = clickhouse_settings.db) -> None:
         self.client = Client(host=clickhouse_settings.host)
         self.cluster_name = cluster_name
         self.db_name = db_name
@@ -27,8 +29,13 @@ class ClickHouseLoader:
                 elif isinstance(val, (dict, list)):
                     json_str = json.dumps(val).replace("'", "''")  # экранирование одинарных кавычек
                     row.append(f"'{json_str}'")
+                elif isinstance(val, datetime.datetime):
+                    formatted = val.astimezone(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f')[:23]
+                    row.append(f"'{formatted}'")
+                elif isinstance(val, uuid.UUID):
+                    row.append(f"'{str(val)}'")
                 elif isinstance(val, str):
-                    escaped = val.replace("'", "''")  # экранировать одинарные кавычки
+                    escaped = val.replace("'", "''")
                     row.append(f"'{escaped}'")
                 else:
                     row.append(str(val))
@@ -44,7 +51,6 @@ class ClickHouseLoader:
     def create_tables(self) -> None:
         self._create_database()
         self._create_click_events()
-        self._create_page_view_events()
         self._create_custom_events()
 
     def _create_click_events(self) -> None:
@@ -59,7 +65,8 @@ class ClickHouseLoader:
                 element String,
                 element_id String,
                 element_classes String,
-                url String
+                url String,
+                event_type LowCardinality(String)
             )
             ENGINE = MergeTree
             PARTITION BY toYYYYMM(timestamp)
@@ -71,28 +78,6 @@ class ClickHouseLoader:
             ON CLUSTER {self.cluster_name}
             AS {self.db_name}.click_events_local
             ENGINE = Distributed({self.cluster_name}, {self.db_name}, click_events_local, rand());
-        """)
-
-    def _create_page_view_events(self) -> None:
-        self.client.execute(f"""
-            CREATE TABLE IF NOT EXISTS {self.db_name}.page_view_events_local
-            ON CLUSTER {self.cluster_name} (
-                event_id UUID,
-                user_id String,
-                timestamp DateTime64(3, 'UTC'),
-                url String,
-                dwell_time Int32
-            )
-            ENGINE = MergeTree
-            PARTITION BY toYYYYMM(timestamp)
-            ORDER BY (timestamp, user_id);
-        """)
-
-        self.client.execute(f"""
-            CREATE TABLE IF NOT EXISTS {self.db_name}.page_view_events
-            ON CLUSTER {self.cluster_name}
-            AS {self.db_name}.page_view_events_local
-            ENGINE = Distributed({self.cluster_name}, {self.db_name}, page_view_events_local, rand());
         """)
 
     def _create_custom_events(self) -> None:

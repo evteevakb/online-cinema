@@ -12,6 +12,7 @@ from core.config import etl_settings, kafka_settings
 from pipeline.extract import extract_batch
 from pipeline.transform import transform_batch
 from pipeline.load import load_batch_to_clickhouse
+from db.clickhouse import ClickHouseLoader
 from state.json_storage import JsonFileStorage
 from utils.logger import Logger
 
@@ -24,6 +25,8 @@ def format_time(
 ) -> datetime:
     return dtparser.parse(timestamptz).astimezone(timezone.utc)
 
+clickhouse_loader = ClickHouseLoader()
+clickhouse_loader.create_tables()
 
 while True:
     for topic in kafka_settings.topics_list:

@@ -1,28 +1,36 @@
 from core.config import etl_settings
-from core.kafka import KafkaConsumerContext
-from etl.extract import extract_batch
-from etl.transform import transform_batch
-from storage.clickhouse_loader import ClickHouseLoader
-from models import EventBase
+from clients.kafka import KafkaConsumerContext
+from db.clickhouse import ClickHouseLoader
 from utils.logger import Logger
+from schemas.events import (
+    BaseEvent,
+    CLickEvent,
+    DwellTime,
+    QualityVideoChangeEvent,
+    VideoStopEvent,
+    FilterEvent,
+    CustomEvent
+)
 
 logger = Logger.get_logger("load", prefix="Load: ")
 clickhouse_loader = ClickHouseLoader()
 
 EVENT_TYPE_TO_TABLE = {
     "click": "click_events",
-    "page_view": "page_view_events",
     "video_stop": "custom_events",
     "quality_change": "custom_events",
-    "filter": "custom_events"
+    "filter": "custom_events",
+    "dwell_time": "custom_events"
 }
 
-def load_batch_to_clickhouse(events: list[EventBase]) -> None:
+CUSTOM_EVENTS_SCHEMAS = [DwellTime, QualityVideoChangeEvent, FilterEvent, DwellTime]
+
+def load_batch_to_clickhouse(events: list[BaseEvent]) -> None:
     if not events:
         logger.info("No events to load. Skipping batch.")
         return
 
-    batches_by_table: dict[str, list[EventBase]] = {}
+    batches_by_table: dict[str, list[BaseEvent]] = {}
 
     for event in events:
         table_name = EVENT_TYPE_TO_TABLE.get(event.event_type)
@@ -33,4 +41,11 @@ def load_batch_to_clickhouse(events: list[EventBase]) -> None:
 
     for table, batch in batches_by_table.items():
         logger.info(f"Loading {len(batch)} events into '{table}' table.")
-        clickhouse_loader.insert_batch(table=table, batch=batch)
+
+        if type(batch[0]) in CUSTOM_EVENTS_SCHEMAS:
+            batch = [CustomEvent.from_event(e) for e in batch]
+            model_fields = list(CustomEvent.model_fields.keys())
+        else:
+            model_fields = list(type(batch[0]).model_fields.keys())
+            logger.info(f"Model fields %s", model_fields)
+        clickhouse_loader.insert_batch(table=table, fields=model_fields, batch=batch)
