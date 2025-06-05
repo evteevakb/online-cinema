@@ -1,15 +1,15 @@
-from typing import Type, Any
+from typing import Any, Type
 
 from pydantic import BaseModel, ValidationError
-from utils.logger import Logger
 
 from schemas.events import (
     CLickEvent,
     DwellTime,
+    FilterEvent,
     QualityVideoChangeEvent,
     VideoStopEvent,
-    FilterEvent
 )
+from utils.logger import Logger
 
 logger = Logger.get_logger("transform", prefix="Transform: ")
 

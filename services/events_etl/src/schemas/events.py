@@ -142,7 +142,6 @@ class DwellTime(BaseEvent):
     event_type: str = "dwell_time"
 
 
-
 class CustomEvent(BaseModel):
     event_id: uuid.UUID
     user_id: str

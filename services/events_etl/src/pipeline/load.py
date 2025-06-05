@@ -1,16 +1,16 @@
-from core.config import etl_settings
 from clients.kafka import KafkaConsumerContext
+from core.config import etl_settings
 from db.clickhouse import ClickHouseLoader
-from utils.logger import Logger
 from schemas.events import (
     BaseEvent,
     CLickEvent,
+    CustomEvent,
     DwellTime,
+    FilterEvent,
     QualityVideoChangeEvent,
     VideoStopEvent,
-    FilterEvent,
-    CustomEvent
 )
+from utils.logger import Logger
 
 logger = Logger.get_logger("load", prefix="Load: ")
 clickhouse_loader = ClickHouseLoader()
@@ -20,10 +20,11 @@ EVENT_TYPE_TO_TABLE = {
     "video_stop": "custom_events",
     "quality_change": "custom_events",
     "filter": "custom_events",
-    "dwell_time": "custom_events"
+    "dwell_time": "custom_events",
 }
 
 CUSTOM_EVENTS_SCHEMAS = [DwellTime, QualityVideoChangeEvent, FilterEvent, DwellTime]
+
 
 def load_batch_to_clickhouse(events: list[BaseEvent]) -> None:
     if not events:

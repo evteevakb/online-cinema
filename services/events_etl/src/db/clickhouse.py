@@ -1,21 +1,27 @@
 import datetime
 import json
-import uuid
 from typing import Type
+import uuid
 
-from pydantic import BaseModel
 from clickhouse_driver import Client
+from pydantic import BaseModel
 
 from core.config import clickhouse_settings
 
 
 class ClickHouseLoader:
-    def __init__(self, cluster_name: str = clickhouse_settings.cluster, db_name: str = clickhouse_settings.db) -> None:
+    def __init__(
+        self,
+        cluster_name: str = clickhouse_settings.cluster,
+        db_name: str = clickhouse_settings.db,
+    ) -> None:
         self.client = Client(host=clickhouse_settings.host)
         self.cluster_name = cluster_name
         self.db_name = db_name
 
-    def insert_batch(self, table: str, fields: tuple[str], batch: list[Type[BaseModel]]) -> None:
+    def insert_batch(
+        self, table: str, fields: tuple[str], batch: list[Type[BaseModel]]
+    ) -> None:
         fields_str = f"({', '.join(fields)})"
         values = []
 
@@ -25,12 +31,16 @@ class ClickHouseLoader:
             for field in fields:
                 val = dumped.get(field)
                 if val is None:
-                    row.append('NULL')
+                    row.append("NULL")
                 elif isinstance(val, (dict, list)):
-                    json_str = json.dumps(val).replace("'", "''")  # экранирование одинарных кавычек
+                    json_str = json.dumps(val).replace(
+                        "'", "''"
+                    )  # экранирование одинарных кавычек
                     row.append(f"'{json_str}'")
                 elif isinstance(val, datetime.datetime):
-                    formatted = val.astimezone(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f')[:23]
+                    formatted = val.astimezone(datetime.timezone.utc).strftime(
+                        "%Y-%m-%d %H:%M:%S.%f"
+                    )[:23]
                     row.append(f"'{formatted}'")
                 elif isinstance(val, uuid.UUID):
                     row.append(f"'{str(val)}'")
@@ -41,12 +51,14 @@ class ClickHouseLoader:
                     row.append(str(val))
             values.append(f"({', '.join(row)})")
 
-        values_str = ',\n'.join(values)
+        values_str = ",\n".join(values)
         query = f"INSERT INTO {self.db_name}.{table} {fields_str} VALUES {values_str}"
         self.client.execute(query)
 
     def _create_database(self) -> None:
-        self.client.execute(f'CREATE DATABASE IF NOT EXISTS {self.db_name} ON CLUSTER {self.cluster_name}')
+        self.client.execute(
+            f"CREATE DATABASE IF NOT EXISTS {self.db_name} ON CLUSTER {self.cluster_name}"
+        )
 
     def create_tables(self) -> None:
         self._create_database()
