@@ -1,6 +1,3 @@
-Ссылка на репозиторий:
-https://github.com/wegas66/Auth_sprint_1
-
 # Online Cinema
 
 This is a repository for the online cinema platform.
